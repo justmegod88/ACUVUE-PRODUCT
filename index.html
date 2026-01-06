@@ -896,7 +896,12 @@
     }
 
     function showResult(product, meta){
-
+      document.getElementById("productName").textContent = product.product_name;
+      
+      document.getElementById("productImage").src = product.product_image;
+    
+      document.getElementById("productImage").alt = product.product_name + " 팩샷";
+      
       viewEntry.classList.add('hide');
 
       viewResult.classList.remove('hide');
@@ -1228,5 +1233,6 @@
 </html>
 
  
+
 
 
