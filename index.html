@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>아큐브 | 오늘 선택한 제품 더 알아보기 (AR Prototype)</title>
+  <title>아큐브 | 알림톡 → 스캔 → AR 결과 (포인트 클릭)</title>
 
   <style>
     :root{
@@ -18,8 +18,13 @@
       --line:#e6e9f2;
       --shadow: 0 10px 28px rgba(16,24,40,0.10);
       --shadow2: 0 6px 16px rgba(16,24,40,0.08);
+
       --radius: 18px;
       --radiusSm: 14px;
+
+      --green:#18a85b;
+      --green2:#0f8b49;
+
       --max: 760px;
     }
 
@@ -34,54 +39,22 @@
       line-height:1.35;
     }
 
-    .wrap{
-      max-width: var(--max);
-      margin:0 auto;
-      padding: 18px 16px 44px;
-    }
+    .wrap{ max-width: var(--max); margin:0 auto; padding: 18px 16px 44px; }
 
     header{
-      position: sticky;
-      top: 0;
-      z-index: 5;
+      position: sticky; top: 0; z-index: 5;
       padding: 12px 0 12px;
       backdrop-filter: blur(10px);
       background: rgba(246,248,252,0.72);
       border-bottom: 1px solid rgba(230,233,242,0.75);
     }
-
-    .headRow{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .brandBox{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width:0;
-    }
-    .brandBox .title{
-      font-weight:950;
-      letter-spacing:-0.45px;
-      font-size:16px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .brandBox .sub{
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+    .headRow{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brandBox{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+    .brandBox .title{ font-weight:950; letter-spacing:-0.45px; font-size:16px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .brandBox .sub{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
     .pill{
-      font-size:12px;
-      padding:8px 10px;
+      font-size:12px; padding:8px 10px;
       border:1px solid var(--line);
       border-radius:999px;
       color:var(--muted);
@@ -97,21 +70,8 @@
       padding: 16px;
       box-shadow: var(--shadow);
     }
-    .card + .card{ margin-top: 12px; }
-
-    .h1{
-      font-size: 20px;
-      font-weight: 980;
-      letter-spacing:-0.65px;
-      margin:0 0 8px;
-      line-height:1.15;
-    }
-    .p{
-      margin:0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height:1.5;
-    }
+    .h1{ font-size: 20px; font-weight: 980; letter-spacing:-0.65px; margin:0 0 8px; line-height:1.15; }
+    .p{ margin:0; color: var(--muted); font-size: 14px; line-height:1.5; }
 
     .btn{
       width:100%;
@@ -146,163 +106,13 @@
       align-items:flex-start;
       gap:8px;
     }
-    .trust .dot{
-      width:8px; height:8px;
-      margin-top: 5px;
-      border-radius: 999px;
-      background: #16a34a;
-      flex:0 0 auto;
-    }
+    .trust .dot{ width:8px; height:8px; margin-top: 5px; border-radius: 999px; background: #16a34a; flex:0 0 auto; }
 
     .hide{ display:none !important; }
 
-    /* ========== RESULT HERO (팩샷 + 제품명 + 헤드라인) ========== */
-    .hero{
-      padding: 16px;
-      border-radius: var(--radius);
-      border: 1px solid rgba(230,233,242,0.9);
-      background:
-        radial-gradient(420px 260px at 10% 10%, rgba(30,120,255,0.18), transparent 60%),
-        radial-gradient(380px 240px at 90% 0%, rgba(11,74,162,0.14), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.92));
-      box-shadow: var(--shadow);
-    }
-
-    .heroTop{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-    }
-
-    .heroShot{
-      width:120px;
-      height:70px;
-      object-fit:contain;
-      border-radius: 16px;
-      background:#fff;
-      border:1px solid rgba(0,0,0,0.06);
-      box-shadow: 0 10px 24px rgba(0,0,0,0.10);
-      flex: 0 0 auto;
-      padding: 8px;
-    }
-
-    .heroText{ flex:1 1 auto; min-width:0; }
-
-    .heroProductName{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size: 13px;
-      font-weight: 980;
-      letter-spacing: -0.2px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(11,74,162,0.08);
-      border: 1px solid rgba(11,74,162,0.16);
-      margin: 0 0 10px;
-      color: var(--text);
-    }
-    .heroProductName .miniDot{
-      width:8px; height:8px;
-      border-radius:999px;
-      background: var(--brand);
-      box-shadow: 0 0 0 5px rgba(11,74,162,0.10);
-      flex:0 0 auto;
-    }
-
-    .hero h2{
-      margin:0 0 8px;
-      font-size: 20px;
-      letter-spacing:-0.55px;
-      font-weight: 980;
-      line-height:1.18;
-    }
-
-    .hero p{
-      margin:0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height:1.5;
-    }
-
-    /* ========== KEY CARDS ========== */
-    .kcards{ display:grid; gap:10px; margin-top: 12px; }
-
-    .kcard{
-      background:#fff;
-      border: 1px solid rgba(230,233,242,0.95);
-      border-radius: var(--radiusSm);
-      padding: 14px;
-      box-shadow: var(--shadow2);
-    }
-    .kcard .khead{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      margin-bottom: 6px;
-      font-weight: 980;
-      letter-spacing:-0.3px;
-    }
-    .kcard .ico{
-      width:34px; height:34px;
-      display:grid; place-items:center;
-      border-radius: 12px;
-      background: rgba(11,74,162,0.10);
-      border: 1px solid rgba(11,74,162,0.18);
-      font-size: 16px;
-      flex: 0 0 auto;
-    }
-    .kcard .kbody{
-      color: var(--muted);
-      font-size: 14px;
-      line-height:1.45;
-    }
-
-    .list{
-      margin:0; padding:0;
-      list-style:none;
-      display:grid; gap:8px;
-      font-size:14px;
-    }
-    .li{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 12px;
-      background:#fff;
-      border:1px solid rgba(230,233,242,0.95);
-      border-radius:14px;
-      box-shadow: var(--shadow2);
-    }
-    .li span{ color:var(--muted); }
-    .li b{ color:var(--text); }
-
-    .quote{
-      margin-top:12px;
-      padding:14px;
-      border-radius:16px;
-      background: rgba(217, 237, 255, 0.62);
-      border: 1px solid rgba(11,74,162,0.22);
-      color: var(--text);
-      font-size: 14px;
-      line-height:1.55;
-      box-shadow: var(--shadow2);
-    }
-    .quote b{ font-weight:980; }
-
-    .foot{
-      margin-top:12px;
-      color: var(--muted);
-      font-size:12px;
-      line-height:1.45;
-      border-top:1px solid rgba(230,233,242,0.9);
-      padding-top:12px;
-    }
-
-    /* ========== MODAL (SCAN / AR) ========== */
+    /* ========== MODAL ========== */
     .modal{
-      position: fixed;
-      inset:0;
+      position: fixed; inset:0;
       background: rgba(0,0,0,0.55);
       display:none;
       align-items:center;
@@ -314,7 +124,7 @@
 
     .modalBox{
       width:100%;
-      max-width: 620px;
+      max-width: 640px;
       background:#fff;
       border-radius: var(--radius);
       overflow:hidden;
@@ -332,10 +142,7 @@
       background: rgba(255,255,255,0.92);
       backdrop-filter: blur(10px);
     }
-    .modalTop .t{
-      font-weight: 980;
-      letter-spacing:-0.3px;
-    }
+    .modalTop .t{ font-weight: 980; letter-spacing:-0.3px; }
 
     .x{
       border:1px solid rgba(230,233,242,0.95);
@@ -354,12 +161,7 @@
       width:100%;
       aspect-ratio: 3 / 4;
     }
-    video{
-      width:100%;
-      height:100%;
-      object-fit: cover;
-      display:block;
-    }
+    video{ width:100%; height:100%; object-fit: cover; display:block; }
 
     /* Scan overlay */
     .scanFrame{
@@ -372,9 +174,7 @@
     }
     .scanHint{
       position:absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
+      bottom: 10px; left: 10px; right: 10px;
       background: rgba(255,255,255,0.92);
       border-radius: 14px;
       padding: 10px 10px;
@@ -402,92 +202,125 @@
     }
     .status b{ color: var(--text); }
 
-    .inputRow{
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-    input[type="text"]{
-      width:100%;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(230,233,242,0.95);
-      font-size: 14px;
-      outline: none;
-      box-shadow: inset 0 1px 0 rgba(16,24,40,0.03);
-    }
-
-    /* AR overlay */
-    .arHintBar{
+    /* ========== AR RESULT UI (그린패널 + 포인트 버튼) ========== */
+    .arHeaderBar{
       position:absolute;
       left:10px; right:10px; top:10px;
-      background: rgba(11,74,162,0.92);
-      color:#fff;
-      border-radius: 16px;
-      padding: 10px 12px;
-      font-size: 13px;
-      line-height:1.35;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(8px);
-      pointer-events:none;
-    }
-
-    .arTag{
-      position:absolute;
-      max-width: 82%;
       background: rgba(255,255,255,0.92);
-      border: 1px solid rgba(230,233,242,0.95);
+      border: 1px solid rgba(230,233,242,0.9);
       border-radius: 16px;
       padding: 10px 12px;
-      color: var(--text);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow2);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
       backdrop-filter: blur(10px);
       pointer-events:none;
     }
-    .arTag .t{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-weight: 980;
-      letter-spacing:-0.2px;
-      margin: 0 0 6px;
-      font-size: 13px;
-    }
-    .arTag .b{
-      font-size: 13px;
-      color: var(--muted);
-      line-height:1.45;
-    }
-    .arTag .dot{
-      width:10px; height:10px;
-      border-radius:999px;
-      background: var(--brand);
-      box-shadow: 0 0 0 6px rgba(11,74,162,0.12);
-      flex:0 0 auto;
+    .arHeaderBar .name{
+      font-weight:980; letter-spacing:-0.2px; font-size:13px;
+      color: var(--text);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
 
-    /* 3D canvas */
+    .points{
+      position:absolute;
+      right: 10px;
+      top: 56px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      pointer-events:auto;
+    }
+    .ptBtn{
+      width: 46px; height: 46px;
+      border-radius: 999px;
+      border: 1px solid rgba(230,233,242,0.95);
+      background: rgba(255,255,255,0.92);
+      box-shadow: var(--shadow2);
+      display:grid;
+      place-items:center;
+      font-weight:980;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ptBtn.active{
+      border-color: rgba(11,74,162,0.35);
+      box-shadow: 0 10px 24px rgba(11,74,162,0.18);
+      transform: translateY(-1px);
+    }
+
+    .ptIcon{
+      width: 28px; height: 28px;
+      border-radius: 999px;
+      display:grid;
+      place-items:center;
+      font-size: 15px;
+      background: rgba(11,74,162,0.10);
+      border: 1px solid rgba(11,74,162,0.16);
+    }
+
+    /* Green panel */
+    .greenPanel{
+      position:absolute;
+      left:0; right:0; bottom: 92px;
+      margin: 0 10px;
+      background: linear-gradient(180deg, var(--green), var(--green2));
+      color:#fff;
+      border-radius: 14px;
+      padding: 14px 14px 16px;
+      box-shadow: var(--shadow);
+      pointer-events:none;
+    }
+    .greenTitle{
+      font-weight:980;
+      letter-spacing:-0.45px;
+      font-size: 16px;
+      margin:0 0 10px;
+      line-height:1.15;
+      text-align:center;
+    }
+    .greenBody{
+      font-size: 13px;
+      line-height:1.45;
+      opacity: 0.95;
+      text-align:center;
+    }
+
+    .greenSubBox{
+      margin: 10px auto 0;
+      max-width: 92%;
+      background: rgba(0,0,0,0.16);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 10px;
+      padding: 10px 10px;
+      font-size: 12.5px;
+      line-height:1.45;
+      text-align:center;
+      opacity:0.95;
+    }
+
+    /* Bottom action buttons inside AR modal bottom */
+    .actionRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+
+    /* 3D canvas overlay */
     #lensCanvas{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
-      pointer-events:auto; /* 드래그 회전 */
+      pointer-events:auto; /* 드래그 회전 허용 */
     }
 
-    .miniHelp{
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.45;
-    }
-
-    @media (min-width: 720px){
-      .wrap{ padding: 20px 18px 60px; }
-      .btnRow{ grid-template-columns: 1fr 1fr; }
-    }
+    .miniHelp{ font-size:12px; color:var(--muted); line-height:1.45; }
   </style>
 
-  <!-- 3D 렌즈 구현 -->
   <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
 </head>
 
@@ -497,18 +330,18 @@
       <div class="headRow">
         <div class="brandBox">
           <div class="title">알림톡 랜딩 (테스트)</div>
-          <div class="sub">오늘 선택한 제품 더 알아보기</div>
+          <div class="sub">알림톡 → 스캔 → AR 결과(포인트 클릭)</div>
         </div>
         <div class="pill" id="envPill">환경 확인 중…</div>
       </div>
     </header>
 
-    <!-- (A) 알림톡 느낌 랜딩: 버튼 1개 -->
+    <!-- 알림톡 랜딩: 버튼 1개 -->
     <section id="viewLanding">
       <div class="card">
         <div class="h1">알림톡 도착</div>
         <p class="p">
-          오늘 선택하신 제품 정보를 확인할 수 있어요.<br>
+          오늘 선택하신 제품 정보를 <b>AR로</b> 확인할 수 있어요.<br>
           아래 버튼을 눌러 제품을 스캔해 주세요.
         </p>
 
@@ -518,58 +351,13 @@
 
         <div class="trust">
           <div class="dot"></div>
-          <div>테스트 버전: 카메라 스캔 → 결과 → AR(3D 설계) → 설문</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- (B) 결과 페이지 -->
-    <section id="viewResult" class="hide">
-      <div class="hero">
-        <div class="heroTop">
-          <img id="productImage" class="heroShot" alt="팩샷" />
-          <div class="heroText">
-            <div class="heroProductName" id="productName">
-              <span class="miniDot"></span>아큐브 오아시스® MAX 원데이 난시용
-            </div>
-            <h2 id="heroTitle">난시엔 아큐브 교정력 · 촉촉하고 또렷하게</h2>
-            <p id="heroSub">제품 설계 포인트를 3D로 확인해 보세요</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="kcards" id="keyCards"></div>
-
-      <div class="card" style="margin-top:12px;">
-        <div style="font-weight:980; letter-spacing:-0.3px; margin-bottom:10px;">기본 정보(요약)</div>
-        <ul class="list" id="productFacts"></ul>
-
-        <div class="quote" style="margin-top:12px;">
-          💬 <b>“전문적인 제품인가요?”</b>에 대한 확신을 주기 위해<br>
-          <b>난시 회전 안정성(ASD)</b>을 3D로 보여드립니다.
-        </div>
-
-        <!-- 결과 페이지에서 AR 버튼 (프로세스 2번째 이미지의 "클릭시 3D") -->
-        <div class="btnRow" style="margin-top:12px;">
-          <button class="btn" id="btnOpenAR">렌즈 설계(ASD) 3D로 확인하기</button>
-          <button class="btn secondary" id="btnRescan">다시 스캔하기</button>
-        </div>
-
-        <!-- 설문 링크 (프로세스 2번째 이미지 하단) -->
-        <div class="btnRow" style="margin-top:10px;">
-          <a class="btn secondary" id="btnSurvey" href="https://forms.office.com/r/aqt7sf0ciB" target="_blank" rel="noopener">
-            만족도 조사 참여하기
-          </a>
-        </div>
-
-        <div class="foot">
-          본 페이지는 프로토타입 데모입니다. 개인 착용 상담은 안경사와 상담해주세요.
+          <div>촬영 시작 → 자동으로 AR 결과 화면으로 전환됩니다</div>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- (C) 스캔 모달 -->
+  <!-- (1) 스캔 모달 -->
   <div class="modal" id="scanModal" aria-hidden="true">
     <div class="modalBox">
       <div class="modalTop">
@@ -589,24 +377,19 @@
       <div class="modalBottom">
         <div class="status">
           <span id="scanStatus">상태: <b>대기</b></span>
-          <span id="scanTech">인식: <b>자동</b></span>
+          <span id="scanTech">인식: <b>카메라</b></span>
         </div>
 
-        <div class="inputRow">
-          <input id="manualInput" type="text" placeholder="제품명 수동 입력 (예: 오아시스 맥스 난시)" />
-          <button class="btn secondary" id="btnManualOK" style="width:auto; padding:12px 12px;">확인</button>
-        </div>
-
-        <button class="btn" id="btnScanStart">스캔 시작</button>
+        <button class="btn" id="btnScanStart">촬영 시작</button>
       </div>
     </div>
   </div>
 
-  <!-- (D) AR 모달: 카메라 + 3D 렌즈(ASD 강조) -->
+  <!-- (2) AR 결과 모달 -->
   <div class="modal" id="arModal" aria-hidden="true">
     <div class="modalBox">
       <div class="modalTop">
-        <div class="t">AR · ASD 3D 설계 (Prototype)</div>
+        <div class="t">AR 결과</div>
         <button class="x" id="btnCloseAR" aria-label="닫기">닫기</button>
       </div>
 
@@ -614,38 +397,43 @@
         <video id="arVideo" playsinline muted></video>
         <canvas id="lensCanvas"></canvas>
 
-        <div class="arHintBar">
-          📦 제품 박스를 화면에 크게 잡아주세요. (반사되면 각도 살짝 변경)
+        <!-- 상단 제품명 바 -->
+        <div class="arHeaderBar">
+          <div class="name" id="arProductName">아큐브 오아시스 맥스 구면</div>
+          <div class="name" id="arHintSmall" style="font-weight:900; color: var(--muted); font-size:12px;">
+            기기를 움직이면 렌즈가 돌아가요
+          </div>
         </div>
 
-        <div class="arTag" style="left:10px; top:34%;">
-          <div class="t"><span class="dot"></span>ASD 안정화 존(3D)</div>
-          <div class="b">렌즈 주변부 ‘안정화 존’이 회전 안정성에 도움을 주는 구조</div>
-        </div>
+        <!-- 오른쪽 포인트 버튼 -->
+        <div class="points" id="points"></div>
 
-        <div class="arTag" style="right:10px; top:50%;">
-          <div class="t"><span class="dot"></span>난시 시야 안정</div>
-          <div class="b">렌즈가 회전하면 시야가 흔들릴 수 있어요</div>
-        </div>
-
-        <div class="arTag" style="left:10px; bottom:18%;">
-          <div class="t"><span class="dot"></span>드래그로 회전</div>
-          <div class="b">3D 렌즈를 손가락으로 돌려보며 구조를 확인</div>
+        <!-- 하단 그린 패널(문구 변경 영역) -->
+        <div class="greenPanel" id="greenPanel">
+          <div class="greenTitle" id="greenTitle">눈 피로까지 고려해 설계된 원데이 렌즈</div>
+          <div class="greenBody" id="greenBody">추후 구매 시에도 제품의 핵심 포인트를 AR로 다시 확인해 보세요.</div>
+          <div class="greenSubBox" id="greenSub">포인트 아이콘을 눌러 설명을 바꿔볼 수 있어요.</div>
         </div>
       </div>
 
       <div class="modalBottom">
         <div class="status">
           <span id="arStatus">상태: <b>대기</b></span>
-          <span>조작: <b>드래그 회전</b></span>
+          <span>조작: <b>기기 기울기 + 드래그</b></span>
         </div>
 
         <button class="btn" id="btnARStart">AR 시작</button>
-        <button class="btn secondary hide" id="btnARRestart">다시 시작</button>
+
+        <div class="actionRow">
+          <button class="btn secondary" id="btnRescan">다시 스캔하기</button>
+          <a class="btn secondary" id="btnSurvey" href="https://forms.office.com/r/aqt7sf0ciB" target="_blank" rel="noopener">
+            만족도 조사
+          </a>
+        </div>
 
         <div class="miniHelp">
-          iPhone Safari: 권한 팝업이 뜨면 “허용”을 눌러주세요.<br>
-          시작 후 버튼이 사라지면 정상 동작입니다.
+          iPhone Safari에서 “동작 및 방향 접근” 권한이 뜨면 허용해주세요(렌즈 회전에 필요).<br>
+          권한이 없으면 드래그로도 회전 가능합니다.
         </div>
       </div>
     </div>
@@ -653,27 +441,32 @@
 
   <script>
     // =========================
-    // 설정: 팩샷 이미지 경로
+    // (A) 콘텐츠(포인트 클릭 시 하단 문구 변경)
     // =========================
-    // ✅ GitHub repo에 assets/packshot.png 로 업로드하면 바로 적용됨
-    const PACKSHOT_URL = "./assets/packshot.png";
-
-    // =========================
-    // 제품 데이터(테스트: 난시용 고정)
-    // =========================
-    const PRODUCT = {
-      product_name: "아큐브 오아시스® MAX 원데이 난시용",
-      hero_title: "난시엔 아큐브 교정력 · 촉촉하고 또렷하게",
-      hero_sub: "제품 설계 포인트를 3D로 확인해 보세요",
-      key_cards: [
-        { icon: "🧭", title: "ASD(난시 안정화 설계)", body: "렌즈 회전 안정성을 돕는 설계 포인트" },
-        { icon: "💧", title: "장시간 촉촉함", body: "하루 종일 편안한 착용감을 돕는 구조" },
-        { icon: "🟦", title: "디지털 환경 시야", body: "디지털 기기 사용 환경을 고려한 설계 컨셉" }
-      ],
-      facts: [
-        { k: "제품 유형", v: "난시용(토릭) · 원데이" },
-        { k: "기능 포인트", v: "ASD · 시야 안정 · 착용감" },
-        { k: "AR 데모", v: "3D 렌즈 + ASD 안정화 존" }
+    const AR_CONTENT = {
+      productNameTop: "아큐브 오아시스 맥스 구면",
+      points: [
+        {
+          id: "p0",
+          icon: "💧",
+          title: "눈 피로까지 고려해 설계된 원데이 렌즈",
+          body: "추후 구매 시에도, 제품의 핵심 설계 포인트를 AR로 다시 확인해 보세요.",
+          sub: "포인트 아이콘을 눌러 설명을 바꿔볼 수 있어요."
+        },
+        {
+          id: "p1",
+          icon: "ⓘ",
+          title: "123마크",
+          body: "콘택트렌즈가 뒤집혀 있는지 확인이 가능해요",
+          sub: "필요 시 실제 가이드 문구로 교체하면 됩니다."
+        },
+        {
+          id: "p2",
+          icon: "🟦",
+          title: "블루라이트 차단",
+          body: "55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공",
+          sub: "수치는 내부 확정 문구로 교체하세요."
+        }
       ]
     };
 
@@ -682,44 +475,33 @@
     // =========================
     const envPill = document.getElementById('envPill');
 
-    const viewLanding = document.getElementById('viewLanding');
-    const viewResult  = document.getElementById('viewResult');
-
+    // landing
     const btnStartFlow = document.getElementById('btnStartFlow');
 
-    // result
-    const productImageEl = document.getElementById('productImage');
-    const productNameEl  = document.getElementById('productName');
-    const heroTitleEl    = document.getElementById('heroTitle');
-    const heroSubEl      = document.getElementById('heroSub');
-    const keyCardsEl     = document.getElementById('keyCards');
-    const factsEl        = document.getElementById('productFacts');
-
-    const btnOpenAR   = document.getElementById('btnOpenAR');
-    const btnRescan   = document.getElementById('btnRescan');
-
     // scan modal
-    const scanModal   = document.getElementById('scanModal');
-    const scanVideo   = document.getElementById('scanVideo');
-    const btnCloseScan= document.getElementById('btnCloseScan');
-    const btnScanStart= document.getElementById('btnScanStart');
-    const scanStatus  = document.getElementById('scanStatus');
-    const scanTech    = document.getElementById('scanTech');
-    const manualInput = document.getElementById('manualInput');
-    const btnManualOK = document.getElementById('btnManualOK');
+    const scanModal    = document.getElementById('scanModal');
+    const scanVideo    = document.getElementById('scanVideo');
+    const btnCloseScan = document.getElementById('btnCloseScan');
+    const btnScanStart = document.getElementById('btnScanStart');
+    const scanStatus   = document.getElementById('scanStatus');
 
     // ar modal
-    const arModal     = document.getElementById('arModal');
-    const arVideo     = document.getElementById('arVideo');
-    const lensCanvas  = document.getElementById('lensCanvas');
-    const btnCloseAR  = document.getElementById('btnCloseAR');
-    const btnARStart  = document.getElementById('btnARStart');
-    const btnARRestart= document.getElementById('btnARRestart');
-    const arStatus    = document.getElementById('arStatus');
+    const arModal      = document.getElementById('arModal');
+    const arVideo      = document.getElementById('arVideo');
+    const lensCanvas   = document.getElementById('lensCanvas');
+    const btnCloseAR   = document.getElementById('btnCloseAR');
+    const btnARStart   = document.getElementById('btnARStart');
+    const btnRescan    = document.getElementById('btnRescan');
+    const arStatus     = document.getElementById('arStatus');
 
-    // =========================
-    // 유틸
-    // =========================
+    // AR UI
+    const pointsEl     = document.getElementById('points');
+    const arProductName= document.getElementById('arProductName');
+    const greenTitle   = document.getElementById('greenTitle');
+    const greenBody    = document.getElementById('greenBody');
+    const greenSub     = document.getElementById('greenSub');
+
+    // util
     function openModal(modal){
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
@@ -728,7 +510,6 @@
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
     }
-
     function setScanStatus(text, bold){
       scanStatus.innerHTML = `상태: <b>${bold || ""}</b>${text ? " · " + text : ""}`;
     }
@@ -737,46 +518,12 @@
     }
 
     // =========================
-    // 결과 렌더링
+    // (B) Flow: 알림톡 → 스캔 → (촬영 시작 후) 자동 AR
     // =========================
-    function renderResult(){
-      viewLanding.classList.add('hide');
-      viewResult.classList.remove('hide');
-
-      productImageEl.src = PACKSHOT_URL;
-      productImageEl.alt = PRODUCT.product_name + " 팩샷";
-
-      productNameEl.innerHTML = `<span class="miniDot"></span>${PRODUCT.product_name}`;
-      heroTitleEl.textContent = PRODUCT.hero_title;
-      heroSubEl.textContent   = PRODUCT.hero_sub;
-
-      keyCardsEl.innerHTML = "";
-      PRODUCT.key_cards.forEach(c => {
-        const el = document.createElement('div');
-        el.className = "kcard";
-        el.innerHTML = `
-          <div class="khead">
-            <div class="ico">${c.icon}</div>
-            <div>${c.title}</div>
-          </div>
-          <div class="kbody">${c.body}</div>
-        `;
-        keyCardsEl.appendChild(el);
-      });
-
-      factsEl.innerHTML = "";
-      PRODUCT.facts.forEach(f => {
-        const li = document.createElement('li');
-        li.className = "li";
-        li.innerHTML = `<span>${f.k}</span><b>${f.v}</b>`;
-        factsEl.appendChild(li);
-      });
-    }
+    btnStartFlow.addEventListener('click', () => openScan());
 
     // =========================
-    // 스캔 (간단 MVP)
-    // - 자동 바코드 인식은 기기마다/브라우저마다 편차가 있어서
-    //   "카메라 켜기 + 수동입력"을 기본으로 둠(테스트 안정성)
+    // (1) Scan camera
     // =========================
     let scanStream = null;
 
@@ -801,11 +548,7 @@
 
     function openScan(){
       openModal(scanModal);
-      manualInput.value = "";
       setScanStatus("", "대기");
-
-      const supported = !!navigator.mediaDevices?.getUserMedia;
-      scanTech.innerHTML = `인식: <b>${supported ? "카메라/수동" : "수동"}</b>`;
     }
 
     function closeScan(){
@@ -814,29 +557,33 @@
       setScanStatus("", "대기");
     }
 
-    async function scanStart(){
+    btnCloseScan.addEventListener('click', closeScan);
+    scanModal.addEventListener('click', (e) => { if(e.target === scanModal) closeScan(); });
+
+    btnScanStart.addEventListener('click', async () => {
       try{
         if(!navigator.mediaDevices?.getUserMedia){
-          setScanStatus("이 기기는 카메라를 지원하지 않아요.", "실패");
+          setScanStatus("카메라 미지원", "실패");
           return;
         }
         setScanStatus("카메라 준비 중…", "진행");
         await startScanCamera();
-        setScanStatus("제품을 프레임에 맞춰주세요", "스캔 중");
+        setScanStatus("촬영 중…", "스캔 중");
+
+        // ✅ 여기서 "인식 완료" 느낌으로 1.1초 후 AR로 자동 전환
+        setTimeout(() => {
+          stopScanCamera();
+          closeModal(scanModal);
+          openAR();
+        }, 1100);
+
       }catch(e){
         setScanStatus("카메라 권한을 허용해주세요.", "실패");
       }
-    }
-
-    function manualOK(){
-      // MVP: 어떤 텍스트가 들어와도 테스트 제품으로 결과 이동(프로세스 확인용)
-      // 추후: 제품명/바코드 매칭 DB 연결하면 됨
-      closeScan();
-      renderResult();
-    }
+    });
 
     // =========================
-    // AR (카메라 + 3D 렌즈, ASD 패드 강조)
+    // (2) AR camera + 3D (기기 기울기/드래그 회전)
     // =========================
     let arStream = null;
     let renderer = null;
@@ -845,8 +592,13 @@
     let lensGroup = null;
     let raf = null;
 
+    // 드래그 회전
     let dragging = false;
     let lastX = 0, lastY = 0;
+
+    // 기울기 회전 (DeviceOrientation)
+    let oriEnabled = false;
+    let oriX = 0, oriY = 0;
 
     async function startARCamera(){
       const constraints = {
@@ -858,7 +610,8 @@
       await arVideo.play();
     }
 
-    function stopAR(){
+    function stopARAll(){
+      // camera
       if(arStream){
         arStream.getTracks().forEach(t => t.stop());
         arStream = null;
@@ -866,9 +619,11 @@
       arVideo.pause();
       arVideo.srcObject = null;
 
+      // raf
       if(raf) cancelAnimationFrame(raf);
       raf = null;
 
+      // three
       if(renderer){
         renderer.dispose();
         renderer = null;
@@ -876,6 +631,10 @@
       scene = null;
       camera3D = null;
       lensGroup = null;
+
+      // orientation
+      window.removeEventListener("deviceorientation", onDeviceOrientation);
+      oriEnabled = false;
 
       setARStatus("", "대기");
     }
@@ -916,7 +675,7 @@
       lensGroup = new THREE.Group();
       scene.add(lensGroup);
 
-      // lens surface (lathe)
+      // Lens surface
       const pts = [];
       pts.push(new THREE.Vector2(0.00, 0.00));
       pts.push(new THREE.Vector2(0.10, 0.005));
@@ -945,7 +704,7 @@
       const lensMesh = new THREE.Mesh(lensGeo, lensMat);
       lensGroup.add(lensMesh);
 
-      // rim highlight
+      // Rim
       const rimGeo = new THREE.TorusGeometry(0.50, 0.010, 16, 96);
       const rimMat = new THREE.MeshStandardMaterial({ color: 0x2a7fff, transparent:true, opacity:0.22, roughness:0.2 });
       const rim = new THREE.Mesh(rimGeo, rimMat);
@@ -953,33 +712,7 @@
       rim.position.y = 0.002;
       lensGroup.add(rim);
 
-      // ASD pads (4개, 12/6 강조)
-      const padMat = new THREE.MeshStandardMaterial({
-        color: 0x0b4aa2,
-        transparent: true,
-        opacity: 0.38,
-        roughness: 0.35
-      });
-
-      function makePad(angleRad, scaleY){
-        const padGeo = new THREE.CapsuleGeometry(0.07, 0.20, 6, 14);
-        const pad = new THREE.Mesh(padGeo, padMat);
-        pad.rotation.z = Math.PI/2;
-        pad.scale.set(1.0, scaleY, 1.0);
-
-        const r = 0.44;
-        pad.position.set(Math.cos(angleRad)*r, 0.00, Math.sin(angleRad)*r);
-        pad.lookAt(0,0,0);
-        pad.rotateY(Math.PI/2);
-        return pad;
-      }
-
-      lensGroup.add(makePad(0, 1.0));
-      lensGroup.add(makePad(Math.PI, 1.0));
-      lensGroup.add(makePad(Math.PI/2, 0.8));
-      lensGroup.add(makePad(3*Math.PI/2, 0.8));
-
-      // guide ring
+      // Accent ring
       const ringGeo = new THREE.RingGeometry(0.18, 0.20, 48);
       const ringMat = new THREE.MeshBasicMaterial({ color: 0x1e78ff, transparent:true, opacity:0.35, side: THREE.DoubleSide });
       const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -988,14 +721,26 @@
       lensGroup.add(ring);
 
       lensGroup.rotation.x = -0.25;
-      lensGroup.rotation.y = 0.5;
+      lensGroup.rotation.y = 0.4;
 
       const render = () => {
         raf = requestAnimationFrame(render);
+
+        // ✅ 기울기 기반 회전(손으로 움직이면 돌아가는 느낌)
+        if(lensGroup && oriEnabled){
+          const targetX = -0.25 + oriY * 0.012;  // pitch
+          const targetY =  0.40 + oriX * 0.012;  // roll
+          lensGroup.rotation.x += (targetX - lensGroup.rotation.x) * 0.08;
+          lensGroup.rotation.y += (targetY - lensGroup.rotation.y) * 0.08;
+        } else if(lensGroup){
+          // 기본은 아주 미세한 자동 움직임(살아있는 느낌)
+          lensGroup.rotation.y += 0.0015;
+        }
+
         if(lensGroup){
-          lensGroup.rotation.y += 0.002;
           lensGroup.position.y = Math.sin(Date.now()*0.002) * 0.01;
         }
+
         renderer.render(scene, camera3D);
       };
       render();
@@ -1034,12 +779,73 @@
       window.addEventListener('resize', resize3D);
     }
 
+    function onDeviceOrientation(e){
+      // gamma: 좌우(-90~90), beta: 앞뒤(-180~180)
+      const g = (typeof e.gamma === "number") ? e.gamma : 0;
+      const b = (typeof e.beta  === "number") ? e.beta  : 0;
+
+      // 살짝 안정화
+      oriX = g;
+      oriY = b;
+    }
+
+    async function enableDeviceOrientationIfNeeded(){
+      // iOS는 권한 요청 필요할 수 있음
+      try{
+        if(typeof DeviceOrientationEvent !== "undefined" &&
+           typeof DeviceOrientationEvent.requestPermission === "function"){
+          const res = await DeviceOrientationEvent.requestPermission();
+          if(res === "granted"){
+            window.addEventListener("deviceorientation", onDeviceOrientation, true);
+            oriEnabled = true;
+          }
+        } else {
+          window.addEventListener("deviceorientation", onDeviceOrientation, true);
+          oriEnabled = true;
+        }
+      } catch(_) {
+        // 실패해도 드래그 회전이 있으니 OK
+        oriEnabled = false;
+      }
+    }
+
+    // =========================
+    // AR UI: 포인트 클릭 시 그린패널 문구 변경
+    // =========================
+    function renderPoints(){
+      pointsEl.innerHTML = "";
+      AR_CONTENT.points.forEach((p, idx) => {
+        const btn = document.createElement("div");
+        btn.className = "ptBtn" + (idx === 0 ? " active" : "");
+        btn.dataset.idx = String(idx);
+        btn.innerHTML = `<div class="ptIcon" aria-hidden="true">${p.icon}</div>`;
+        btn.addEventListener("click", () => selectPoint(idx));
+        pointsEl.appendChild(btn);
+      });
+    }
+
+    function selectPoint(idx){
+      const p = AR_CONTENT.points[idx];
+      greenTitle.textContent = p.title;
+      greenBody.textContent  = p.body;
+      greenSub.textContent   = p.sub;
+
+      [...pointsEl.querySelectorAll(".ptBtn")].forEach((el, i) => {
+        if(i === idx) el.classList.add("active");
+        else el.classList.remove("active");
+      });
+    }
+
+    // =========================
+    // AR modal open/start
+    // =========================
     function openAR(){
       openModal(arModal);
+      arProductName.textContent = AR_CONTENT.productNameTop;
 
-      // 버튼 초기화
-      btnARStart.classList.remove("hide");
-      btnARRestart.classList.add("hide");
+      renderPoints();
+      selectPoint(0);
+
       btnARStart.disabled = false;
       btnARStart.textContent = "AR 시작";
       setARStatus("", "대기");
@@ -1048,7 +854,7 @@
     async function startAR(){
       try{
         if(!navigator.mediaDevices?.getUserMedia){
-          setARStatus("이 기기는 카메라를 지원하지 않아요.", "실패");
+          setARStatus("카메라 미지원", "실패");
           return;
         }
 
@@ -1064,10 +870,11 @@
         }
         resize3D();
 
-        setARStatus("제품을 화면에 크게 잡아주세요", "실행 중");
+        // ✅ 기울기 권한 요청(있으면 손으로 움직일 때 렌즈가 더 자연스럽게)
+        await enableDeviceOrientationIfNeeded();
 
-        btnARStart.classList.add("hide");
-        btnARRestart.classList.remove("hide");
+        setARStatus("포인트를 눌러 설명을 바꿔보세요", "실행 중");
+        btnARStart.classList.add("hide"); // 시작 후 숨김
       }catch(e){
         console.log(e);
         setARStatus("카메라 권한/재생이 막혔어요. 새로고침 후 다시 시도해주세요.", "실패");
@@ -1076,43 +883,34 @@
       }
     }
 
-    // =========================
-    // 이벤트: 프로세스 연결
-    // =========================
-    btnStartFlow.addEventListener('click', () => {
-      // 알림톡 버튼 클릭 → 스캔 화면 오픈
+    // AR modal events
+    btnARStart.addEventListener('click', startAR);
+
+    btnCloseAR.addEventListener('click', () => {
+      stopARAll();
+      btnARStart.classList.remove("hide");
+      closeModal(arModal);
+    });
+    arModal.addEventListener('click', (e) => {
+      if(e.target === arModal){
+        stopARAll();
+        btnARStart.classList.remove("hide");
+        closeModal(arModal);
+      }
+    });
+
+    // 다시 스캔하기
+    btnRescan.addEventListener("click", () => {
+      stopARAll();
+      btnARStart.classList.remove("hide");
+      closeModal(arModal);
       openScan();
     });
 
-    btnRescan.addEventListener('click', () => openScan());
-
-    btnOpenAR.addEventListener('click', () => openAR());
-
-    // scan modal events
-    btnCloseScan.addEventListener('click', closeScan);
-    scanModal.addEventListener('click', (e) => { if(e.target === scanModal) closeScan(); });
-    btnScanStart.addEventListener('click', scanStart);
-    btnManualOK.addEventListener('click', manualOK);
-
-    // ar modal events
-    btnCloseAR.addEventListener('click', () => { stopAR(); closeModal(arModal); });
-    arModal.addEventListener('click', (e) => { if(e.target === arModal){ stopAR(); closeModal(arModal); } });
-    btnARStart.addEventListener('click', startAR);
-
-    btnARRestart.addEventListener('click', () => {
-      stopAR();
-      btnARStart.classList.remove("hide");
-      btnARRestart.classList.add("hide");
-      btnARStart.disabled = false;
-      btnARStart.textContent = "AR 시작";
-      setARStatus("", "대기");
-    });
-
-    // 초기
+    // =========================
+    // 환경 pill
+    // =========================
     envPill.textContent = (navigator.mediaDevices?.getUserMedia) ? "카메라 지원" : "카메라 미지원";
-
-    // 개발 중 편의: 결과 바로 보고 싶으면 아래 주석 해제
-    // renderResult();
   </script>
 </body>
 </html>
