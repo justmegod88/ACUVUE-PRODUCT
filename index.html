@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>제품 스캔 → 결과(AR 없이 정면 렌즈)</title>
+  <title>제품 촬영 → 결과(AR 없이 정면 렌즈)</title>
 
   <style>
     :root{
@@ -104,7 +104,8 @@
       align-items:flex-start;
       gap:8px;
     }
-    .trust .dot{ width:8px; height:8px; margin-top: 5px; border-radius: 999px; background: #16a34a; flex:0 0 auto; }
+    .trust .dot{ width:8px; height:8px; margin-top: 5px; border-radius: 999 hookup
+     ;border-radius: 999px; background: #16a34a; flex:0 0 auto; }
 
     .hide{ display:none !important; }
 
@@ -162,6 +163,70 @@
         radial-gradient(600px 340px at 0% 40%, rgba(11,74,162,0.10), transparent 58%),
         linear-gradient(180deg, #1a2636 0%, #0f1726 100%);
       overflow:hidden;
+    }
+
+    /* 촬영(스캔) 화면: 실제 카메라 */
+    .camStage{
+      position: relative;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background: #0b1020;
+    }
+    #camVideo{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* 셀카처럼 보이면 불편할 수 있어. 필요 없으면 삭제 */
+    }
+    .scanGuide{
+      position:absolute;
+      left:12px; right:12px; top:12px;
+      background: rgba(12,20,36,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      color:#fff;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height:1.45;
+      backdrop-filter: blur(10px);
+    }
+    .frame{
+      position:absolute;
+      left: 14%;
+      right: 14%;
+      top: 24%;
+      bottom: 24%;
+      border-radius: 18px;
+      border: 2px solid rgba(255,255,255,0.85);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+      pointer-events:none;
+    }
+    .frame::after{
+      content:"";
+      position:absolute;
+      inset: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+    .scanHint{
+      position:absolute;
+      left:0; right:0;
+      bottom: 90px;
+      display:flex;
+      justify-content:center;
+      pointer-events:none;
+    }
+    .scanHint span{
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.18);
+      color:#fff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      backdrop-filter: blur(10px);
     }
 
     /* 위쪽 제품명 바 */
@@ -224,59 +289,59 @@
       font-weight: 950;
     }
 
-    /* ✅ 렌즈 캔버스(정면 원형 고정) */
+    /* ✅ 렌즈: 겹침 줄이기 위해 살짝 위, 크기도 살짝 줄임 */
     #lens2d{
       position:absolute;
       left: 50%;
-      top: 48%;
+      top: 44%;                  /* ⬅️ (2) 겹침 줄이기: 위로 올림 */
       transform: translate(-50%, -50%);
-      width: min(78vw, 360px);
-      height: min(78vw, 360px);
+      width: min(74vw, 330px);   /* ⬅️ 살짝 줄임 */
+      height: min(74vw, 330px);
       pointer-events:auto;
-      filter: drop-shadow(0 20px 28px rgba(0,0,0,0.22));
+      filter: drop-shadow(0 18px 26px rgba(0,0,0,0.20));
     }
 
-    /* ✅ 초록 패널: 조금 아래 + 폰트 조금 크게 */
+    /* ✅ 초록 패널: 세로 줄이기 + 폰트 줄이기 */
     .greenPanel{
       position:absolute;
       left:0; right:0;
-      bottom: 52px;
+      bottom: 54px;
       margin: 0 10px;
       background: linear-gradient(180deg, var(--green), var(--green2));
       color:#fff;
       border-radius: 14px;
-      padding: 16px 14px 14px;
+      padding: 12px 12px 10px;  /* ⬅️ (1) 패딩 줄임 */
       box-shadow: var(--shadow);
       pointer-events:none;
     }
     .greenTitle{
       font-weight:980;
-      letter-spacing:-0.45px;
-      font-size: 17px;
-      margin:0 0 10px;
+      letter-spacing:-0.35px;
+      font-size: 15px;          /* ⬅️ (1) 폰트 줄임 */
+      margin:0 0 6px;
       line-height:1.15;
       text-align:center;
     }
     .greenBody{
-      font-size: 14px;
-      line-height:1.45;
+      font-size: 13px;          /* ⬅️ (1) 폰트 줄임 */
+      line-height:1.35;
       opacity: 0.96;
       text-align:center;
     }
     .greenSubBox{
-      margin: 10px auto 0;
+      margin: 8px auto 0;
       max-width: 92%;
       background: rgba(0,0,0,0.16);
       border: 1px solid rgba(255,255,255,0.18);
       border-radius: 10px;
-      padding: 10px 10px;
-      font-size: 13px;
-      line-height:1.45;
+      padding: 8px 10px;        /* ⬅️ (1) 줄임 */
+      font-size: 12px;          /* ⬅️ (1) 폰트 줄임 */
+      line-height:1.35;
       text-align:center;
       opacity:0.95;
     }
     .badgeRow{
-      margin-top: 10px;
+      margin-top: 8px;
       display:flex;
       justify-content:center;
       pointer-events:none;
@@ -284,10 +349,10 @@
     .badge{
       background: rgba(0,0,0,0.20);
       border: 1px solid rgba(255,255,255,0.20);
-      padding: 10px 12px;
+      padding: 8px 10px;        /* ⬅️ 줄임 */
       border-radius: 12px;
       font-weight: 950;
-      font-size: 13px;
+      font-size: 12px;          /* ⬅️ 줄임 */
       letter-spacing:-0.2px;
       box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
     }
@@ -418,6 +483,7 @@
     .tagLine.on{ opacity: 0.9; }
 
     .miniHelp{ font-size:12px; color:var(--muted); line-height:1.45; }
+    input[type="file"]{ display:none; }
   </style>
 </head>
 
@@ -427,7 +493,7 @@
       <div class="headRow">
         <div class="brandBox">
           <div class="title">알림톡 랜딩 (테스트)</div>
-          <div class="sub">알림톡 → 스캔(모형) → 결과(AR 없이 정면 렌즈)</div>
+          <div class="sub">알림톡 → 제품 촬영(테스트) → 결과(AR 없이 정면 렌즈)</div>
         </div>
         <div class="pill">AR 미사용</div>
       </div>
@@ -438,7 +504,7 @@
         <div class="h1">알림톡 도착</div>
         <p class="p">
           오늘 선택하신 제품 정보를 확인할 수 있어요.<br>
-          (테스트) 스캔 후 결과 화면으로 이동합니다.
+          (테스트) 촬영 후 결과 화면으로 이동합니다.
         </p>
 
         <div class="btnRow">
@@ -453,21 +519,27 @@
     </section>
   </div>
 
-  <!-- (스캔 모달: MVP에서는 “촬영 시작” 누르면 바로 결과로 이동) -->
+  <!-- 스캔(촬영) 모달 -->
   <div class="modal" id="scanModal" aria-hidden="true">
     <div class="modalBox">
       <div class="modalTop">
-        <div class="t">제품 스캔</div>
+        <div class="t">제품 촬영(테스트)</div>
         <button class="x" id="btnCloseScan">닫기</button>
       </div>
 
-      <div class="stage" style="display:grid; place-items:center; color:#fff;">
-        <div style="text-align:center; padding: 0 18px;">
-          <div style="font-weight:980; font-size:16px; letter-spacing:-0.2px;">(테스트) 카메라 없이 진행</div>
-          <div style="opacity:.85; margin-top:8px; line-height:1.5;">
-            실제 스캔은 나중에 붙이고,<br>지금은 “촬영 시작”을 누르면 결과 화면으로 이동합니다.
-          </div>
+      <div class="stage camStage">
+        <video id="camVideo" playsinline muted autoplay></video>
+
+        <div class="scanGuide">
+          제품 박스(바코드/측면)를 프레임 안에 맞춰주세요.<br>
+          (테스트) 실제 바코드 인식은 다음 단계에서 붙입니다.
         </div>
+
+        <div class="frame" aria-hidden="true"></div>
+        <div class="scanHint"><span>밝은 곳에서 촬영하면 인식이 더 좋아요</span></div>
+
+        <!-- 카메라가 안 될 때 대비: 사진 업로드로 대체 -->
+        <input id="fileFallback" type="file" accept="image/*" capture="environment">
       </div>
 
       <div class="modalBottom">
@@ -475,7 +547,16 @@
           <span id="scanStatus">상태: <b>대기</b></span>
           <span>인식: <b>미사용</b></span>
         </div>
-        <button class="btn" id="btnScanStart">촬영 시작</button>
+
+        <div class="actionRow">
+          <button class="btn secondary" id="btnUsePhoto">사진으로 진행</button>
+          <button class="btn" id="btnScanUse">이 사진 사용</button>
+        </div>
+
+        <div class="miniHelp">
+          * iOS에서 카메라 권한 팝업이 뜨면 <b>허용</b>을 눌러주세요.<br>
+          * 카메라가 안 되면 <b>사진으로 진행</b>으로 테스트할 수 있어요.
+        </div>
       </div>
     </div>
   </div>
@@ -484,7 +565,7 @@
   <div class="modal" id="resultModal" aria-hidden="true">
     <div class="modalBox">
       <div class="modalTop">
-        <div class="t">AR 결과</div>
+        <div class="t">결과</div>
         <button class="x" id="btnCloseResult">닫기</button>
       </div>
 
@@ -496,10 +577,10 @@
 
         <div class="points" id="points"></div>
 
-        <!-- ✅ 정면 렌즈(2D) -->
+        <!-- 정면 렌즈(2D) -->
         <canvas id="lens2d" width="800" height="800"></canvas>
 
-        <!-- ✅ 눈물막 오버레이 -->
+        <!-- 눈물막 오버레이 -->
         <div class="tearOverlay" id="tearOverlay">
           <canvas id="tearCanvas" width="256" height="256"></canvas>
         </div>
@@ -525,11 +606,11 @@
       <div class="modalBottom">
         <div class="status">
           <span id="resStatus">상태: <b>실행 중</b></span>
-          <span>조작: <b>드래그(살짝)</b></span>
+          <span>조작: <b>드래그(살짝 회전)</b></span>
         </div>
 
         <div class="actionRow">
-          <button class="btn secondary" id="btnRescan">다시 스캔하기</button>
+          <button class="btn secondary" id="btnRescan">다시 촬영하기</button>
 
           <a class="btn secondary surveyBtn" href="https://forms.office.com/r/aqt7sf0ciB" target="_blank" rel="noopener">
             <div class="surveyText">
@@ -541,8 +622,8 @@
         </div>
 
         <div class="miniHelp">
-          * 지금 버전은 <b>카메라/AR 없이</b> 정면 렌즈 UI로만 보여줍니다.<br>
-          (원하면 나중에 “카메라 배경”만 다시 붙일 수 있어요)
+          * 지금 버전은 <b>AR 없이</b> 정면 렌즈 UI로만 보여줍니다.<br>
+          * 제품 확인을 위한 <b>촬영 단계</b>만 유지한 테스트 버전입니다.
         </div>
       </div>
     </div>
@@ -586,8 +667,12 @@
 
     const scanModal = document.getElementById('scanModal');
     const btnCloseScan = document.getElementById('btnCloseScan');
-    const btnScanStart = document.getElementById('btnScanStart');
+    const btnScanUse = document.getElementById('btnScanUse');
+    const btnUsePhoto = document.getElementById('btnUsePhoto');
     const scanStatus = document.getElementById('scanStatus');
+
+    const camVideo = document.getElementById('camVideo');
+    const fileFallback = document.getElementById('fileFallback');
 
     const resultModal = document.getElementById('resultModal');
     const btnCloseResult = document.getElementById('btnCloseResult');
@@ -624,28 +709,81 @@
     }
 
     // =========================
+    // Camera (촬영 테스트)
+    // =========================
+    let mediaStream = null;
+
+    async function startCamera(){
+      // 이미 켜져있으면 skip
+      if(mediaStream) return;
+
+      try{
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false
+        });
+        camVideo.srcObject = mediaStream;
+        await camVideo.play().catch(()=>{});
+        scanStatus.innerHTML = `상태: <b>촬영 중</b>`;
+      }catch(err){
+        // 카메라가 막히면 파일 업로드로 fallback
+        console.warn("Camera error:", err);
+        scanStatus.innerHTML = `상태: <b>카메라 불가(사진으로 진행)</b>`;
+      }
+    }
+
+    function stopCamera(){
+      if(!mediaStream) return;
+      mediaStream.getTracks().forEach(t=>t.stop());
+      mediaStream = null;
+      camVideo.srcObject = null;
+    }
+
+    // =========================
     // Flow
     // =========================
-    btnStartFlow.addEventListener('click', () => {
+    btnStartFlow.addEventListener('click', async () => {
       scanStatus.innerHTML = `상태: <b>대기</b>`;
       openModal(scanModal);
+      await startCamera();
     });
 
-    btnCloseScan.addEventListener('click', () => closeModal(scanModal));
-    scanModal.addEventListener('click', (e)=>{ if(e.target===scanModal) closeModal(scanModal); });
+    btnCloseScan.addEventListener('click', ()=>{
+      closeModal(scanModal);
+      stopCamera();
+    });
+    scanModal.addEventListener('click', (e)=>{
+      if(e.target===scanModal){
+        closeModal(scanModal);
+        stopCamera();
+      }
+    });
 
-    btnScanStart.addEventListener('click', ()=>{
+    // 사진 fallback
+    btnUsePhoto.addEventListener('click', ()=>{
+      fileFallback.click();
+    });
+    fileFallback.addEventListener('change', ()=>{
+      if(fileFallback.files && fileFallback.files.length){
+        scanStatus.innerHTML = `상태: <b>사진 선택됨</b>`;
+      }
+    });
+
+    // "이 사진 사용" = 테스트에서는 인식 없이 결과로 이동
+    btnScanUse.addEventListener('click', ()=>{
       scanStatus.innerHTML = `상태: <b>완료</b>`;
       closeModal(scanModal);
+      stopCamera();
       openResult();
     });
 
     btnCloseResult.addEventListener('click', ()=> closeModal(resultModal));
     resultModal.addEventListener('click', (e)=>{ if(e.target===resultModal) closeModal(resultModal); });
 
-    btnRescan.addEventListener('click', ()=>{
+    btnRescan.addEventListener('click', async ()=>{
       closeModal(resultModal);
       openModal(scanModal);
+      await startCamera();
     });
 
     // =========================
@@ -725,14 +863,14 @@
     // ✅ 정면 렌즈(2D) 그리기
     // =========================
     function resizeLensCanvas(){
-      // CSS 크기에 맞춰 실제 해상도 스케일 조절
       const rect = lens2d.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       lens2d.width = Math.floor(rect.width * dpr);
       lens2d.height = Math.floor(rect.height * dpr);
     }
 
-    let rot = 0;          // 살짝 회전
+    // (4) 드래그 = 살짝 회전만
+    let rot = 0;
     let dragging = false;
     let lastX = 0;
 
@@ -745,33 +883,32 @@
       if(!dragging) return;
       const dx = e.clientX - lastX;
       lastX = e.clientX;
-      rot += dx * 0.002; // ✅ “살짝만”
+      rot += dx * 0.0016; // ✅ 아주 살짝
     });
     lens2d.addEventListener("pointerup", (e)=>{
       dragging = false;
       try{ lens2d.releasePointerCapture(e.pointerId); }catch(_){}
     });
 
-    // 123 반짝
     function markPulse(t){
-      return 0.55 + (Math.sin(t*0.012)+1)*0.20; // 0.55~0.95
+      return 0.55 + (Math.sin(t*0.012)+1)*0.20;
     }
 
-    // 렌즈 패턴(왼쪽 이미지 느낌: 투명 + 라인 + 하이라이트)
     function drawLens(){
       const w = lens2d.width, h = lens2d.height;
       const ctx = lctx;
       ctx.clearRect(0,0,w,h);
 
       const cx = w/2, cy = h/2;
-      const R  = Math.min(w,h) * 0.42;
+      const R  = Math.min(w,h) * 0.43; // 중심 안정
 
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.rotate(rot * 0.12); // 너무 돌지 않게
+      ctx.rotate(rot * 0.10);
 
-      // tint by mode
-      const tint = (mode==="BLUE") ? {r: 170, g: 255, b: 236, a: 0.22} : {r: 220, g: 245, b: 255, a: 0.20};
+      const tint = (mode==="BLUE")
+        ? {r: 170, g: 255, b: 236, a: 0.22}
+        : {r: 220, g: 245, b: 255, a: 0.20};
 
       // base glass
       const g = ctx.createRadialGradient(-R*0.18, -R*0.22, R*0.12, 0,0,R*1.05);
@@ -785,56 +922,47 @@
       ctx.fill();
 
       // outer rim
-      ctx.strokeStyle = `rgba(255,255,255,0.28)`;
+      ctx.strokeStyle = `rgba(255,255,255,0.26)`;
       ctx.lineWidth = Math.max(2, R*0.012);
       ctx.beginPath();
       ctx.arc(0,0,R*0.985,0,Math.PI*2);
       ctx.stroke();
 
       // inner soft ring
-      ctx.strokeStyle = (mode==="BLUE") ? `rgba(30,120,255,0.22)` : `rgba(255,255,255,0.18)`;
+      ctx.strokeStyle = (mode==="BLUE") ? `rgba(30,120,255,0.20)` : `rgba(255,255,255,0.16)`;
       ctx.lineWidth = Math.max(1.5, R*0.008);
       ctx.beginPath();
       ctx.arc(0,0,R*0.62,0,Math.PI*2);
       ctx.stroke();
 
-      // “렌즈 라인 패턴”(왼쪽 예시처럼 아래쪽 곡선 라인들)
-      ctx.lineWidth = Math.max(1, R*0.006);
-      ctx.strokeStyle = `rgba(255,255,255,0.22)`;
-      for(let i=0;i<7;i++){
-        const yy = R*0.08 + i*R*0.06;
-        const rr = R*0.92 - i*R*0.05;
-        ctx.beginPath();
-        ctx.arc(0, yy, rr, Math.PI*0.10, Math.PI*0.90);
-        ctx.stroke();
-      }
+      // ✅ (3) 빗살/아래 라인 패턴 제거: 해당 블록 삭제함
 
       // highlight blob
       const hl = ctx.createRadialGradient(-R*0.25, -R*0.28, R*0.05, -R*0.15, -R*0.18, R*0.55);
-      hl.addColorStop(0, `rgba(255,255,255,0.35)`);
+      hl.addColorStop(0, `rgba(255,255,255,0.32)`);
       hl.addColorStop(1, `rgba(255,255,255,0)`);
       ctx.fillStyle = hl;
       ctx.beginPath();
       ctx.arc(0,0,R,0,Math.PI*2);
       ctx.fill();
 
-      // subtle shadow bottom (gives depth)
+      // subtle shadow bottom (depth)
       const sh = ctx.createRadialGradient(0, R*0.65, R*0.02, 0, R*0.75, R*0.55);
-      sh.addColorStop(0, `rgba(0,0,0,0.18)`);
+      sh.addColorStop(0, `rgba(0,0,0,0.16)`);
       sh.addColorStop(1, `rgba(0,0,0,0)`);
       ctx.fillStyle = sh;
       ctx.beginPath();
       ctx.arc(0,0,R,0,Math.PI*2);
       ctx.fill();
 
-      // ✅ 123 강조(렌즈 하단 포인트 위치)
+      // 123 강조
       if(mode==="MARK"){
         const t = Date.now();
         const p = markPulse(t);
 
-        // glow ring
         ctx.save();
         ctx.translate(0, R*0.56);
+
         ctx.globalAlpha = 0.55 * p;
         ctx.strokeStyle = "rgba(255,255,255,0.85)";
         ctx.lineWidth = Math.max(2.5, R*0.014);
@@ -842,7 +970,6 @@
         ctx.arc(0,0,R*0.14,0,Math.PI*2);
         ctx.stroke();
 
-        // glow fill
         const gg = ctx.createRadialGradient(0,0,R*0.02, 0,0,R*0.22);
         gg.addColorStop(0, `rgba(255,255,255,0.65)`);
         gg.addColorStop(1, `rgba(255,255,255,0)`);
@@ -851,7 +978,6 @@
         ctx.arc(0,0,R*0.22,0,Math.PI*2);
         ctx.fill();
 
-        // text
         ctx.globalAlpha = 0.90;
         ctx.fillStyle = "rgba(15,23,38,0.92)";
         ctx.font = `900 ${Math.max(18, R*0.14)}px Arial`;
@@ -929,8 +1055,7 @@
     // =========================
     function loop(){
       requestAnimationFrame(loop);
-      // 아주 미세한 자동 회전(원하면 지워도 됨)
-      if(!dragging) rot += 0.0012;
+      // ✅ (4) 자동회전 OFF: 드래그할 때만 움직임
       drawLens();
       if(mode==="TEAR") drawTearOverlay();
     }
