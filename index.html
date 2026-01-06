@@ -622,6 +622,8 @@
 
     .hide{ display:none !important; }
 
+    
+    
     @media (min-width: 720px){
 
       .wrap{ padding: 20px 18px 60px; }
@@ -641,7 +643,7 @@
 <!-- ENTRY VIEW -->
 <section id="viewEntry">
 <div class="card">
-<h1 class="h1">📷 내가 구매한 렌즈는 어떤 제품일까?</h1>
+<h1 class="h1">📷 내가 구매한 렌즈, 어떤 제품일까?</h1>
 <div class="btnRow">
 <button class="btn" id="btnOpenScan">카메라로 스캔해서 제품 확인</button>
 <button class="btn secondary" id="btnGoManual">테스트용 코드 입력</button>
@@ -654,8 +656,8 @@
 <!-- RESULT VIEW -->
 <section id="viewResult" class="hide">
 <div class="hero">
-<h2 id="heroTitle">눈의 피로까지 고려해 설계된 원데이 렌즈</h2>
-<p id="heroSub">장시간 디지털 환경에서도 편안한 착용을 목표로 개발되었습니다</p>
+<h2 id="heroTitle">눈 피로까지 고려해 설계된 원데이 렌즈</h2>
+<p id="heroSub">   이 렌즈는 스마트폰·PC 사용 시간이 긴 라이프스타일을 고려해 설계되었습니다</p>
 </div>
 <div class="kcards" id="keyCards"></div>
 <div class="grid2">
@@ -664,21 +666,18 @@
 <ul class="list" id="productFacts"></ul>
 <div style="margin-top:10px; color:var(--muted); font-size:14px; line-height:1.45;" id="targetLine">
 
-            이 렌즈는 스마트폰·PC 사용 시간이 긴 라이프스타일을 고려해 설계되었습니다
-</div>
 </div>
 <div class="quote" id="defenseCopy">
 
-          💬 <b>다른 렌즈를 추천받으셔도,</b><br>
+        defense_copy_html: `💡 <b>추후 구매시에도,</b><br>
 
-          지금 사용 중인 렌즈가<br>
 <b>시야 안정성과 눈의 피로를 고려해 설계된 제품인지</b><br>
 
-          비교해보세요.
+          확인해보세요.`
 </div>
 <button class="btn secondary" id="btnAR">
 
-          🔍 렌즈 설계 포인트를 한눈에 보기
+          🔍 렌즈 설계 포인트 한눈에 보기
 </button>
 <div class="card">
 <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
@@ -754,7 +753,9 @@
         product_name: "아큐브 맥스 오아시스 원데이",
 
         hero_title: "눈 피로까지 고려해 설계된 원데이 렌즈",
-
+       
+        product_image: "https://via.placeholder.com/300x300?text=ACUVUE+MAX+OASYS+1-Day",
+        
         hero_sub: "이 렌즈는 스마트폰·PC 사용 시간이 긴 라이프스타일을 고려해 설계되었습니다",
 
         key_cards: [
@@ -1227,4 +1228,5 @@
 </html>
 
  
+
 
