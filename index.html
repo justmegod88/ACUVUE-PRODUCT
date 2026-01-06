@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>알림톡 → 스캔 → AR 결과 (요청 이미지 반영)</title>
+  <title>제품 스캔 → 결과(AR 없이 정면 렌즈)</title>
 
   <style>
     :root{
@@ -153,54 +153,18 @@
       box-shadow: var(--shadow2);
     }
 
-    .videoWrap{
+    .stage{
       position: relative;
-      background:#000;
       width:100%;
       aspect-ratio: 3 / 4;
-    }
-    video{ width:100%; height:100%; object-fit: cover; display:block; }
-
-    /* Scan overlay */
-    .scanFrame{
-      position:absolute;
-      inset: 14% 10%;
-      border: 2px solid rgba(255,255,255,0.88);
-      border-radius: 16px;
-      box-shadow: 0 0 0 999px rgba(0,0,0,0.15);
-      pointer-events:none;
-    }
-    .scanHint{
-      position:absolute;
-      bottom: 10px; left: 10px; right: 10px;
-      background: rgba(255,255,255,0.92);
-      border-radius: 14px;
-      padding: 10px 10px;
-      font-size: 13px;
-      color: var(--text);
-      box-shadow: var(--shadow2);
-      line-height:1.35;
+      background:
+        radial-gradient(700px 340px at 55% 5%, rgba(30,120,255,0.18), transparent 62%),
+        radial-gradient(600px 340px at 0% 40%, rgba(11,74,162,0.10), transparent 58%),
+        linear-gradient(180deg, #1a2636 0%, #0f1726 100%);
+      overflow:hidden;
     }
 
-    .modalBottom{
-      padding: 12px 14px 14px;
-      border-top: 1px solid rgba(230,233,242,0.95);
-      display:grid;
-      gap: 10px;
-      background: rgba(255,255,255,0.98);
-    }
-
-    .status{
-      font-size: 13px;
-      color: var(--muted);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .status b{ color: var(--text); }
-
-    /* ========== AR RESULT UI ========== */
+    /* 위쪽 제품명 바 */
     .arHeaderBar{
       position:absolute;
       left:10px; right:10px; top:10px;
@@ -222,6 +186,7 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
 
+    /* 오른쪽 포인트 버튼 */
     .points{
       position:absolute;
       right: 10px;
@@ -259,11 +224,23 @@
       font-weight: 950;
     }
 
+    /* ✅ 렌즈 캔버스(정면 원형 고정) */
+    #lens2d{
+      position:absolute;
+      left: 50%;
+      top: 48%;
+      transform: translate(-50%, -50%);
+      width: min(78vw, 360px);
+      height: min(78vw, 360px);
+      pointer-events:auto;
+      filter: drop-shadow(0 20px 28px rgba(0,0,0,0.22));
+    }
+
     /* ✅ 초록 패널: 조금 아래 + 폰트 조금 크게 */
     .greenPanel{
       position:absolute;
       left:0; right:0;
-      bottom: 52px; /* (조금 아래로) */
+      bottom: 52px;
       margin: 0 10px;
       background: linear-gradient(180deg, var(--green), var(--green2));
       color:#fff;
@@ -275,13 +252,13 @@
     .greenTitle{
       font-weight:980;
       letter-spacing:-0.45px;
-      font-size: 17px; /* 조금 크게 */
+      font-size: 17px;
       margin:0 0 10px;
       line-height:1.15;
       text-align:center;
     }
     .greenBody{
-      font-size: 14px; /* 조금 크게 */
+      font-size: 14px;
       line-height:1.45;
       opacity: 0.96;
       text-align:center;
@@ -293,13 +270,11 @@
       border: 1px solid rgba(255,255,255,0.18);
       border-radius: 10px;
       padding: 10px 10px;
-      font-size: 13px; /* 조금 크게 */
+      font-size: 13px;
       line-height:1.45;
       text-align:center;
       opacity:0.95;
     }
-
-    /* ✅ 블루라이트 모드에서 초록 패널 안에 들어가는 “강조 배지” */
     .badgeRow{
       margin-top: 10px;
       display:flex;
@@ -317,7 +292,23 @@
       box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
     }
 
-    /* ✅ 하단 버튼 영역(이미지처럼 정리) */
+    .modalBottom{
+      padding: 12px 14px 14px;
+      border-top: 1px solid rgba(230,233,242,0.95);
+      display:grid;
+      gap: 10px;
+      background: rgba(255,255,255,0.98);
+    }
+    .status{
+      font-size: 13px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .status b{ color: var(--text); }
+
     .actionRow{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -353,17 +344,7 @@
       font-size: 18px;
     }
 
-    #lensCanvas{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      pointer-events:auto;
-    }
-
-    .miniHelp{ font-size:12px; color:var(--muted); line-height:1.45; }
-
-    /* ✅ 눈물막 모드: 렌즈 위에 뜨는 “원형 이미지 + 라벨” UI(HTML 오버레이) */
+    /* ✅ 눈물막 오버레이(왼쪽 상단 원형 + 라벨) */
     .tearOverlay{
       position:absolute;
       left: 20px;
@@ -373,7 +354,7 @@
       border-radius: 999px;
       border: 2px solid rgba(255,255,255,0.92);
       box-shadow: 0 12px 26px rgba(16,24,40,0.18);
-      background: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.10);
       backdrop-filter: blur(2px);
       overflow:hidden;
       pointer-events:none;
@@ -422,7 +403,6 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-
     .tagLine{
       position:absolute;
       left: 92px;
@@ -436,9 +416,9 @@
       transition: opacity .20s ease;
     }
     .tagLine.on{ opacity: 0.9; }
-  </style>
 
-  <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
+    .miniHelp{ font-size:12px; color:var(--muted); line-height:1.45; }
+  </style>
 </head>
 
 <body>
@@ -447,9 +427,9 @@
       <div class="headRow">
         <div class="brandBox">
           <div class="title">알림톡 랜딩 (테스트)</div>
-          <div class="sub">알림톡 → 스캔 → AR 결과(포인트별 표현 변경)</div>
+          <div class="sub">알림톡 → 스캔(모형) → 결과(AR 없이 정면 렌즈)</div>
         </div>
-        <div class="pill" id="envPill">환경 확인 중…</div>
+        <div class="pill">AR 미사용</div>
       </div>
     </header>
 
@@ -457,8 +437,8 @@
       <div class="card">
         <div class="h1">알림톡 도착</div>
         <p class="p">
-          오늘 선택하신 제품 정보를 <b>AR로</b> 확인할 수 있어요.<br>
-          아래 버튼을 눌러 제품을 스캔해 주세요.
+          오늘 선택하신 제품 정보를 확인할 수 있어요.<br>
+          (테스트) 스캔 후 결과 화면으로 이동합니다.
         </p>
 
         <div class="btnRow">
@@ -467,53 +447,59 @@
 
         <div class="trust">
           <div class="dot"></div>
-          <div>💧/123/🟦 버튼을 누르면 렌즈 표현 + 하단 설명이 바뀝니다.</div>
+          <div>💧 / 123 / 🟦 버튼을 누르면 렌즈 표현 + 하단 설명이 바뀝니다.</div>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- (1) 스캔 모달 -->
+  <!-- (스캔 모달: MVP에서는 “촬영 시작” 누르면 바로 결과로 이동) -->
   <div class="modal" id="scanModal" aria-hidden="true">
     <div class="modalBox">
       <div class="modalTop">
         <div class="t">제품 스캔</div>
-        <button class="x" id="btnCloseScan" aria-label="닫기">닫기</button>
+        <button class="x" id="btnCloseScan">닫기</button>
       </div>
 
-      <div class="videoWrap">
-        <video id="scanVideo" playsinline muted></video>
-        <div class="scanFrame"></div>
-        <div class="scanHint">
-          제품 박스 <b>옆면 바코드</b> 또는 <b>앞면</b>을 프레임 안에 맞춰 주세요.<br>
-          반사되면 각도를 살짝 바꿔주세요.
+      <div class="stage" style="display:grid; place-items:center; color:#fff;">
+        <div style="text-align:center; padding: 0 18px;">
+          <div style="font-weight:980; font-size:16px; letter-spacing:-0.2px;">(테스트) 카메라 없이 진행</div>
+          <div style="opacity:.85; margin-top:8px; line-height:1.5;">
+            실제 스캔은 나중에 붙이고,<br>지금은 “촬영 시작”을 누르면 결과 화면으로 이동합니다.
+          </div>
         </div>
       </div>
 
       <div class="modalBottom">
         <div class="status">
           <span id="scanStatus">상태: <b>대기</b></span>
-          <span id="scanTech">인식: <b>카메라</b></span>
+          <span>인식: <b>미사용</b></span>
         </div>
-
         <button class="btn" id="btnScanStart">촬영 시작</button>
       </div>
     </div>
   </div>
 
-  <!-- (2) AR 결과 모달 -->
-  <div class="modal" id="arModal" aria-hidden="true">
+  <!-- 결과 모달 -->
+  <div class="modal" id="resultModal" aria-hidden="true">
     <div class="modalBox">
       <div class="modalTop">
         <div class="t">AR 결과</div>
-        <button class="x" id="btnCloseAR" aria-label="닫기">닫기</button>
+        <button class="x" id="btnCloseResult">닫기</button>
       </div>
 
-      <div class="videoWrap">
-        <video id="arVideo" playsinline muted></video>
-        <canvas id="lensCanvas"></canvas>
+      <div class="stage">
+        <div class="arHeaderBar">
+          <div class="name" id="productTop">아큐브 오아시스 맥스 구면</div>
+          <div class="name" style="font-weight:900; color: rgba(255,255,255,.0); font-size:12px;"></div>
+        </div>
 
-        <!-- 눈물막 모드 오버레이(이미지처럼 렌즈 위에 이미지 올라가게) -->
+        <div class="points" id="points"></div>
+
+        <!-- ✅ 정면 렌즈(2D) -->
+        <canvas id="lens2d" width="800" height="800"></canvas>
+
+        <!-- ✅ 눈물막 오버레이 -->
         <div class="tearOverlay" id="tearOverlay">
           <canvas id="tearCanvas" width="256" height="256"></canvas>
         </div>
@@ -523,34 +509,25 @@
           <div class="tag">수분</div>
         </div>
 
-        <div class="arHeaderBar">
-          <div class="name" id="arProductName">아큐브 오아시스 맥스 구면</div>
-          <div class="name" style="font-weight:900; color: var(--muted); font-size:12px;">
-            기기 기울기 + 드래그(살짝만 회전)
-          </div>
-        </div>
-
-        <div class="points" id="points"></div>
-
+        <!-- 초록 패널 -->
         <div class="greenPanel">
           <div class="greenTitle" id="greenTitle"></div>
           <div class="greenBody" id="greenBody"></div>
-          <div class="badgeRow hide" id="badgeRow">
+
+          <div class="badgeRow" id="badgeRow" style="display:none;">
             <div class="badge" id="badgeText">블루라이트 차단을 위한 블루그린 틴트</div>
           </div>
+
           <div class="greenSubBox" id="greenSub"></div>
         </div>
       </div>
 
       <div class="modalBottom">
         <div class="status">
-          <span id="arStatus">상태: <b>대기</b></span>
-          <span>조작: <b>기기 기울기 + 드래그</b></span>
+          <span id="resStatus">상태: <b>실행 중</b></span>
+          <span>조작: <b>드래그(살짝)</b></span>
         </div>
 
-        <button class="btn" id="btnARStart">AR 시작</button>
-
-        <!-- ✅ 이미지처럼 “이렇게 변경” : 왼쪽 다시스캔 / 오른쪽 만족도조사(썸네일) -->
         <div class="actionRow">
           <button class="btn secondary" id="btnRescan">다시 스캔하기</button>
 
@@ -559,13 +536,13 @@
               <div class="t1">만족도 조사</div>
               <div class="t2">기프티콘 100% 제공</div>
             </div>
-            <div class="surveyThumb" aria-hidden="true">☕️</div>
+            <div class="surveyThumb">☕️</div>
           </a>
         </div>
 
         <div class="miniHelp">
-          iPhone/iPad Safari에서 “동작 및 방향 접근” 권한이 뜨면 허용해주세요(기기 움직임 회전에 필요).<br>
-          권한이 없어도 드래그로 회전 가능합니다.
+          * 지금 버전은 <b>카메라/AR 없이</b> 정면 렌즈 UI로만 보여줍니다.<br>
+          (원하면 나중에 “카메라 배경”만 다시 붙일 수 있어요)
         </div>
       </div>
     </div>
@@ -573,501 +550,322 @@
 
   <script>
     // =========================
-    // (A) 포인트 콘텐츠 (이미지 4장 요구사항)
+    // 콘텐츠
     // =========================
-    const AR_CONTENT = {
+    const CONTENT = {
       productNameTop: "아큐브 오아시스 맥스 구면",
-      points: [
-        // ✅ 기본(물방울 아이콘은 “기본”처럼 유지하고, 실제 물방울은 4번째 요구 ‘눈물막’에서)
-        // 이미지에서는 기본/블루라이트/123/눈물막 4가지 상태가 있었는데,
-        // UI 버튼은 3개이므로 “기본”은 초기 상태로 두고
-        // 버튼 3개는: 눈물막 / 123 / 블루라이트 로 매핑.
-        {
-          id: "tear",
-          icon: "💧",
-          title: "눈물 안정화 기술",
-          body: "습윤 인자를 통한 오랫동안 촉촉하고 편안한 착용감을 제공",
-          sub: "수치는 내부 확정 문구로 교체하세요.",
-          mode: "TEAR"
-        },
-        {
-          id: "mark",
-          icon: "123",
-          title: "123마크",
-          body: "콘택트렌즈가 뒤집혀 있는지 확인이 가능해요",
-          sub: "필요 시 실제 가이드 문구로 교체하면 됩니다.",
-          mode: "MARK"
-        },
-        {
-          id: "blue",
-          icon: "🟦",
-          title: "블루라이트 차단",
-          body: "55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공",
-          sub: "수치는 내부 확정 문구로 교체하세요.",
-          mode: "BLUE"
-        }
-      ],
-      // ✅ 초기 기본 상태(버튼 클릭 전)
       default: {
         title: "눈 피로까지 고려해 설계된 실리콘하이드로겔 원데이 렌즈",
         body: "추후 구매시에도 블루라이트 차단을 통한 눈 피로를 고려한 제품인지 확인해 보세요",
         sub: ""
-      }
+      },
+      points: [
+        { id:"tear", icon:"💧", mode:"TEAR",
+          title:"눈물 안정화 기술",
+          body:"습윤 인자를 통한 오랫동안 촉촉하고 편안한 착용감을 제공",
+          sub:"수치는 내부 확정 문구로 교체하세요."
+        },
+        { id:"mark", icon:"123", mode:"MARK",
+          title:"123마크",
+          body:"콘택트렌즈가 뒤집혀 있는지 확인이 가능해요",
+          sub:"필요 시 실제 가이드 문구로 교체하면 됩니다."
+        },
+        { id:"blue", icon:"🟦", mode:"BLUE",
+          title:"블루라이트 차단",
+          body:"55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공",
+          sub:"수치는 내부 확정 문구로 교체하세요.",
+          badge:"블루라이트 차단을 위한 블루그린 틴트"
+        }
+      ]
     };
 
     // =========================
     // DOM
     // =========================
-    const envPill = document.getElementById('envPill');
-
     const btnStartFlow = document.getElementById('btnStartFlow');
 
-    const scanModal    = document.getElementById('scanModal');
-    const scanVideo    = document.getElementById('scanVideo');
+    const scanModal = document.getElementById('scanModal');
     const btnCloseScan = document.getElementById('btnCloseScan');
     const btnScanStart = document.getElementById('btnScanStart');
-    const scanStatus   = document.getElementById('scanStatus');
+    const scanStatus = document.getElementById('scanStatus');
 
-    const arModal      = document.getElementById('arModal');
-    const arVideo      = document.getElementById('arVideo');
-    const lensCanvas   = document.getElementById('lensCanvas');
-    const btnCloseAR   = document.getElementById('btnCloseAR');
-    const btnARStart   = document.getElementById('btnARStart');
-    const btnRescan    = document.getElementById('btnRescan');
-    const arStatus     = document.getElementById('arStatus');
+    const resultModal = document.getElementById('resultModal');
+    const btnCloseResult = document.getElementById('btnCloseResult');
+    const btnRescan = document.getElementById('btnRescan');
 
-    const pointsEl     = document.getElementById('points');
-    const arProductName= document.getElementById('arProductName');
-    const greenTitle   = document.getElementById('greenTitle');
-    const greenBody    = document.getElementById('greenBody');
-    const greenSub     = document.getElementById('greenSub');
-    const badgeRow     = document.getElementById('badgeRow');
-    const badgeText    = document.getElementById('badgeText');
+    const productTop = document.getElementById('productTop');
+    const pointsEl = document.getElementById('points');
 
-    // tear overlay
+    const greenTitle = document.getElementById('greenTitle');
+    const greenBody = document.getElementById('greenBody');
+    const greenSub = document.getElementById('greenSub');
+    const badgeRow = document.getElementById('badgeRow');
+    const badgeText = document.getElementById('badgeText');
+
+    const lens2d = document.getElementById('lens2d');
+    const lctx = lens2d.getContext('2d');
+
     const tearOverlay  = document.getElementById('tearOverlay');
     const tearCanvas   = document.getElementById('tearCanvas');
     const tearCtx      = tearCanvas.getContext('2d');
     const tearTags     = document.getElementById('tearTags');
     const tagLine      = document.getElementById('tagLine');
 
+    // =========================
+    // modal helpers
+    // =========================
     function openModal(modal){
       modal.classList.add('open');
-      modal.setAttribute('aria-hidden', 'false');
+      modal.setAttribute('aria-hidden','false');
     }
     function closeModal(modal){
       modal.classList.remove('open');
-      modal.setAttribute('aria-hidden', 'true');
-    }
-    function setScanStatus(text, bold){
-      scanStatus.innerHTML = `상태: <b>${bold || ""}</b>${text ? " · " + text : ""}`;
-    }
-    function setARStatus(text, bold){
-      arStatus.innerHTML = `상태: <b>${bold || ""}</b>${text ? " · " + text : ""}`;
+      modal.setAttribute('aria-hidden','true');
     }
 
     // =========================
-    // Flow: 알림톡 → 스캔
+    // Flow
     // =========================
-    btnStartFlow.addEventListener('click', () => openScan());
-
-    // =========================
-    // (1) Scan camera
-    // =========================
-    let scanStream = null;
-
-    async function startScanCamera(){
-      const constraints = {
-        video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false
-      };
-      scanStream = await navigator.mediaDevices.getUserMedia(constraints);
-      scanVideo.srcObject = scanStream;
-      await scanVideo.play();
-    }
-
-    function stopScanCamera(){
-      if(scanStream){
-        scanStream.getTracks().forEach(t => t.stop());
-        scanStream = null;
-      }
-      scanVideo.pause();
-      scanVideo.srcObject = null;
-    }
-
-    function openScan(){
+    btnStartFlow.addEventListener('click', () => {
+      scanStatus.innerHTML = `상태: <b>대기</b>`;
       openModal(scanModal);
-      setScanStatus("", "대기");
-    }
+    });
 
-    function closeScan(){
-      stopScanCamera();
+    btnCloseScan.addEventListener('click', () => closeModal(scanModal));
+    scanModal.addEventListener('click', (e)=>{ if(e.target===scanModal) closeModal(scanModal); });
+
+    btnScanStart.addEventListener('click', ()=>{
+      scanStatus.innerHTML = `상태: <b>완료</b>`;
       closeModal(scanModal);
-      setScanStatus("", "대기");
-    }
+      openResult();
+    });
 
-    btnCloseScan.addEventListener('click', closeScan);
-    scanModal.addEventListener('click', (e) => { if(e.target === scanModal) closeScan(); });
+    btnCloseResult.addEventListener('click', ()=> closeModal(resultModal));
+    resultModal.addEventListener('click', (e)=>{ if(e.target===resultModal) closeModal(resultModal); });
 
-    btnScanStart.addEventListener('click', async () => {
-      try{
-        if(!navigator.mediaDevices?.getUserMedia){
-          setScanStatus("카메라 미지원", "실패");
-          return;
-        }
-        setScanStatus("카메라 준비 중…", "진행");
-        await startScanCamera();
-        setScanStatus("촬영 중…", "스캔 중");
-
-        // MVP: 인식 완료처럼 잠깐 후 AR로 자동 전환
-        setTimeout(() => {
-          stopScanCamera();
-          closeModal(scanModal);
-          openAR();
-        }, 900);
-
-      }catch(e){
-        setScanStatus("카메라 권한을 허용해주세요.", "실패");
-      }
+    btnRescan.addEventListener('click', ()=>{
+      closeModal(resultModal);
+      openModal(scanModal);
     });
 
     // =========================
-    // (2) AR camera + 3D
+    // 상태/모드
     // =========================
-    let arStream = null;
+    let mode = "BASIC"; // BASIC / TEAR / MARK / BLUE
+    let activeIdx = -1;
 
-    let renderer = null;
-    let scene = null;
-    let camera3D = null;
-    let lensGroup = null;
+    function setGreen({title, body, sub, badge}){
+      greenTitle.textContent = title || "";
+      greenBody.textContent = body || "";
+      greenSub.textContent = sub || "";
 
-    let lensMesh = null;
-    let rimMesh = null;
+      if(badge){
+        badgeText.textContent = badge;
+        badgeRow.style.display = "flex";
+      } else {
+        badgeRow.style.display = "none";
+      }
+    }
 
-    // 123 mark
-    let mark123Plane = null;
-    let mark123Tex = null;
-    let highlightRing = null;
-    let glowDot = null;
+    function showTearUI(on){
+      tearOverlay.classList.toggle("on", on);
+      tearTags.classList.toggle("on", on);
+      tagLine.classList.toggle("on", on);
+    }
 
-    // Blue glow ring
-    let blueGlowRing = null;
+    function applyMode(next){
+      mode = next;
+      showTearUI(false);
 
-    // spotlight
-    let highlightSpot = null;
+      if(mode === "BASIC"){
+        setGreen({ ...CONTENT.default, badge:null });
+      }
+      if(mode === "TEAR"){
+        const p = CONTENT.points[0];
+        setGreen({title:p.title, body:p.body, sub:p.sub, badge:null});
+        showTearUI(true);
+      }
+      if(mode === "MARK"){
+        const p = CONTENT.points[1];
+        setGreen({title:p.title, body:p.body, sub:p.sub, badge:null});
+      }
+      if(mode === "BLUE"){
+        const p = CONTENT.points[2];
+        setGreen({title:p.title, body:p.body, sub:p.sub, badge:p.badge});
+      }
+    }
 
-    // lens material
-    let baseLensMat = null;
-    const baseColor = new THREE.Color(0xd9f0ff);
+    function renderPoints(){
+      pointsEl.innerHTML = "";
+      CONTENT.points.forEach((p, idx)=>{
+        const btn = document.createElement("div");
+        btn.className = "ptBtn";
+        btn.innerHTML = `<div class="ptIcon">${p.icon}</div>`;
+        btn.addEventListener("click", ()=>{
+          activeIdx = idx;
+          [...pointsEl.children].forEach((el,i)=>el.classList.toggle("active", i===idx));
+          applyMode(p.mode);
+        });
+        pointsEl.appendChild(btn);
+      });
+    }
 
-    // animation
-    let raf = null;
+    function openResult(){
+      productTop.textContent = CONTENT.productNameTop;
+      renderPoints();
+      activeIdx = -1;
+      [...pointsEl.children].forEach(el=>el.classList.remove("active"));
+      applyMode("BASIC");
 
-    // controls (민감도 낮춤)
+      openModal(resultModal);
+      resizeLensCanvas();
+    }
+
+    // =========================
+    // ✅ 정면 렌즈(2D) 그리기
+    // =========================
+    function resizeLensCanvas(){
+      // CSS 크기에 맞춰 실제 해상도 스케일 조절
+      const rect = lens2d.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      lens2d.width = Math.floor(rect.width * dpr);
+      lens2d.height = Math.floor(rect.height * dpr);
+    }
+
+    let rot = 0;          // 살짝 회전
     let dragging = false;
-    let lastX = 0, lastY = 0;
-    let oriEnabled = false;
-    let oriX = 0, oriY = 0;
+    let lastX = 0;
 
-    // state
-    let currentMode = "BASIC"; // BASIC / TEAR / MARK / BLUE
+    lens2d.addEventListener("pointerdown", (e)=>{
+      dragging = true;
+      lastX = e.clientX;
+      lens2d.setPointerCapture(e.pointerId);
+    });
+    lens2d.addEventListener("pointermove", (e)=>{
+      if(!dragging) return;
+      const dx = e.clientX - lastX;
+      lastX = e.clientX;
+      rot += dx * 0.002; // ✅ “살짝만”
+    });
+    lens2d.addEventListener("pointerup", (e)=>{
+      dragging = false;
+      try{ lens2d.releasePointerCapture(e.pointerId); }catch(_){}
+    });
 
-    async function startARCamera(){
-      const constraints = {
-        video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false
-      };
-      arStream = await navigator.mediaDevices.getUserMedia(constraints);
-      arVideo.srcObject = arStream;
-      await arVideo.play();
+    // 123 반짝
+    function markPulse(t){
+      return 0.55 + (Math.sin(t*0.012)+1)*0.20; // 0.55~0.95
     }
 
-    function stopARAll(){
-      if(arStream){
-        arStream.getTracks().forEach(t => t.stop());
-        arStream = null;
-      }
-      arVideo.pause();
-      arVideo.srcObject = null;
+    // 렌즈 패턴(왼쪽 이미지 느낌: 투명 + 라인 + 하이라이트)
+    function drawLens(){
+      const w = lens2d.width, h = lens2d.height;
+      const ctx = lctx;
+      ctx.clearRect(0,0,w,h);
 
-      if(raf) cancelAnimationFrame(raf);
-      raf = null;
-
-      window.removeEventListener("deviceorientation", onDeviceOrientation);
-      oriEnabled = false;
-
-      if(renderer){
-        renderer.dispose();
-        renderer = null;
-      }
-      scene = null;
-      camera3D = null;
-      lensGroup = null;
-
-      lensMesh = null;
-      rimMesh = null;
-
-      mark123Plane = null;
-      mark123Tex = null;
-
-      blueGlowRing = null;
-      highlightSpot = null;
-
-      highlightRing = null;
-      glowDot = null;
-
-      baseLensMat = null;
-
-      setARStatus("", "대기");
-    }
-
-    function resize3D(){
-      if(!renderer || !camera3D) return;
-      const w = lensCanvas.clientWidth;
-      const h = lensCanvas.clientHeight;
-      renderer.setSize(w, h, false);
-      camera3D.aspect = w / h;
-      camera3D.updateProjectionMatrix();
-    }
-
-    function make123Texture(){
-      const c = document.createElement("canvas");
-      c.width = 512;
-      c.height = 256;
-      const ctx = c.getContext("2d");
-      ctx.clearRect(0,0,c.width,c.height);
+      const cx = w/2, cy = h/2;
+      const R  = Math.min(w,h) * 0.42;
 
       ctx.save();
-      ctx.translate(c.width/2, c.height/2);
-      ctx.font = "900 160px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.translate(cx, cy);
+      ctx.rotate(rot * 0.12); // 너무 돌지 않게
 
-      ctx.fillStyle = "rgba(0,0,0,0.30)";
-      ctx.fillText("123", 7, 7);
+      // tint by mode
+      const tint = (mode==="BLUE") ? {r: 170, g: 255, b: 236, a: 0.22} : {r: 220, g: 245, b: 255, a: 0.20};
 
-      ctx.fillStyle = "rgba(255,255,255,0.40)";
-      ctx.fillText("123", -3, -3);
+      // base glass
+      const g = ctx.createRadialGradient(-R*0.18, -R*0.22, R*0.12, 0,0,R*1.05);
+      g.addColorStop(0, `rgba(255,255,255,0.38)`);
+      g.addColorStop(0.35, `rgba(${tint.r},${tint.g},${tint.b},${tint.a})`);
+      g.addColorStop(1, `rgba(255,255,255,0.02)`);
 
-      ctx.fillStyle = "rgba(255,255,255,0.22)";
-      ctx.fillText("123", 0, 0);
-      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(0,0,R,0,Math.PI*2);
+      ctx.fillStyle = g;
+      ctx.fill();
 
-      const tex = new THREE.CanvasTexture(c);
-      tex.needsUpdate = true;
-      return tex;
-    }
+      // outer rim
+      ctx.strokeStyle = `rgba(255,255,255,0.28)`;
+      ctx.lineWidth = Math.max(2, R*0.012);
+      ctx.beginPath();
+      ctx.arc(0,0,R*0.985,0,Math.PI*2);
+      ctx.stroke();
 
-    function init3D(){
-      renderer = new THREE.WebGLRenderer({ canvas: lensCanvas, alpha: true, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(lensCanvas.clientWidth, lensCanvas.clientHeight, false);
+      // inner soft ring
+      ctx.strokeStyle = (mode==="BLUE") ? `rgba(30,120,255,0.22)` : `rgba(255,255,255,0.18)`;
+      ctx.lineWidth = Math.max(1.5, R*0.008);
+      ctx.beginPath();
+      ctx.arc(0,0,R*0.62,0,Math.PI*2);
+      ctx.stroke();
 
-      scene = new THREE.Scene();
-
-      camera3D = new THREE.PerspectiveCamera(45, lensCanvas.clientWidth / lensCanvas.clientHeight, 0.01, 50);
-      camera3D.position.set(0, 0.12, 1.1);
-
-      // lighting
-      const key = new THREE.DirectionalLight(0xffffff, 1.0);
-      key.position.set(1, 1, 1);
-      scene.add(key);
-
-      const fill = new THREE.DirectionalLight(0xffffff, 0.55);
-      fill.position.set(-1, 0.5, 0.8);
-      scene.add(fill);
-
-      scene.add(new THREE.AmbientLight(0xffffff, 0.28));
-
-      // spotlight for mark highlight
-      highlightSpot = new THREE.SpotLight(0xffffff, 0.75, 5.0, Math.PI/8, 0.6, 1.0);
-      highlightSpot.position.set(0.0, 0.55, -0.32);
-      highlightSpot.target.position.set(0, 0, 0);
-      scene.add(highlightSpot);
-      scene.add(highlightSpot.target);
-
-      lensGroup = new THREE.Group();
-      scene.add(lensGroup);
-
-      // lens geometry (shape 유지)
-      const pts = [];
-      pts.push(new THREE.Vector2(0.00, 0.00));
-      pts.push(new THREE.Vector2(0.10, 0.005));
-      pts.push(new THREE.Vector2(0.22, 0.012));
-      pts.push(new THREE.Vector2(0.32, 0.014));
-      pts.push(new THREE.Vector2(0.40, 0.012));
-      pts.push(new THREE.Vector2(0.46, 0.008));
-      pts.push(new THREE.Vector2(0.50, 0.000));
-
-      const lensGeo = new THREE.LatheGeometry(pts, 96);
-      lensGeo.rotateX(Math.PI / 2);
-
-      baseLensMat = new THREE.MeshPhysicalMaterial({
-        color: baseColor.clone(),
-        transparent: true,
-        opacity: 0.26,
-        roughness: 0.06,
-        metalness: 0.0,
-        transmission: 0.88,
-        thickness: 0.16,
-        ior: 1.37,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.10
-      });
-
-      lensMesh = new THREE.Mesh(lensGeo, baseLensMat);
-      lensGroup.add(lensMesh);
-
-      // rim
-      const rimGeo = new THREE.TorusGeometry(0.50, 0.010, 16, 96);
-      const rimMat = new THREE.MeshStandardMaterial({ color: 0x2a7fff, transparent:true, opacity:0.18, roughness:0.22 });
-      rimMesh = new THREE.Mesh(rimGeo, rimMat);
-      rimMesh.rotation.x = Math.PI/2;
-      rimMesh.position.y = 0.002;
-      lensGroup.add(rimMesh);
-
-      // blue glow ring
-      const bRingGeo = new THREE.RingGeometry(0.22, 0.27, 72);
-      const bRingMat = new THREE.MeshBasicMaterial({ color: 0x1e78ff, transparent:true, opacity:0.04, side: THREE.DoubleSide });
-      blueGlowRing = new THREE.Mesh(bRingGeo, bRingMat);
-      blueGlowRing.rotation.x = Math.PI/2;
-      blueGlowRing.position.y = 0.028;
-      lensGroup.add(blueGlowRing);
-
-      // 123 highlight ring + dot
-      const hRingGeo = new THREE.RingGeometry(0.12, 0.16, 64);
-      const hRingMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.10, side: THREE.DoubleSide });
-      highlightRing = new THREE.Mesh(hRingGeo, hRingMat);
-      highlightRing.rotation.x = Math.PI/2;
-      highlightRing.position.set(0.0, 0.033, -0.26);
-      lensGroup.add(highlightRing);
-
-      const dotGeo = new THREE.SphereGeometry(0.02, 20, 20);
-      const dotMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.0 });
-      glowDot = new THREE.Mesh(dotGeo, dotMat);
-      glowDot.position.set(0.0, 0.040, -0.26);
-      lensGroup.add(glowDot);
-
-      // 123 mark plane
-      mark123Tex = make123Texture();
-      const mGeo = new THREE.PlaneGeometry(0.38, 0.19);
-      const mMat = new THREE.MeshBasicMaterial({
-        map: mark123Tex,
-        transparent: true,
-        opacity: 0.0,
-        depthWrite: false
-      });
-      mark123Plane = new THREE.Mesh(mGeo, mMat);
-      mark123Plane.rotation.x = Math.PI/2;
-      mark123Plane.position.set(0.08, 0.034, -0.12);
-      lensGroup.add(mark123Plane);
-
-      // initial pose (살짝만)
-      lensGroup.rotation.x = -0.22;
-      lensGroup.rotation.y = 0.22;
-
-      const render = () => {
-        raf = requestAnimationFrame(render);
-
-        // ✅ “살짝만 돌아가게” 회전 민감도 낮춤
-        if(lensGroup && oriEnabled){
-          const targetX = -0.22 + oriY * 0.005;
-          const targetY =  0.22 + oriX * 0.005;
-          lensGroup.rotation.x += (targetX - lensGroup.rotation.x) * 0.08;
-          lensGroup.rotation.y += (targetY - lensGroup.rotation.y) * 0.08;
-        } else if(lensGroup){
-          lensGroup.rotation.y += 0.00055;
-        }
-
-        // gentle float
-        if(lensGroup){
-          lensGroup.position.y = Math.sin(Date.now()*0.002) * 0.006;
-        }
-
-        // MARK(123) 반짝반짝
-        if(currentMode === "MARK"){
-          const t = Date.now()*0.006;
-          const pulse = 0.45 + (Math.sin(t)+1)*0.18; // 0.45~0.81
-          if(mark123Plane) mark123Plane.material.opacity = pulse * 0.85;
-          if(glowDot) glowDot.material.opacity = 0.35 + (Math.sin(t+1.1)+1)*0.16;
-          if(highlightRing) highlightRing.material.opacity = 0.16 + (Math.sin(t+0.4)+1)*0.06;
-          if(highlightSpot) highlightSpot.intensity = 1.25;
-        } else {
-          if(mark123Plane) mark123Plane.material.opacity += (0.0 - mark123Plane.material.opacity) * 0.16;
-          if(glowDot) glowDot.material.opacity += (0.0 - glowDot.material.opacity) * 0.16;
-          if(highlightRing) highlightRing.material.opacity += (0.10 - highlightRing.material.opacity) * 0.12;
-          if(highlightSpot) highlightSpot.intensity += (0.75 - highlightSpot.intensity) * 0.12;
-        }
-
-        // BLUE: 블루 글로우 강화
-        if(blueGlowRing){
-          const t = Date.now() * 0.002;
-          const base = (currentMode === "BLUE") ? 0.14 : 0.04;
-          const amp  = (currentMode === "BLUE") ? 0.10 : 0.02;
-          blueGlowRing.material.opacity = base + (Math.sin(t+0.8) + 1) * amp * 0.5;
-        }
-
-        renderer.render(scene, camera3D);
-      };
-      render();
-    }
-
-    function bind3DControls(){
-      // ✅ 드래그도 “살짝만”
-      lensCanvas.addEventListener('pointerdown', (e) => {
-        dragging = true;
-        lastX = e.clientX;
-        lastY = e.clientY;
-        lensCanvas.setPointerCapture(e.pointerId);
-      });
-
-      lensCanvas.addEventListener('pointermove', (e) => {
-        if(!dragging || !lensGroup) return;
-        const dx = (e.clientX - lastX) / 520;
-        const dy = (e.clientY - lastY) / 520;
-        lastX = e.clientX;
-        lastY = e.clientY;
-
-        lensGroup.rotation.y += dx;
-        lensGroup.rotation.x += dy;
-        lensGroup.rotation.x = Math.max(-0.9, Math.min(0.15, lensGroup.rotation.x));
-      });
-
-      lensCanvas.addEventListener('pointerup', (e) => {
-        dragging = false;
-        try { lensCanvas.releasePointerCapture(e.pointerId); } catch(_) {}
-      });
-
-      window.addEventListener('resize', resize3D);
-    }
-
-    function onDeviceOrientation(e){
-      const g = (typeof e.gamma === "number") ? e.gamma : 0;
-      const b = (typeof e.beta  === "number") ? e.beta  : 0;
-      oriX = g;
-      oriY = b;
-    }
-
-    async function enableDeviceOrientationIfNeeded(){
-      try{
-        if(typeof DeviceOrientationEvent !== "undefined" &&
-           typeof DeviceOrientationEvent.requestPermission === "function"){
-          const res = await DeviceOrientationEvent.requestPermission();
-          if(res === "granted"){
-            window.addEventListener("deviceorientation", onDeviceOrientation, true);
-            oriEnabled = true;
-          }
-        } else {
-          window.addEventListener("deviceorientation", onDeviceOrientation, true);
-          oriEnabled = true;
-        }
-      } catch(_) {
-        oriEnabled = false;
+      // “렌즈 라인 패턴”(왼쪽 예시처럼 아래쪽 곡선 라인들)
+      ctx.lineWidth = Math.max(1, R*0.006);
+      ctx.strokeStyle = `rgba(255,255,255,0.22)`;
+      for(let i=0;i<7;i++){
+        const yy = R*0.08 + i*R*0.06;
+        const rr = R*0.92 - i*R*0.05;
+        ctx.beginPath();
+        ctx.arc(0, yy, rr, Math.PI*0.10, Math.PI*0.90);
+        ctx.stroke();
       }
+
+      // highlight blob
+      const hl = ctx.createRadialGradient(-R*0.25, -R*0.28, R*0.05, -R*0.15, -R*0.18, R*0.55);
+      hl.addColorStop(0, `rgba(255,255,255,0.35)`);
+      hl.addColorStop(1, `rgba(255,255,255,0)`);
+      ctx.fillStyle = hl;
+      ctx.beginPath();
+      ctx.arc(0,0,R,0,Math.PI*2);
+      ctx.fill();
+
+      // subtle shadow bottom (gives depth)
+      const sh = ctx.createRadialGradient(0, R*0.65, R*0.02, 0, R*0.75, R*0.55);
+      sh.addColorStop(0, `rgba(0,0,0,0.18)`);
+      sh.addColorStop(1, `rgba(0,0,0,0)`);
+      ctx.fillStyle = sh;
+      ctx.beginPath();
+      ctx.arc(0,0,R,0,Math.PI*2);
+      ctx.fill();
+
+      // ✅ 123 강조(렌즈 하단 포인트 위치)
+      if(mode==="MARK"){
+        const t = Date.now();
+        const p = markPulse(t);
+
+        // glow ring
+        ctx.save();
+        ctx.translate(0, R*0.56);
+        ctx.globalAlpha = 0.55 * p;
+        ctx.strokeStyle = "rgba(255,255,255,0.85)";
+        ctx.lineWidth = Math.max(2.5, R*0.014);
+        ctx.beginPath();
+        ctx.arc(0,0,R*0.14,0,Math.PI*2);
+        ctx.stroke();
+
+        // glow fill
+        const gg = ctx.createRadialGradient(0,0,R*0.02, 0,0,R*0.22);
+        gg.addColorStop(0, `rgba(255,255,255,0.65)`);
+        gg.addColorStop(1, `rgba(255,255,255,0)`);
+        ctx.fillStyle = gg;
+        ctx.beginPath();
+        ctx.arc(0,0,R*0.22,0,Math.PI*2);
+        ctx.fill();
+
+        // text
+        ctx.globalAlpha = 0.90;
+        ctx.fillStyle = "rgba(15,23,38,0.92)";
+        ctx.font = `900 ${Math.max(18, R*0.14)}px Arial`;
+        ctx.textAlign="center";
+        ctx.textBaseline="middle";
+        ctx.fillText("123", 0, 0);
+        ctx.restore();
+      }
+
+      ctx.restore();
     }
 
     // =========================
-    // 눈물막 오버레이 “원형 이미지” (캔버스로 텍스처 생성)
+    // 눈물막 텍스처(기존 유지)
     // =========================
     let tearAnimT = 0;
     function drawTearOverlay(){
@@ -1075,26 +873,22 @@
       const ctx = tearCtx;
       ctx.clearRect(0,0,w,h);
 
-      // background
       const bg = ctx.createRadialGradient(w*0.45, h*0.42, 10, w*0.5, h*0.5, w*0.55);
       bg.addColorStop(0, "rgba(255,255,255,0.08)");
       bg.addColorStop(1, "rgba(0,0,0,0.06)");
       ctx.fillStyle = bg;
       ctx.fillRect(0,0,w,h);
 
-      // network fibers 느낌
       tearAnimT += 0.016;
       ctx.save();
       ctx.translate(w/2, h/2);
 
-      // ring
       ctx.strokeStyle = "rgba(255,255,255,0.28)";
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(0,0,w*0.44,0,Math.PI*2);
       ctx.stroke();
 
-      // random-ish lines (deterministic)
       for(let i=0;i<42;i++){
         const a = i * 0.38 + Math.sin(tearAnimT*0.7+i)*0.12;
         const r1 = 30 + (i%7)*8;
@@ -1110,7 +904,6 @@
         ctx.stroke();
       }
 
-      // dots
       for(let k=0;k<26;k++){
         const a = k*0.62 + tearAnimT*0.45;
         const r = 16 + (k%9)*10;
@@ -1120,7 +913,6 @@
         ctx.fill();
       }
 
-      // highlight
       const hl = ctx.createRadialGradient(-30,-40, 6, -20,-30, 90);
       hl.addColorStop(0, "rgba(255,255,255,0.18)");
       hl.addColorStop(1, "rgba(255,255,255,0)");
@@ -1132,209 +924,28 @@
       ctx.restore();
     }
 
-    let tearRAF = null;
-    function startTearOverlayAnim(){
-      if(tearRAF) cancelAnimationFrame(tearRAF);
-      const loop = () => {
-        tearRAF = requestAnimationFrame(loop);
-        if(currentMode === "TEAR"){
-          drawTearOverlay();
-        }
-      };
+    // =========================
+    // Loop
+    // =========================
+    function loop(){
+      requestAnimationFrame(loop);
+      // 아주 미세한 자동 회전(원하면 지워도 됨)
+      if(!dragging) rot += 0.0012;
+      drawLens();
+      if(mode==="TEAR") drawTearOverlay();
+    }
+
+    // =========================
+    // init
+    // =========================
+    function init(){
+      productTop.textContent = CONTENT.productNameTop;
+      setGreen({ ...CONTENT.default, badge:null });
+      resizeLensCanvas();
+      window.addEventListener("resize", resizeLensCanvas);
       loop();
     }
-
-    function showTearUI(on){
-      tearOverlay.classList.toggle("on", on);
-      tearTags.classList.toggle("on", on);
-      tagLine.classList.toggle("on", on);
-    }
-
-    // =========================
-    // 모드 적용 (BASIC / TEAR / MARK / BLUE)
-    // =========================
-    function setGreenPanel({title, body, sub, badge=null}){
-      greenTitle.textContent = title || "";
-      greenBody.textContent  = body  || "";
-      greenSub.textContent   = sub   || "";
-      if(badge){
-        badgeText.textContent = badge;
-        badgeRow.classList.remove("hide");
-      } else {
-        badgeRow.classList.add("hide");
-      }
-    }
-
-    function applyMode(mode){
-      currentMode = mode;
-
-      // 공통 초기화
-      showTearUI(false);
-
-      if(baseLensMat && rimMesh){
-        baseLensMat.color.copy(baseColor);
-        baseLensMat.opacity = 0.26;
-        rimMesh.material.opacity = 0.18;
-      }
-
-      if(mode === "BASIC"){
-        setGreenPanel({
-          title: AR_CONTENT.default.title,
-          body: AR_CONTENT.default.body,
-          sub:  AR_CONTENT.default.sub,
-          badge: null
-        });
-      }
-
-      if(mode === "TEAR"){
-        // 렌즈 위 이미지 오버레이 + 라벨
-        showTearUI(true);
-        startTearOverlayAnim();
-
-        setGreenPanel({
-          title: AR_CONTENT.points[0].title,
-          body:  AR_CONTENT.points[0].body,
-          sub:   AR_CONTENT.points[0].sub,
-          badge: null
-        });
-      }
-
-      if(mode === "MARK"){
-        // 123 깜빡은 렌더 루프에서
-        // 하이라이트 집중
-        if(highlightSpot){
-          highlightSpot.position.set(0.0, 0.58, -0.34);
-        }
-        if(highlightRing){
-          highlightRing.position.set(0.0, 0.033, -0.26);
-        }
-
-        setGreenPanel({
-          title: AR_CONTENT.points[1].title,
-          body:  AR_CONTENT.points[1].body,
-          sub:   AR_CONTENT.points[1].sub,
-          badge: null
-        });
-      }
-
-      if(mode === "BLUE"){
-        // 블루그린 틴트
-        if(baseLensMat && rimMesh){
-          baseLensMat.color.setHex(0xb7fff1);
-          baseLensMat.opacity = 0.24;
-          rimMesh.material.opacity = 0.26;
-        }
-
-        setGreenPanel({
-          title: AR_CONTENT.points[2].title,
-          body:  AR_CONTENT.points[2].body,
-          sub:   AR_CONTENT.points[2].sub,
-          badge: "블루라이트 차단을 위한 블루그린 틴트"
-        });
-      }
-    }
-
-    // =========================
-    // 포인트 UI
-    // =========================
-    function renderPoints(){
-      pointsEl.innerHTML = "";
-      // 버튼 순서: 눈물막 / 123 / 블루라이트 (이미지 흐름)
-      AR_CONTENT.points.forEach((p, idx) => {
-        const btn = document.createElement("div");
-        btn.className = "ptBtn";
-        btn.innerHTML = `<div class="ptIcon" aria-hidden="true">${p.icon}</div>`;
-        btn.addEventListener("click", () => selectPoint(idx));
-        pointsEl.appendChild(btn);
-      });
-    }
-
-    function setActiveBtn(idx){
-      [...pointsEl.querySelectorAll(".ptBtn")].forEach((el, i) => {
-        el.classList.toggle("active", i === idx);
-      });
-    }
-
-    function selectPoint(idx){
-      const p = AR_CONTENT.points[idx];
-      setActiveBtn(idx);
-      applyMode(p.mode);
-    }
-
-    function openAR(){
-      openModal(arModal);
-      arProductName.textContent = AR_CONTENT.productNameTop;
-
-      renderPoints();
-      setActiveBtn(-1); // 기본은 아무 버튼도 선택 안 된 느낌
-      applyMode("BASIC");
-
-      btnARStart.classList.remove("hide");
-      btnARStart.disabled = false;
-      btnARStart.textContent = "AR 시작";
-      setARStatus("", "대기");
-    }
-
-    async function startAR(){
-      try{
-        if(!navigator.mediaDevices?.getUserMedia){
-          setARStatus("카메라 미지원", "실패");
-          return;
-        }
-
-        btnARStart.disabled = true;
-        btnARStart.textContent = "AR 실행 중…";
-        setARStatus("카메라 준비 중…", "진행");
-
-        await startARCamera();
-
-        if(!renderer){
-          init3D();
-          bind3DControls();
-        }
-        resize3D();
-
-        await enableDeviceOrientationIfNeeded();
-
-        setARStatus("버튼을 눌러 렌즈 표현을 확인하세요", "실행 중");
-        btnARStart.classList.add("hide");
-      }catch(e){
-        console.log(e);
-        setARStatus("카메라 권한/재생이 막혔어요. 새로고침 후 다시 시도해주세요.", "실패");
-        btnARStart.disabled = false;
-        btnARStart.textContent = "AR 시작";
-      }
-    }
-
-    // =========================
-    // AR modal controls
-    // =========================
-    btnARStart.addEventListener('click', startAR);
-
-    btnCloseAR.addEventListener('click', () => {
-      stopARAll();
-      btnARStart.classList.remove("hide");
-      closeModal(arModal);
-    });
-    arModal.addEventListener('click', (e) => {
-      if(e.target === arModal){
-        stopARAll();
-        btnARStart.classList.remove("hide");
-        closeModal(arModal);
-      }
-    });
-
-    btnRescan.addEventListener("click", () => {
-      stopARAll();
-      btnARStart.classList.remove("hide");
-      closeModal(arModal);
-      openScan();
-    });
-
-    // =========================
-    // init env
-    // =========================
-    envPill.textContent = (navigator.mediaDevices?.getUserMedia) ? "카메라 지원" : "카메라 미지원";
+    init();
   </script>
 </body>
 </html>
