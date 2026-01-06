@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>알림톡 → 스캔 → AR 결과 (이미지 지시사항 반영)</title>
+  <title>알림톡 → 스캔 → AR 결과 (요청 이미지 반영)</title>
 
   <style>
     :root{
@@ -200,7 +200,7 @@
     }
     .status b{ color: var(--text); }
 
-    /* ========== AR RESULT UI (요청 반영) ========== */
+    /* ========== AR RESULT UI ========== */
     .arHeaderBar{
       position:absolute;
       left:10px; right:10px; top:10px;
@@ -253,34 +253,35 @@
       border-radius: 999px;
       display:grid;
       place-items:center;
-      font-size: 15px;
+      font-size: 13px;
       background: rgba(11,74,162,0.10);
       border: 1px solid rgba(11,74,162,0.16);
+      font-weight: 950;
     }
 
-    /* ✅ 초록 패널: "조금만 아래로" + 폰트 조금 크게 */
+    /* ✅ 초록 패널: 조금 아래 + 폰트 조금 크게 */
     .greenPanel{
       position:absolute;
       left:0; right:0;
-      bottom: 64px;                 /* (기존 92px → 아래로 이동) */
+      bottom: 52px; /* (조금 아래로) */
       margin: 0 10px;
       background: linear-gradient(180deg, var(--green), var(--green2));
       color:#fff;
       border-radius: 14px;
-      padding: 16px 14px 16px;
+      padding: 16px 14px 14px;
       box-shadow: var(--shadow);
       pointer-events:none;
     }
     .greenTitle{
       font-weight:980;
       letter-spacing:-0.45px;
-      font-size: 17px;              /* (조금 크게) */
+      font-size: 17px; /* 조금 크게 */
       margin:0 0 10px;
       line-height:1.15;
       text-align:center;
     }
     .greenBody{
-      font-size: 14px;              /* (조금 크게) */
+      font-size: 14px; /* 조금 크게 */
       line-height:1.45;
       opacity: 0.96;
       text-align:center;
@@ -292,16 +293,64 @@
       border: 1px solid rgba(255,255,255,0.18);
       border-radius: 10px;
       padding: 10px 10px;
-      font-size: 13px;              /* (조금 크게) */
+      font-size: 13px; /* 조금 크게 */
       line-height:1.45;
       text-align:center;
       opacity:0.95;
     }
 
+    /* ✅ 블루라이트 모드에서 초록 패널 안에 들어가는 “강조 배지” */
+    .badgeRow{
+      margin-top: 10px;
+      display:flex;
+      justify-content:center;
+      pointer-events:none;
+    }
+    .badge{
+      background: rgba(0,0,0,0.20);
+      border: 1px solid rgba(255,255,255,0.20);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 950;
+      font-size: 13px;
+      letter-spacing:-0.2px;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+    }
+
+    /* ✅ 하단 버튼 영역(이미지처럼 정리) */
     .actionRow{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:10px;
+      align-items:stretch;
+    }
+
+    .surveyBtn{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      text-decoration:none;
+      padding: 12px 12px;
+    }
+    .surveyText{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .surveyText .t1{ font-weight:980; font-size:14px; color: var(--text); line-height:1.2; }
+    .surveyText .t2{ font-size:12px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .surveyThumb{
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      flex: 0 0 auto;
+      background: linear-gradient(180deg, rgba(34,197,94,0.18), rgba(34,197,94,0.10));
+      border: 1px solid rgba(230,233,242,0.95);
+      display:grid;
+      place-items:center;
+      font-size: 18px;
     }
 
     #lensCanvas{
@@ -309,10 +358,84 @@
       inset:0;
       width:100%;
       height:100%;
-      pointer-events:auto; /* 드래그 회전 */
+      pointer-events:auto;
     }
 
     .miniHelp{ font-size:12px; color:var(--muted); line-height:1.45; }
+
+    /* ✅ 눈물막 모드: 렌즈 위에 뜨는 “원형 이미지 + 라벨” UI(HTML 오버레이) */
+    .tearOverlay{
+      position:absolute;
+      left: 20px;
+      top: 92px;
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      border: 2px solid rgba(255,255,255,0.92);
+      box-shadow: 0 12px 26px rgba(16,24,40,0.18);
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(2px);
+      overflow:hidden;
+      pointer-events:none;
+      opacity: 0;
+      transform: translateY(4px) scale(0.98);
+      transition: opacity .20s ease, transform .20s ease;
+    }
+    .tearOverlay.on{
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .tearOverlay canvas{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .tearTags{
+      position:absolute;
+      left: 118px;
+      top: 96px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      pointer-events:none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity .20s ease, transform .20s ease;
+    }
+    .tearTags.on{
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .tag{
+      background: rgba(22, 27, 45, 0.88);
+      color:#fff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing:-0.2px;
+      box-shadow: 0 8px 18px rgba(16,24,40,0.18);
+      width: fit-content;
+      max-width: 170px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .tagLine{
+      position:absolute;
+      left: 92px;
+      top: 144px;
+      width: 64px;
+      height: 2px;
+      background: rgba(255,255,255,0.82);
+      transform: rotate(10deg);
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .20s ease;
+    }
+    .tagLine.on{ opacity: 0.9; }
   </style>
 
   <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
@@ -324,7 +447,7 @@
       <div class="headRow">
         <div class="brandBox">
           <div class="title">알림톡 랜딩 (테스트)</div>
-          <div class="sub">알림톡 → 스캔 → AR 결과(이미지 지시 반영)</div>
+          <div class="sub">알림톡 → 스캔 → AR 결과(포인트별 표현 변경)</div>
         </div>
         <div class="pill" id="envPill">환경 확인 중…</div>
       </div>
@@ -344,7 +467,7 @@
 
         <div class="trust">
           <div class="dot"></div>
-          <div>포인트 클릭 시 “물 흐름/블루틴트/123 하이라이트” 이펙트가 바뀝니다.</div>
+          <div>💧/123/🟦 버튼을 누르면 렌즈 표현 + 하단 설명이 바뀝니다.</div>
         </div>
       </div>
     </section>
@@ -390,8 +513,18 @@
         <video id="arVideo" playsinline muted></video>
         <canvas id="lensCanvas"></canvas>
 
+        <!-- 눈물막 모드 오버레이(이미지처럼 렌즈 위에 이미지 올라가게) -->
+        <div class="tearOverlay" id="tearOverlay">
+          <canvas id="tearCanvas" width="256" height="256"></canvas>
+        </div>
+        <div class="tagLine" id="tagLine"></div>
+        <div class="tearTags" id="tearTags">
+          <div class="tag">PVP 습윤인자</div>
+          <div class="tag">수분</div>
+        </div>
+
         <div class="arHeaderBar">
-          <div class="name" id="arProductName">아큐브 오아시스 맥스</div>
+          <div class="name" id="arProductName">아큐브 오아시스 맥스 구면</div>
           <div class="name" style="font-weight:900; color: var(--muted); font-size:12px;">
             기기 기울기 + 드래그(살짝만 회전)
           </div>
@@ -402,6 +535,9 @@
         <div class="greenPanel">
           <div class="greenTitle" id="greenTitle"></div>
           <div class="greenBody" id="greenBody"></div>
+          <div class="badgeRow hide" id="badgeRow">
+            <div class="badge" id="badgeText">블루라이트 차단을 위한 블루그린 틴트</div>
+          </div>
           <div class="greenSubBox" id="greenSub"></div>
         </div>
       </div>
@@ -414,10 +550,16 @@
 
         <button class="btn" id="btnARStart">AR 시작</button>
 
+        <!-- ✅ 이미지처럼 “이렇게 변경” : 왼쪽 다시스캔 / 오른쪽 만족도조사(썸네일) -->
         <div class="actionRow">
           <button class="btn secondary" id="btnRescan">다시 스캔하기</button>
-          <a class="btn secondary" href="https://forms.office.com/r/aqt7sf0ciB" target="_blank" rel="noopener">
-            만족도 조사
+
+          <a class="btn secondary surveyBtn" href="https://forms.office.com/r/aqt7sf0ciB" target="_blank" rel="noopener">
+            <div class="surveyText">
+              <div class="t1">만족도 조사</div>
+              <div class="t2">기프티콘 100% 제공</div>
+            </div>
+            <div class="surveyThumb" aria-hidden="true">☕️</div>
           </a>
         </div>
 
@@ -431,36 +573,46 @@
 
   <script>
     // =========================
-    // (A) 포인트 콘텐츠 + "이미지 지시사항" 이펙트 설정
+    // (A) 포인트 콘텐츠 (이미지 4장 요구사항)
     // =========================
     const AR_CONTENT = {
       productNameTop: "아큐브 오아시스 맥스 구면",
       points: [
+        // ✅ 기본(물방울 아이콘은 “기본”처럼 유지하고, 실제 물방울은 4번째 요구 ‘눈물막’에서)
+        // 이미지에서는 기본/블루라이트/123/눈물막 4가지 상태가 있었는데,
+        // UI 버튼은 3개이므로 “기본”은 초기 상태로 두고
+        // 버튼 3개는: 눈물막 / 123 / 블루라이트 로 매핑.
         {
-          id: "p0",
+          id: "tear",
           icon: "💧",
-          title: "눈물막 안정",
-          body: "클릭 시 렌즈 위로 ‘물이 흐르는 느낌’이 표현됩니다.",
-          sub: "렌즈 모양은 유지되고, 움직이면 살짝 돌아가는 정도로만 반응합니다.",
+          title: "눈물 안정화 기술",
+          body: "습윤 인자를 통한 오랫동안 촉촉하고 편안한 착용감을 제공",
+          sub: "수치는 내부 확정 문구로 교체하세요.",
           mode: "TEAR"
         },
         {
-          id: "p1",
-          icon: "ⓘ",
-          title: "123 마크",
-          body: "이 포인트에서는 아래 영역이 하이라이트로 빛나며 ‘123’ 각인이 표시됩니다.",
-          sub: "뒤집힘 확인 포인트를 시각적으로 강조합니다.",
+          id: "mark",
+          icon: "123",
+          title: "123마크",
+          body: "콘택트렌즈가 뒤집혀 있는지 확인이 가능해요",
+          sub: "필요 시 실제 가이드 문구로 교체하면 됩니다.",
           mode: "MARK"
         },
         {
-          id: "p2",
+          id: "blue",
           icon: "🟦",
           title: "블루라이트 차단",
-          body: "클릭 시 색상이 블루/그린 틴트로 강조되어 ‘차단 컨셉’을 직관적으로 보여줍니다.",
-          sub: "블루 글로우/링 효과가 강화됩니다.",
+          body: "55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공",
+          sub: "수치는 내부 확정 문구로 교체하세요.",
           mode: "BLUE"
         }
-      ]
+      ],
+      // ✅ 초기 기본 상태(버튼 클릭 전)
+      default: {
+        title: "눈 피로까지 고려해 설계된 실리콘하이드로겔 원데이 렌즈",
+        body: "추후 구매시에도 블루라이트 차단을 통한 눈 피로를 고려한 제품인지 확인해 보세요",
+        sub: ""
+      }
     };
 
     // =========================
@@ -489,6 +641,15 @@
     const greenTitle   = document.getElementById('greenTitle');
     const greenBody    = document.getElementById('greenBody');
     const greenSub     = document.getElementById('greenSub');
+    const badgeRow     = document.getElementById('badgeRow');
+    const badgeText    = document.getElementById('badgeText');
+
+    // tear overlay
+    const tearOverlay  = document.getElementById('tearOverlay');
+    const tearCanvas   = document.getElementById('tearCanvas');
+    const tearCtx      = tearCanvas.getContext('2d');
+    const tearTags     = document.getElementById('tearTags');
+    const tagLine      = document.getElementById('tagLine');
 
     function openModal(modal){
       modal.classList.add('open');
@@ -563,7 +724,7 @@
           stopScanCamera();
           closeModal(scanModal);
           openAR();
-        }, 1100);
+        }, 900);
 
       }catch(e){
         setScanStatus("카메라 권한을 허용해주세요.", "실패");
@@ -571,7 +732,7 @@
     });
 
     // =========================
-    // (2) AR camera + 3D (이미지 지시사항 반영)
+    // (2) AR camera + 3D
     // =========================
     let arStream = null;
 
@@ -580,46 +741,36 @@
     let camera3D = null;
     let lensGroup = null;
 
-    // 렌즈/효과 요소
     let lensMesh = null;
     let rimMesh = null;
 
-    // (물 흐름 오버레이)
-    let waterPlane = null;
-    let waterTex = null;
-    let waterCanvas = null;
-    let waterCtx = null;
-    let waterT = 0;
-
-    // (123 각인)
+    // 123 mark
     let mark123Plane = null;
     let mark123Tex = null;
+    let highlightRing = null;
+    let glowDot = null;
 
-    // (블루 글로우 링)
+    // Blue glow ring
     let blueGlowRing = null;
 
-    // (123 강조 하이라이트: 아래쪽)
+    // spotlight
     let highlightSpot = null;
-    let highlightRing = null;
-    let glowDot = null; // 작은 글로우 점
 
-    // 렌즈 재질
+    // lens material
     let baseLensMat = null;
     const baseColor = new THREE.Color(0xd9f0ff);
 
-    // 애니메이션
+    // animation
     let raf = null;
 
-    // 드래그 회전 (✅ 민감도 낮춤)
+    // controls (민감도 낮춤)
     let dragging = false;
     let lastX = 0, lastY = 0;
-
-    // 기울기 회전 (✅ 민감도 낮춤)
     let oriEnabled = false;
     let oriX = 0, oriY = 0;
 
-    // 선택 상태
-    let currentMode = "TEAR"; // TEAR / MARK / BLUE
+    // state
+    let currentMode = "BASIC"; // BASIC / TEAR / MARK / BLUE
 
     async function startARCamera(){
       const constraints = {
@@ -656,17 +807,12 @@
       lensMesh = null;
       rimMesh = null;
 
-      waterPlane = null;
-      waterTex = null;
-      waterCanvas = null;
-      waterCtx = null;
-
       mark123Plane = null;
       mark123Tex = null;
 
       blueGlowRing = null;
-
       highlightSpot = null;
+
       highlightRing = null;
       glowDot = null;
 
@@ -712,65 +858,6 @@
       return tex;
     }
 
-    // ✅ 물 흐름 캔버스 텍스처 (간단하지만 "흐르는 느낌" 나게)
-    function initWaterTexture(){
-      waterCanvas = document.createElement("canvas");
-      waterCanvas.width = 512;
-      waterCanvas.height = 512;
-      waterCtx = waterCanvas.getContext("2d");
-      waterTex = new THREE.CanvasTexture(waterCanvas);
-      waterTex.wrapS = waterTex.wrapT = THREE.RepeatWrapping;
-      waterTex.repeat.set(1.2, 1.2);
-    }
-
-    function drawWaterFrame(){
-      if(!waterCtx) return;
-      const ctx = waterCtx;
-      const w = waterCanvas.width, h = waterCanvas.height;
-
-      ctx.clearRect(0,0,w,h);
-
-      // 은은한 블루 필름
-      const g = ctx.createRadialGradient(w*0.55, h*0.45, 40, w*0.55, h*0.45, 280);
-      g.addColorStop(0, "rgba(170, 230, 255, 0.10)");
-      g.addColorStop(1, "rgba(170, 230, 255, 0.00)");
-      ctx.fillStyle = g;
-      ctx.fillRect(0,0,w,h);
-
-      // 흐르는 라인 (아래로 흐르는 느낌)
-      waterT += 0.016;
-      for(let i=0;i<12;i++){
-        const x = (i/12)*w + Math.sin(waterT*1.2 + i)*18;
-        const yOffset = (waterT*140 + i*60) % (h+160) - 160;
-
-        const grad = ctx.createLinearGradient(x-40, yOffset, x+40, yOffset+160);
-        grad.addColorStop(0,   "rgba(255,255,255,0.00)");
-        grad.addColorStop(0.35,"rgba(255,255,255,0.16)");
-        grad.addColorStop(0.65,"rgba(255,255,255,0.10)");
-        grad.addColorStop(1,   "rgba(255,255,255,0.00)");
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.roundRect(x-18, yOffset, 36, 160, 18);
-        ctx.fill();
-      }
-
-      // 잔물결(원형)
-      for(let r=0;r<5;r++){
-        const t = waterT*0.8 + r*0.9;
-        const cx = w*0.50 + Math.sin(t)*60;
-        const cy = h*0.55 + Math.cos(t*1.2)*40;
-        const rad = 30 + (t*22)%70;
-        ctx.strokeStyle = "rgba(255,255,255,0.08)";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(cx, cy, rad, 0, Math.PI*2);
-        ctx.stroke();
-      }
-
-      waterTex.needsUpdate = true;
-    }
-
     function init3D(){
       renderer = new THREE.WebGLRenderer({ canvas: lensCanvas, alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -781,7 +868,7 @@
       camera3D = new THREE.PerspectiveCamera(45, lensCanvas.clientWidth / lensCanvas.clientHeight, 0.01, 50);
       camera3D.position.set(0, 0.12, 1.1);
 
-      // 조명 (기본)
+      // lighting
       const key = new THREE.DirectionalLight(0xffffff, 1.0);
       key.position.set(1, 1, 1);
       scene.add(key);
@@ -792,9 +879,8 @@
 
       scene.add(new THREE.AmbientLight(0xffffff, 0.28));
 
-      // ✅ 123 하이라이트 스팟(아래쪽 강조용)
-      highlightSpot = new THREE.SpotLight(0xffffff, 0.8, 5.0, Math.PI/8, 0.6, 1.0);
-      // 기본은 아래쪽(이미지 빨간 원 근처)로
+      // spotlight for mark highlight
+      highlightSpot = new THREE.SpotLight(0xffffff, 0.75, 5.0, Math.PI/8, 0.6, 1.0);
       highlightSpot.position.set(0.0, 0.55, -0.32);
       highlightSpot.target.position.set(0, 0, 0);
       scene.add(highlightSpot);
@@ -803,7 +889,7 @@
       lensGroup = new THREE.Group();
       scene.add(lensGroup);
 
-      // 렌즈 형태 (유지)
+      // lens geometry (shape 유지)
       const pts = [];
       pts.push(new THREE.Vector2(0.00, 0.00));
       pts.push(new THREE.Vector2(0.10, 0.005));
@@ -840,30 +926,29 @@
       rimMesh.position.y = 0.002;
       lensGroup.add(rimMesh);
 
-      // ✅ 123 강조 링(아래쪽 고정)
+      // blue glow ring
+      const bRingGeo = new THREE.RingGeometry(0.22, 0.27, 72);
+      const bRingMat = new THREE.MeshBasicMaterial({ color: 0x1e78ff, transparent:true, opacity:0.04, side: THREE.DoubleSide });
+      blueGlowRing = new THREE.Mesh(bRingGeo, bRingMat);
+      blueGlowRing.rotation.x = Math.PI/2;
+      blueGlowRing.position.y = 0.028;
+      lensGroup.add(blueGlowRing);
+
+      // 123 highlight ring + dot
       const hRingGeo = new THREE.RingGeometry(0.12, 0.16, 64);
-      const hRingMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.12, side: THREE.DoubleSide });
+      const hRingMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.10, side: THREE.DoubleSide });
       highlightRing = new THREE.Mesh(hRingGeo, hRingMat);
       highlightRing.rotation.x = Math.PI/2;
       highlightRing.position.set(0.0, 0.033, -0.26);
       lensGroup.add(highlightRing);
 
-      // ✅ 작은 글로우 점(하이라이트 포인트)
       const dotGeo = new THREE.SphereGeometry(0.02, 20, 20);
       const dotMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent:true, opacity:0.0 });
       glowDot = new THREE.Mesh(dotGeo, dotMat);
       glowDot.position.set(0.0, 0.040, -0.26);
       lensGroup.add(glowDot);
 
-      // ✅ 블루 글로우 링(블루 포인트에서 강화)
-      const bRingGeo = new THREE.RingGeometry(0.22, 0.27, 72);
-      const bRingMat = new THREE.MeshBasicMaterial({ color: 0x1e78ff, transparent:true, opacity:0.06, side: THREE.DoubleSide });
-      blueGlowRing = new THREE.Mesh(bRingGeo, bRingMat);
-      blueGlowRing.rotation.x = Math.PI/2;
-      blueGlowRing.position.y = 0.028;
-      lensGroup.add(blueGlowRing);
-
-      // ✅ 123 각인 plane (기본 숨김)
+      // 123 mark plane
       mark123Tex = make123Texture();
       const mGeo = new THREE.PlaneGeometry(0.38, 0.19);
       const mMat = new THREE.MeshBasicMaterial({
@@ -874,71 +959,51 @@
       });
       mark123Plane = new THREE.Mesh(mGeo, mMat);
       mark123Plane.rotation.x = Math.PI/2;
-      // 아래쪽에 더 가깝게
       mark123Plane.position.set(0.08, 0.034, -0.12);
       lensGroup.add(mark123Plane);
 
-      // ✅ 물 흐름 plane (TEAR에서만 보이게)
-      initWaterTexture();
-      const wGeo = new THREE.PlaneGeometry(1.02, 1.02);
-      const wMat = new THREE.MeshBasicMaterial({
-        map: waterTex,
-        transparent: true,
-        opacity: 0.0,     // 기본 숨김
-        depthWrite: false
-      });
-      waterPlane = new THREE.Mesh(wGeo, wMat);
-      waterPlane.rotation.x = Math.PI/2;
-      waterPlane.position.set(0.0, 0.036, 0.02);
-      lensGroup.add(waterPlane);
-
-      // 기본 위치: 렌즈 모양 유지 / 회전은 약하게만
+      // initial pose (살짝만)
       lensGroup.rotation.x = -0.22;
       lensGroup.rotation.y = 0.22;
 
       const render = () => {
         raf = requestAnimationFrame(render);
 
-        // ✅ "약간만 돌아가는 정도" (민감도 낮춤)
+        // ✅ “살짝만 돌아가게” 회전 민감도 낮춤
         if(lensGroup && oriEnabled){
-          const targetX = -0.22 + oriY * 0.005;  // 기존보다 훨씬 작게
+          const targetX = -0.22 + oriY * 0.005;
           const targetY =  0.22 + oriX * 0.005;
           lensGroup.rotation.x += (targetX - lensGroup.rotation.x) * 0.08;
           lensGroup.rotation.y += (targetY - lensGroup.rotation.y) * 0.08;
         } else if(lensGroup){
-          lensGroup.rotation.y += 0.0006; // 자동 회전도 아주 약하게
+          lensGroup.rotation.y += 0.00055;
         }
 
-        // 살짝 부유(너무 과하면 꺼도 됨)
+        // gentle float
         if(lensGroup){
           lensGroup.position.y = Math.sin(Date.now()*0.002) * 0.006;
         }
 
-        // 모드별 애니메이션
-        // TEAR: 물 텍스처 업데이트
-        if(currentMode === "TEAR" && waterPlane){
-          drawWaterFrame();
-          waterPlane.material.opacity = 0.22;
-        } else if (waterPlane) {
-          waterPlane.material.opacity += (0.0 - waterPlane.material.opacity) * 0.12;
-        }
-
-        // MARK: 아래쪽 하이라이트 더 강하게 + 글로우 점
+        // MARK(123) 반짝반짝
         if(currentMode === "MARK"){
-          if(highlightRing) highlightRing.material.opacity = 0.20;
-          if(glowDot) glowDot.material.opacity = 0.55 + (Math.sin(Date.now()*0.006)+1)*0.08;
-          if(highlightSpot) highlightSpot.intensity = 1.35;
+          const t = Date.now()*0.006;
+          const pulse = 0.45 + (Math.sin(t)+1)*0.18; // 0.45~0.81
+          if(mark123Plane) mark123Plane.material.opacity = pulse * 0.85;
+          if(glowDot) glowDot.material.opacity = 0.35 + (Math.sin(t+1.1)+1)*0.16;
+          if(highlightRing) highlightRing.material.opacity = 0.16 + (Math.sin(t+0.4)+1)*0.06;
+          if(highlightSpot) highlightSpot.intensity = 1.25;
         } else {
-          if(highlightRing) highlightRing.material.opacity = 0.10;
-          if(glowDot) glowDot.material.opacity = 0.0;
-          if(highlightSpot) highlightSpot.intensity = 0.75;
+          if(mark123Plane) mark123Plane.material.opacity += (0.0 - mark123Plane.material.opacity) * 0.16;
+          if(glowDot) glowDot.material.opacity += (0.0 - glowDot.material.opacity) * 0.16;
+          if(highlightRing) highlightRing.material.opacity += (0.10 - highlightRing.material.opacity) * 0.12;
+          if(highlightSpot) highlightSpot.intensity += (0.75 - highlightSpot.intensity) * 0.12;
         }
 
-        // BLUE: 블루 글로우/링 강화 (펄스)
+        // BLUE: 블루 글로우 강화
         if(blueGlowRing){
           const t = Date.now() * 0.002;
-          const base = (currentMode === "BLUE") ? 0.14 : 0.06;
-          const amp  = (currentMode === "BLUE") ? 0.10 : 0.03;
+          const base = (currentMode === "BLUE") ? 0.14 : 0.04;
+          const amp  = (currentMode === "BLUE") ? 0.10 : 0.02;
           blueGlowRing.material.opacity = base + (Math.sin(t+0.8) + 1) * amp * 0.5;
         }
 
@@ -948,7 +1013,7 @@
     }
 
     function bind3DControls(){
-      // ✅ 드래그도 "살짝만" 돌아가게: dx/dy 분모 키움
+      // ✅ 드래그도 “살짝만”
       lensCanvas.addEventListener('pointerdown', (e) => {
         dragging = true;
         lastX = e.clientX;
@@ -958,7 +1023,7 @@
 
       lensCanvas.addEventListener('pointermove', (e) => {
         if(!dragging || !lensGroup) return;
-        const dx = (e.clientX - lastX) / 520; // (기존보다 둔하게)
+        const dx = (e.clientX - lastX) / 520;
         const dy = (e.clientY - lastY) / 520;
         lastX = e.clientX;
         lastY = e.clientY;
@@ -1002,48 +1067,170 @@
     }
 
     // =========================
-    // 모드 적용 (이미지 지시사항 반영)
+    // 눈물막 오버레이 “원형 이미지” (캔버스로 텍스처 생성)
     // =========================
+    let tearAnimT = 0;
+    function drawTearOverlay(){
+      const w = tearCanvas.width, h = tearCanvas.height;
+      const ctx = tearCtx;
+      ctx.clearRect(0,0,w,h);
+
+      // background
+      const bg = ctx.createRadialGradient(w*0.45, h*0.42, 10, w*0.5, h*0.5, w*0.55);
+      bg.addColorStop(0, "rgba(255,255,255,0.08)");
+      bg.addColorStop(1, "rgba(0,0,0,0.06)");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0,0,w,h);
+
+      // network fibers 느낌
+      tearAnimT += 0.016;
+      ctx.save();
+      ctx.translate(w/2, h/2);
+
+      // ring
+      ctx.strokeStyle = "rgba(255,255,255,0.28)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0,0,w*0.44,0,Math.PI*2);
+      ctx.stroke();
+
+      // random-ish lines (deterministic)
+      for(let i=0;i<42;i++){
+        const a = i * 0.38 + Math.sin(tearAnimT*0.7+i)*0.12;
+        const r1 = 30 + (i%7)*8;
+        const r2 = 92 + (i%11)*6;
+        ctx.strokeStyle = `rgba(120, 210, 255, ${0.06 + (i%5)*0.01})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a)*r1, Math.sin(a)*r1);
+        ctx.quadraticCurveTo(
+          Math.cos(a+0.9)*55, Math.sin(a+0.9)*55,
+          Math.cos(a+0.25)*r2, Math.sin(a+0.25)*r2
+        );
+        ctx.stroke();
+      }
+
+      // dots
+      for(let k=0;k<26;k++){
+        const a = k*0.62 + tearAnimT*0.45;
+        const r = 16 + (k%9)*10;
+        ctx.fillStyle = "rgba(255,255,255,0.22)";
+        ctx.beginPath();
+        ctx.arc(Math.cos(a)*r, Math.sin(a)*r, 2.2, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      // highlight
+      const hl = ctx.createRadialGradient(-30,-40, 6, -20,-30, 90);
+      hl.addColorStop(0, "rgba(255,255,255,0.18)");
+      hl.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = hl;
+      ctx.beginPath();
+      ctx.arc(0,0,w*0.48,0,Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    let tearRAF = null;
+    function startTearOverlayAnim(){
+      if(tearRAF) cancelAnimationFrame(tearRAF);
+      const loop = () => {
+        tearRAF = requestAnimationFrame(loop);
+        if(currentMode === "TEAR"){
+          drawTearOverlay();
+        }
+      };
+      loop();
+    }
+
+    function showTearUI(on){
+      tearOverlay.classList.toggle("on", on);
+      tearTags.classList.toggle("on", on);
+      tagLine.classList.toggle("on", on);
+    }
+
+    // =========================
+    // 모드 적용 (BASIC / TEAR / MARK / BLUE)
+    // =========================
+    function setGreenPanel({title, body, sub, badge=null}){
+      greenTitle.textContent = title || "";
+      greenBody.textContent  = body  || "";
+      greenSub.textContent   = sub   || "";
+      if(badge){
+        badgeText.textContent = badge;
+        badgeRow.classList.remove("hide");
+      } else {
+        badgeRow.classList.add("hide");
+      }
+    }
+
     function applyMode(mode){
       currentMode = mode;
 
       // 공통 초기화
-      if(mark123Plane) mark123Plane.material.opacity = 0.0;
+      showTearUI(false);
 
-      // 렌즈 색/틴트
       if(baseLensMat && rimMesh){
-        // 기본값
         baseLensMat.color.copy(baseColor);
         baseLensMat.opacity = 0.26;
         rimMesh.material.opacity = 0.18;
       }
 
-      // 모드별
+      if(mode === "BASIC"){
+        setGreenPanel({
+          title: AR_CONTENT.default.title,
+          body: AR_CONTENT.default.body,
+          sub:  AR_CONTENT.default.sub,
+          badge: null
+        });
+      }
+
       if(mode === "TEAR"){
-        // 물 흐름은 render loop에서 opacity 올라감
-        // (특별히 렌즈 색은 기본 유지)
+        // 렌즈 위 이미지 오버레이 + 라벨
+        showTearUI(true);
+        startTearOverlayAnim();
+
+        setGreenPanel({
+          title: AR_CONTENT.points[0].title,
+          body:  AR_CONTENT.points[0].body,
+          sub:   AR_CONTENT.points[0].sub,
+          badge: null
+        });
       }
 
       if(mode === "MARK"){
-        // 123 각인 켬
-        if(mark123Plane) mark123Plane.material.opacity = 0.55;
-
-        // 하이라이트를 아래쪽에 더 집중 (스팟 위치 고정)
+        // 123 깜빡은 렌더 루프에서
+        // 하이라이트 집중
         if(highlightSpot){
           highlightSpot.position.set(0.0, 0.58, -0.34);
         }
         if(highlightRing){
           highlightRing.position.set(0.0, 0.033, -0.26);
         }
+
+        setGreenPanel({
+          title: AR_CONTENT.points[1].title,
+          body:  AR_CONTENT.points[1].body,
+          sub:   AR_CONTENT.points[1].sub,
+          badge: null
+        });
       }
 
       if(mode === "BLUE"){
-        // 블루/그린 틴트 강조
+        // 블루그린 틴트
         if(baseLensMat && rimMesh){
-          baseLensMat.color.setHex(0xb7fff1); // 블루그린 느낌
+          baseLensMat.color.setHex(0xb7fff1);
           baseLensMat.opacity = 0.24;
           rimMesh.material.opacity = 0.26;
         }
+
+        setGreenPanel({
+          title: AR_CONTENT.points[2].title,
+          body:  AR_CONTENT.points[2].body,
+          sub:   AR_CONTENT.points[2].sub,
+          badge: "블루라이트 차단을 위한 블루그린 틴트"
+        });
       }
     }
 
@@ -1052,26 +1239,25 @@
     // =========================
     function renderPoints(){
       pointsEl.innerHTML = "";
+      // 버튼 순서: 눈물막 / 123 / 블루라이트 (이미지 흐름)
       AR_CONTENT.points.forEach((p, idx) => {
         const btn = document.createElement("div");
-        btn.className = "ptBtn" + (idx === 0 ? " active" : "");
+        btn.className = "ptBtn";
         btn.innerHTML = `<div class="ptIcon" aria-hidden="true">${p.icon}</div>`;
         btn.addEventListener("click", () => selectPoint(idx));
         pointsEl.appendChild(btn);
       });
     }
 
-    function selectPoint(idx){
-      const p = AR_CONTENT.points[idx];
-
-      greenTitle.textContent = p.title;
-      greenBody.textContent  = p.body;
-      greenSub.textContent   = p.sub;
-
+    function setActiveBtn(idx){
       [...pointsEl.querySelectorAll(".ptBtn")].forEach((el, i) => {
         el.classList.toggle("active", i === idx);
       });
+    }
 
+    function selectPoint(idx){
+      const p = AR_CONTENT.points[idx];
+      setActiveBtn(idx);
       applyMode(p.mode);
     }
 
@@ -1080,7 +1266,8 @@
       arProductName.textContent = AR_CONTENT.productNameTop;
 
       renderPoints();
-      selectPoint(0);
+      setActiveBtn(-1); // 기본은 아무 버튼도 선택 안 된 느낌
+      applyMode("BASIC");
 
       btnARStart.classList.remove("hide");
       btnARStart.disabled = false;
@@ -1109,7 +1296,7 @@
 
         await enableDeviceOrientationIfNeeded();
 
-        setARStatus("포인트를 눌러 효과를 확인하세요", "실행 중");
+        setARStatus("버튼을 눌러 렌즈 표현을 확인하세요", "실행 중");
         btnARStart.classList.add("hide");
       }catch(e){
         console.log(e);
@@ -1145,39 +1332,9 @@
     });
 
     // =========================
-    // Scan modal close
-    // =========================
-    function closeScan(){
-      stopScanCamera();
-      closeModal(scanModal);
-      setScanStatus("", "대기");
-    }
-
-    // =========================
-    // Scan → AR 전환
-    // =========================
-    function openScan(){
-      openModal(scanModal);
-      setScanStatus("", "대기");
-    }
-
-    // =========================
     // init env
     // =========================
     envPill.textContent = (navigator.mediaDevices?.getUserMedia) ? "카메라 지원" : "카메라 미지원";
-  </script>
-
-  <script>
-    // 버튼/모달 이벤트는 위 스크립트와 겹치지 않게 마지막에 연결 (간단 안정)
-    document.getElementById("btnCloseScan").addEventListener("click", () => {
-      // closeScan은 상위 스코프에 있음
-      try { closeScan(); } catch(_) {}
-    });
-    document.getElementById("scanModal").addEventListener("click", (e) => {
-      if(e.target === document.getElementById("scanModal")){
-        try { closeScan(); } catch(_) {}
-      }
-    });
   </script>
 </body>
 </html>
