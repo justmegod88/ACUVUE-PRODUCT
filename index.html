@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>제품 촬영 → 결과(AR 없이 정면 렌즈)</title>
+  <title>제품 카드 → 결과(AR 없이 정면 렌즈)</title>
 
   <style>
     :root{
@@ -23,7 +23,7 @@
       --green:#18a85b;
       --green2:#0f8b49;
 
-      --max: 760px;
+      --max: 820px;
     }
 
     *{box-sizing:border-box}
@@ -71,30 +71,75 @@
     .h1{ font-size: 20px; font-weight: 980; letter-spacing:-0.65px; margin:0 0 8px; line-height:1.15; }
     .p{ margin:0; color: var(--muted); font-size: 14px; line-height:1.5; }
 
-    .btn{
-      width:100%;
-      border:0;
-      border-radius: 14px;
-      padding: 14px 14px;
-      font-size: 16px;
-      font-weight: 950;
-      background: linear-gradient(180deg, var(--brand2), var(--brand));
-      color: #fff;
-      cursor:pointer;
-      box-shadow: 0 10px 22px rgba(11,74,162,0.22);
+    /* ===== 제품 리스트(카드) ===== */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
     }
-    .btn:active{ transform: translateY(1px); }
-    .btn[disabled]{ opacity:0.65; cursor:not-allowed; }
-
-    .btn.secondary{
-      background: rgba(255,255,255,0.96);
-      color: var(--text);
-      border:1px solid var(--line);
-      font-weight: 950;
+    .prod{
+      border: 1px solid rgba(230,233,242,0.95);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(255,255,255,0.92);
       box-shadow: var(--shadow2);
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .12s ease, box-shadow .12s ease;
     }
-
-    .btnRow{ display:grid; grid-template-columns: 1fr; gap:10px; margin-top: 14px; }
+    .prod:active{ transform: translateY(1px) scale(0.995); }
+    .prodTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .prodName{
+      font-weight:980;
+      letter-spacing:-0.35px;
+      font-size: 15px;
+      line-height:1.25;
+      min-width:0;
+    }
+    .prodSub{
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .chips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .chip{
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(11,18,32,0.78);
+      background: rgba(11,74,162,0.06);
+      border: 1px solid rgba(11,74,162,0.12);
+    }
+    .thumb{
+      width: 56px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(230,233,242,0.95);
+      background: linear-gradient(180deg, rgba(30,120,255,0.10), rgba(11,74,162,0.06));
+      display:grid;
+      place-items:center;
+      flex: 0 0 auto;
+      overflow:hidden;
+    }
+    .thumb img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display:block;
+    }
 
     .trust{
       margin-top: 12px;
@@ -104,10 +149,7 @@
       align-items:flex-start;
       gap:8px;
     }
-    .trust .dot{ width:8px; height:8px; margin-top: 5px; border-radius: 999 hookup
-     ;border-radius: 999px; background: #16a34a; flex:0 0 auto; }
-
-    .hide{ display:none !important; }
+    .trust .dot{ width:8px; height:8px; margin-top: 5px; border-radius: 999px; background: #16a34a; flex:0 0 auto; }
 
     /* ========== MODAL ========== */
     .modal{
@@ -163,70 +205,6 @@
         radial-gradient(600px 340px at 0% 40%, rgba(11,74,162,0.10), transparent 58%),
         linear-gradient(180deg, #1a2636 0%, #0f1726 100%);
       overflow:hidden;
-    }
-
-    /* 촬영(스캔) 화면: 실제 카메라 */
-    .camStage{
-      position: relative;
-      width:100%;
-      height:100%;
-      overflow:hidden;
-      background: #0b1020;
-    }
-    #camVideo{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit: cover;
-      transform: scaleX(-1); /* 셀카처럼 보이면 불편할 수 있어. 필요 없으면 삭제 */
-    }
-    .scanGuide{
-      position:absolute;
-      left:12px; right:12px; top:12px;
-      background: rgba(12,20,36,0.55);
-      border: 1px solid rgba(255,255,255,0.12);
-      color:#fff;
-      border-radius: 14px;
-      padding: 10px 12px;
-      font-size: 13px;
-      line-height:1.45;
-      backdrop-filter: blur(10px);
-    }
-    .frame{
-      position:absolute;
-      left: 14%;
-      right: 14%;
-      top: 24%;
-      bottom: 24%;
-      border-radius: 18px;
-      border: 2px solid rgba(255,255,255,0.85);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-      pointer-events:none;
-    }
-    .frame::after{
-      content:"";
-      position:absolute;
-      inset: 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.25);
-    }
-    .scanHint{
-      position:absolute;
-      left:0; right:0;
-      bottom: 90px;
-      display:flex;
-      justify-content:center;
-      pointer-events:none;
-    }
-    .scanHint span{
-      background: rgba(0,0,0,0.35);
-      border: 1px solid rgba(255,255,255,0.18);
-      color:#fff;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      backdrop-filter: blur(10px);
     }
 
     /* 위쪽 제품명 바 */
@@ -289,72 +267,72 @@
       font-weight: 950;
     }
 
-    /* ✅ 렌즈: 겹침 줄이기 위해 살짝 위, 크기도 살짝 줄임 */
+    /* ✅ 렌즈 캔버스: 겹침 줄이려고 위로 + 살짝 작게 */
     #lens2d{
       position:absolute;
       left: 50%;
-      top: 44%;                  /* ⬅️ (2) 겹침 줄이기: 위로 올림 */
+      top: 42%;
       transform: translate(-50%, -50%);
-      width: min(74vw, 330px);   /* ⬅️ 살짝 줄임 */
-      height: min(74vw, 330px);
+      width: min(72vw, 320px);
+      height: min(72vw, 320px);
       pointer-events:auto;
-      filter: drop-shadow(0 18px 26px rgba(0,0,0,0.20));
+      filter: drop-shadow(0 18px 26px rgba(0,0,0,0.22));
     }
 
-    /* ✅ 초록 패널: 세로 줄이기 + 폰트 줄이기 */
+    /* ✅ 초록 패널: 더 얇게 + 폰트 조금 줄이기 + 아래로 살짝 */
     .greenPanel{
       position:absolute;
       left:0; right:0;
-      bottom: 54px;
+      bottom: 58px;
       margin: 0 10px;
       background: linear-gradient(180deg, var(--green), var(--green2));
       color:#fff;
       border-radius: 14px;
-      padding: 12px 12px 10px;  /* ⬅️ (1) 패딩 줄임 */
+      padding: 12px 14px 12px; /* 세로 줄임 */
       box-shadow: var(--shadow);
       pointer-events:none;
     }
     .greenTitle{
       font-weight:980;
-      letter-spacing:-0.35px;
-      font-size: 15px;          /* ⬅️ (1) 폰트 줄임 */
-      margin:0 0 6px;
+      letter-spacing:-0.45px;
+      font-size: 15px;  /* ↓ */
+      margin:0 0 8px;   /* ↓ */
       line-height:1.15;
       text-align:center;
     }
     .greenBody{
-      font-size: 13px;          /* ⬅️ (1) 폰트 줄임 */
-      line-height:1.35;
+      font-size: 13px;  /* ↓ */
+      line-height:1.45;
       opacity: 0.96;
       text-align:center;
     }
     .greenSubBox{
-      margin: 8px auto 0;
+      margin: 9px auto 0;
       max-width: 92%;
       background: rgba(0,0,0,0.16);
       border: 1px solid rgba(255,255,255,0.18);
       border-radius: 10px;
-      padding: 8px 10px;        /* ⬅️ (1) 줄임 */
-      font-size: 12px;          /* ⬅️ (1) 폰트 줄임 */
-      line-height:1.35;
+      padding: 9px 10px;
+      font-size: 12px; /* ↓ */
+      line-height:1.45;
       text-align:center;
       opacity:0.95;
     }
     .badgeRow{
-      margin-top: 8px;
+      margin-top: 9px;
       display:flex;
       justify-content:center;
       pointer-events:none;
     }
     .badge{
-      background: rgba(0,0,0,0.20);
+      background: rgba(0,0,0,0.18); /* 노란 느낌 방지(완전 중립) */
       border: 1px solid rgba(255,255,255,0.20);
-      padding: 8px 10px;        /* ⬅️ 줄임 */
+      padding: 9px 12px;
       border-radius: 12px;
       font-weight: 950;
-      font-size: 12px;          /* ⬅️ 줄임 */
+      font-size: 12px;
       letter-spacing:-0.2px;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
     }
 
     .modalBottom{
@@ -379,6 +357,27 @@
       grid-template-columns: 1fr 1fr;
       gap:10px;
       align-items:stretch;
+    }
+
+    .btn{
+      width:100%;
+      border:0;
+      border-radius: 14px;
+      padding: 14px 14px;
+      font-size: 16px;
+      font-weight: 950;
+      background: linear-gradient(180deg, var(--brand2), var(--brand));
+      color: #fff;
+      cursor:pointer;
+      box-shadow: 0 10px 22px rgba(11,74,162,0.22);
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn.secondary{
+      background: rgba(255,255,255,0.96);
+      color: var(--text);
+      border:1px solid var(--line);
+      font-weight: 950;
+      box-shadow: var(--shadow2);
     }
 
     .surveyBtn{
@@ -431,11 +430,7 @@
       opacity: 1;
       transform: translateY(0) scale(1);
     }
-    .tearOverlay canvas{
-      width:100%;
-      height:100%;
-      display:block;
-    }
+    .tearOverlay canvas{ width:100%; height:100%; display:block; }
 
     .tearTags{
       position:absolute;
@@ -449,10 +444,8 @@
       transform: translateY(4px);
       transition: opacity .20s ease, transform .20s ease;
     }
-    .tearTags.on{
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .tearTags.on{ opacity: 1; transform: translateY(0); }
+
     .tag{
       background: rgba(22, 27, 45, 0.88);
       color:#fff;
@@ -483,7 +476,6 @@
     .tagLine.on{ opacity: 0.9; }
 
     .miniHelp{ font-size:12px; color:var(--muted); line-height:1.45; }
-    input[type="file"]{ display:none; }
   </style>
 </head>
 
@@ -493,72 +485,28 @@
       <div class="headRow">
         <div class="brandBox">
           <div class="title">알림톡 랜딩 (테스트)</div>
-          <div class="sub">알림톡 → 제품 촬영(테스트) → 결과(AR 없이 정면 렌즈)</div>
+          <div class="sub">제품 카드 클릭 → 결과(AR 없이 정면 렌즈)</div>
         </div>
-        <div class="pill">AR 미사용</div>
+        <div class="pill">스캔 제거</div>
       </div>
     </header>
 
     <section id="viewLanding">
       <div class="card">
-        <div class="h1">알림톡 도착</div>
+        <div class="h1">내 제품 정보 확인</div>
         <p class="p">
-          오늘 선택하신 제품 정보를 확인할 수 있어요.<br>
-          (테스트) 촬영 후 결과 화면으로 이동합니다.
+          아래 제품 카드를 눌러 기능 포인트를 확인해 보세요.<br>
+          💧 / 123 / 🟦 버튼으로 렌즈 표현과 하단 설명이 바뀝니다.
         </p>
 
-        <div class="btnRow">
-          <button class="btn" id="btnStartFlow">오늘 선택한 제품 더 알아보기</button>
-        </div>
+        <div class="grid" id="productGrid"></div>
 
         <div class="trust">
           <div class="dot"></div>
-          <div>💧 / 123 / 🟦 버튼을 누르면 렌즈 표현 + 하단 설명이 바뀝니다.</div>
+          <div>“클릭 즉시” 화면이 바뀌도록 만들어서, 스캔 단계 없이도 충분히 ‘우와’ 포인트를 줍니다.</div>
         </div>
       </div>
     </section>
-  </div>
-
-  <!-- 스캔(촬영) 모달 -->
-  <div class="modal" id="scanModal" aria-hidden="true">
-    <div class="modalBox">
-      <div class="modalTop">
-        <div class="t">제품 촬영(테스트)</div>
-        <button class="x" id="btnCloseScan">닫기</button>
-      </div>
-
-      <div class="stage camStage">
-        <video id="camVideo" playsinline muted autoplay></video>
-
-        <div class="scanGuide">
-          제품 박스(바코드/측면)를 프레임 안에 맞춰주세요.<br>
-          (테스트) 실제 바코드 인식은 다음 단계에서 붙입니다.
-        </div>
-
-        <div class="frame" aria-hidden="true"></div>
-        <div class="scanHint"><span>밝은 곳에서 촬영하면 인식이 더 좋아요</span></div>
-
-        <!-- 카메라가 안 될 때 대비: 사진 업로드로 대체 -->
-        <input id="fileFallback" type="file" accept="image/*" capture="environment">
-      </div>
-
-      <div class="modalBottom">
-        <div class="status">
-          <span id="scanStatus">상태: <b>대기</b></span>
-          <span>인식: <b>미사용</b></span>
-        </div>
-
-        <div class="actionRow">
-          <button class="btn secondary" id="btnUsePhoto">사진 불러오기</button>
-          <button class="btn" id="btnScanUse">사진 촬영하기</button>
-        </div>
-
-        <div class="miniHelp">
-          * iOS에서 카메라 권한 팝업이 뜨면 <b>허용</b>을 눌러주세요.<br>
-          * 카메라가 안 되면 <b>사진으로 진행</b>으로 테스트할 수 있어요.
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- 결과 모달 -->
@@ -596,9 +544,8 @@
           <div class="greenBody" id="greenBody"></div>
 
           <div class="badgeRow" id="badgeRow" style="display:none;">
-          <div class="badge" id="badgeText">블루라이트 차단을 위한 블루그린 틴트</div>
+            <div class="badge" id="badgeText"></div>
           </div>
-          
 
           <div class="greenSubBox" id="greenSub"></div>
         </div>
@@ -607,11 +554,11 @@
       <div class="modalBottom">
         <div class="status">
           <span id="resStatus">상태: <b>실행 중</b></span>
-          <span>조작: <b>우측 상단 아이콘 클릭</b></span>
+          <span>조작: <b>드래그(살짝 회전)</b></span>
         </div>
 
         <div class="actionRow">
-          <button class="btn secondary" id="btnRescan">다시 촬영하기</button>
+          <button class="btn secondary" id="btnBack">제품 목록</button>
 
           <a class="btn secondary surveyBtn" href="https://forms.office.com/r/aqt7sf0ciB" target="_blank" rel="noopener">
             <div class="surveyText">
@@ -623,7 +570,7 @@
         </div>
 
         <div class="miniHelp">
-          * 이해를 돕기 위한 <b>가상 이미지</b> 입니다.<br>
+          * 현재 버전은 <b>카메라/AR 없이</b> “제품 카드 클릭 → 결과”로 바로 진입합니다.
         </div>
       </div>
     </div>
@@ -631,49 +578,93 @@
 
   <script>
     // =========================
-    // 콘텐츠
+    // (A) 제품 데이터(테스트용)
+    //  - thumb은 원하면 네가 준 팩샷 경로로 바꿔도 됨(로컬/깃허브 경로)
     // =========================
-    const CONTENT = {
-      productNameTop: "아큐브 오아시스 맥스 구면",
-      default: {
-        title: "눈 피로까지 고려해 설계된 실리콘 원데이 렌즈",
-        sub: "추후 구매시에도 블루라이트 차단을 통한 눈 피로를 고려한 제품인지 확인해 보세요",
-  
+    const PRODUCTS = [
+      {
+        id: "max_spherical",
+        name: "아큐브 오아시스 맥스 구면",
+        sub: "우와 포인트: 클릭 즉시 인터랙션",
+        chips: ["#블루라이트 차단", "#눈물 안정화™"],
+        thumb: "" // 예: "assets/packshot_max.png"
       },
-      points: [
-        { id:"tear", icon:"💧", mode:"TEAR",
-          title:"눈물 안정화 기술",
-          sub:"습윤인자를 통한 오랫동안 촉촉하고 편안한 착용감 제공"
+      {
+        id: "oasys_1day",
+        name: "아큐브 오아시스 원데이®",
+        sub: "테스트용 카드(원하면 삭제)",
+        chips: ["#하루종일 촉촉", "#편안함"],
+        thumb: ""
+      }
+    ];
+
+    // =========================
+    // 콘텐츠(모달 내부)
+    // =========================
+    const CONTENTS_BY_PRODUCT = {
+      max_spherical: {
+        productNameTop: "아큐브 오아시스 맥스 구면",
+        default: {
+          title: "눈 피로까지 고려해 설계된 실리콘하이드로겔 원데이 렌즈",
+          body: "추후 구매 시에도 블루라이트 차단을 통한 눈 피로를 고려한 제품인지 확인해 보세요",
+          sub: ""
         },
-        { id:"mark", icon:"123", mode:"MARK",
-          title:"123마크",
-          sub:"콘택트렌즈가 뒤집혀 있는지 확인이 가능해요"
+        points: [
+          { id:"tear", icon:"💧", mode:"TEAR",
+            title:"눈물 안정화 기술",
+            body:"습윤 인자를 통해 오랫동안 촉촉하고 편안한 착용감을 제공",
+            sub:"수치는 내부 확정 문구로 교체하세요."
+          },
+          { id:"mark", icon:"123", mode:"MARK",
+            title:"123마크",
+            body:"콘택트렌즈가 뒤집혀 있는지 확인이 가능해요",
+            sub:"필요 시 실제 가이드 문구로 교체하면 됩니다."
+          },
+          { id:"blue", icon:"🟦", mode:"BLUE",
+            title:"블루라이트 차단",
+            body:"55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공",
+            sub:"수치는 내부 확정 문구로 교체하세요.",
+            badge:"블루라이트 차단을 위한 블루그린 틴트"
+          }
+        ]
+      },
+
+      oasys_1day: {
+        productNameTop: "아큐브 오아시스 원데이®",
+        default: {
+          title: "하루종일 편안함을 목표로 한 데일리 렌즈",
+          body: "내 눈 상태/라이프스타일에 맞는 제품인지 안경사와 상담해 보세요",
+          sub: ""
         },
-        { id:"blue", icon:"🟦", mode:"BLUE",
-          title:"블루라이트 차단 (블루그린 틴트를 확인해 보세요)",
-          sub:"55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공"
-          
-        }
-      ]
+        points: [
+          { id:"tear", icon:"💧", mode:"TEAR",
+            title:"촉촉함 유지",
+            body:"건조감을 줄이는 데 도움을 줄 수 있는 설계 포인트",
+            sub:"(테스트) 내부 문구로 교체 가능"
+          },
+          { id:"mark", icon:"123", mode:"MARK",
+            title:"착용 가이드",
+            body:"처음 착용 시 체크 포인트를 안내해요",
+            sub:"(테스트) 내부 문구로 교체 가능"
+          },
+          { id:"blue", icon:"🟦", mode:"BLUE",
+            title:"디지털 환경",
+            body:"화면 시청이 많은 환경에서 착용감/편안함 고려",
+            sub:"(테스트) 내부 문구로 교체 가능",
+            badge:"(테스트) 포인트 배지"
+          }
+        ]
+      }
     };
 
     // =========================
     // DOM
     // =========================
-    const btnStartFlow = document.getElementById('btnStartFlow');
-
-    const scanModal = document.getElementById('scanModal');
-    const btnCloseScan = document.getElementById('btnCloseScan');
-    const btnScanUse = document.getElementById('btnScanUse');
-    const btnUsePhoto = document.getElementById('btnUsePhoto');
-    const scanStatus = document.getElementById('scanStatus');
-
-    const camVideo = document.getElementById('camVideo');
-    const fileFallback = document.getElementById('fileFallback');
+    const productGrid = document.getElementById("productGrid");
 
     const resultModal = document.getElementById('resultModal');
     const btnCloseResult = document.getElementById('btnCloseResult');
-    const btnRescan = document.getElementById('btnRescan');
+    const btnBack = document.getElementById('btnBack');
 
     const productTop = document.getElementById('productTop');
     const pointsEl = document.getElementById('points');
@@ -705,87 +696,42 @@
       modal.setAttribute('aria-hidden','true');
     }
 
-    // =========================
-    // Camera (촬영 테스트)
-    // =========================
-    let mediaStream = null;
-
-    async function startCamera(){
-      // 이미 켜져있으면 skip
-      if(mediaStream) return;
-
-      try{
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false
-        });
-        camVideo.srcObject = mediaStream;
-        await camVideo.play().catch(()=>{});
-        scanStatus.innerHTML = `상태: <b>촬영 중</b>`;
-      }catch(err){
-        // 카메라가 막히면 파일 업로드로 fallback
-        console.warn("Camera error:", err);
-        scanStatus.innerHTML = `상태: <b>카메라 불가(사진으로 진행)</b>`;
-      }
-    }
-
-    function stopCamera(){
-      if(!mediaStream) return;
-      mediaStream.getTracks().forEach(t=>t.stop());
-      mediaStream = null;
-      camVideo.srcObject = null;
-    }
-
-    // =========================
-    // Flow
-    // =========================
-    btnStartFlow.addEventListener('click', async () => {
-      scanStatus.innerHTML = `상태: <b>대기</b>`;
-      openModal(scanModal);
-      await startCamera();
-    });
-
-    btnCloseScan.addEventListener('click', ()=>{
-      closeModal(scanModal);
-      stopCamera();
-    });
-    scanModal.addEventListener('click', (e)=>{
-      if(e.target===scanModal){
-        closeModal(scanModal);
-        stopCamera();
-      }
-    });
-
-    // 사진 fallback
-    btnUsePhoto.addEventListener('click', ()=>{
-      fileFallback.click();
-    });
-    fileFallback.addEventListener('change', ()=>{
-      if(fileFallback.files && fileFallback.files.length){
-        scanStatus.innerHTML = `상태: <b>사진 선택됨</b>`;
-      }
-    });
-
-    // "이 사진 사용" = 테스트에서는 인식 없이 결과로 이동
-    btnScanUse.addEventListener('click', ()=>{
-      scanStatus.innerHTML = `상태: <b>완료</b>`;
-      closeModal(scanModal);
-      stopCamera();
-      openResult();
-    });
-
     btnCloseResult.addEventListener('click', ()=> closeModal(resultModal));
     resultModal.addEventListener('click', (e)=>{ if(e.target===resultModal) closeModal(resultModal); });
+    btnBack.addEventListener('click', ()=> closeModal(resultModal));
 
-    btnRescan.addEventListener('click', async ()=>{
-      closeModal(resultModal);
-      openModal(scanModal);
-      await startCamera();
-    });
+    // =========================
+    // 제품 목록 렌더
+    // =========================
+    function renderProductCards(){
+      productGrid.innerHTML = "";
+      PRODUCTS.forEach(p=>{
+        const el = document.createElement("div");
+        el.className = "prod";
+        el.innerHTML = `
+          <div class="prodTop">
+            <div style="min-width:0;">
+              <div class="prodName">${p.name}</div>
+              <div class="prodSub">${p.sub}</div>
+            </div>
+            <div class="thumb">
+              ${p.thumb ? `<img src="${p.thumb}" alt="packshot">` : `<span style="font-weight:950; color:rgba(11,18,32,.55); font-size:12px;">PACK</span>`}
+            </div>
+          </div>
+          <div class="chips">
+            ${p.chips.map(c=>`<div class="chip">${c}</div>`).join("")}
+          </div>
+        `;
+        el.addEventListener("click", ()=> openResult(p.id));
+        productGrid.appendChild(el);
+      });
+    }
 
     // =========================
     // 상태/모드
     // =========================
+    let ACTIVE_CONTENT = CONTENTS_BY_PRODUCT.max_spherical;
+
     let mode = "BASIC"; // BASIC / TEAR / MARK / BLUE
     let activeIdx = -1;
 
@@ -813,26 +759,26 @@
       showTearUI(false);
 
       if(mode === "BASIC"){
-        setGreen({ ...CONTENT.default, badge:null });
+        setGreen({ ...ACTIVE_CONTENT.default, badge:null });
       }
       if(mode === "TEAR"){
-        const p = CONTENT.points[0];
+        const p = ACTIVE_CONTENT.points[0];
         setGreen({title:p.title, body:p.body, sub:p.sub, badge:null});
         showTearUI(true);
       }
       if(mode === "MARK"){
-        const p = CONTENT.points[1];
+        const p = ACTIVE_CONTENT.points[1];
         setGreen({title:p.title, body:p.body, sub:p.sub, badge:null});
       }
       if(mode === "BLUE"){
-        const p = CONTENT.points[2];
+        const p = ACTIVE_CONTENT.points[2];
         setGreen({title:p.title, body:p.body, sub:p.sub, badge:p.badge});
       }
     }
 
     function renderPoints(){
       pointsEl.innerHTML = "";
-      CONTENT.points.forEach((p, idx)=>{
+      ACTIVE_CONTENT.points.forEach((p, idx)=>{
         const btn = document.createElement("div");
         btn.className = "ptBtn";
         btn.innerHTML = `<div class="ptIcon">${p.icon}</div>`;
@@ -845,8 +791,10 @@
       });
     }
 
-    function openResult(){
-      productTop.textContent = CONTENT.productNameTop;
+    function openResult(productId){
+      ACTIVE_CONTENT = CONTENTS_BY_PRODUCT[productId] || CONTENTS_BY_PRODUCT.max_spherical;
+
+      productTop.textContent = ACTIVE_CONTENT.productNameTop;
       renderPoints();
       activeIdx = -1;
       [...pointsEl.children].forEach(el=>el.classList.remove("active"));
@@ -857,7 +805,7 @@
     }
 
     // =========================
-    // ✅ 정면 렌즈(2D) 그리기
+    // 정면 렌즈(2D) 그리기
     // =========================
     function resizeLensCanvas(){
       const rect = lens2d.getBoundingClientRect();
@@ -866,51 +814,69 @@
       lens2d.height = Math.floor(rect.height * dpr);
     }
 
-    // (4) 드래그 = 살짝 회전만
+    // ✅ “살짝” 드래그: 회전 + 아주 미세 이동
     let rot = 0;
+    let dxAcc = 0;
+    let dyAcc = 0;
+
     let dragging = false;
-    let lastX = 0;
+    let lastX = 0, lastY = 0;
 
     lens2d.addEventListener("pointerdown", (e)=>{
       dragging = true;
       lastX = e.clientX;
+      lastY = e.clientY;
       lens2d.setPointerCapture(e.pointerId);
     });
     lens2d.addEventListener("pointermove", (e)=>{
       if(!dragging) return;
       const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
       lastX = e.clientX;
-      rot += dx * 0.0016; // ✅ 아주 살짝
+      lastY = e.clientY;
+
+      // 회전은 아주 조금만
+      rot += dx * 0.0016;
+
+      // 이동도 아주 조금만(“움직이는 느낌”)
+      dxAcc += dx * 0.04;
+      dyAcc += dy * 0.04;
+
+      // 과도하게 안 움직이게 제한
+      dxAcc = Math.max(-18, Math.min(18, dxAcc));
+      dyAcc = Math.max(-18, Math.min(18, dyAcc));
     });
     lens2d.addEventListener("pointerup", (e)=>{
       dragging = false;
       try{ lens2d.releasePointerCapture(e.pointerId); }catch(_){}
     });
 
+    // 123 반짝
     function markPulse(t){
-      return 0.55 + (Math.sin(t*0.012)+1)*0.20;
+      return 0.55 + (Math.sin(t*0.012)+1)*0.20; // 0.55~0.95
     }
 
+    // ✅ 렌즈: 빗살무늬 제거 + 중심 안정 + 투명/하이라이트 유지
     function drawLens(){
       const w = lens2d.width, h = lens2d.height;
       const ctx = lctx;
       ctx.clearRect(0,0,w,h);
 
       const cx = w/2, cy = h/2;
-      const R  = Math.min(w,h) * 0.43; // 중심 안정
+      const R  = Math.min(w,h) * 0.42;
 
       ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(rot * 0.10);
+      ctx.translate(cx + dxAcc, cy + dyAcc);
+      ctx.rotate(rot * 0.10); // 너무 돌지 않게
 
       const tint = (mode==="BLUE")
-        ? {r: 170, g: 255, b: 236, a: 0.22}
-        : {r: 220, g: 245, b: 255, a: 0.20};
+        ? {r: 170, g: 255, b: 236, a: 0.20}
+        : {r: 220, g: 245, b: 255, a: 0.18};
 
       // base glass
-      const g = ctx.createRadialGradient(-R*0.18, -R*0.22, R*0.12, 0,0,R*1.05);
-      g.addColorStop(0, `rgba(255,255,255,0.38)`);
-      g.addColorStop(0.35, `rgba(${tint.r},${tint.g},${tint.b},${tint.a})`);
+      const g = ctx.createRadialGradient(-R*0.16, -R*0.20, R*0.10, 0,0,R*1.05);
+      g.addColorStop(0, `rgba(255,255,255,0.36)`);
+      g.addColorStop(0.38, `rgba(${tint.r},${tint.g},${tint.b},${tint.a})`);
       g.addColorStop(1, `rgba(255,255,255,0.02)`);
 
       ctx.beginPath();
@@ -919,56 +885,63 @@
       ctx.fill();
 
       // outer rim
-      ctx.strokeStyle = `rgba(255,255,255,0.26)`;
-      ctx.lineWidth = Math.max(2, R*0.012);
+      ctx.strokeStyle = `rgba(255,255,255,0.22)`;
+      ctx.lineWidth = Math.max(2, R*0.010);
       ctx.beginPath();
       ctx.arc(0,0,R*0.985,0,Math.PI*2);
       ctx.stroke();
 
       // inner soft ring
-      ctx.strokeStyle = (mode==="BLUE") ? `rgba(30,120,255,0.20)` : `rgba(255,255,255,0.16)`;
-      ctx.lineWidth = Math.max(1.5, R*0.008);
+      ctx.strokeStyle = (mode==="BLUE") ? `rgba(30,120,255,0.18)` : `rgba(255,255,255,0.14)`;
+      ctx.lineWidth = Math.max(1.5, R*0.007);
       ctx.beginPath();
       ctx.arc(0,0,R*0.62,0,Math.PI*2);
       ctx.stroke();
 
-      // ✅ (3) 빗살/아래 라인 패턴 제거: 해당 블록 삭제함
+      // center glow(찌그러짐 느낌 줄이기)
+      const cg = ctx.createRadialGradient(0,0,R*0.02, 0,0,R*0.72);
+      cg.addColorStop(0, "rgba(255,255,255,0.22)");
+      cg.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = cg;
+      ctx.beginPath();
+      ctx.arc(0,0,R*0.95,0,Math.PI*2);
+      ctx.fill();
 
       // highlight blob
-      const hl = ctx.createRadialGradient(-R*0.25, -R*0.28, R*0.05, -R*0.15, -R*0.18, R*0.55);
-      hl.addColorStop(0, `rgba(255,255,255,0.32)`);
+      const hl = ctx.createRadialGradient(-R*0.24, -R*0.26, R*0.05, -R*0.12, -R*0.16, R*0.55);
+      hl.addColorStop(0, `rgba(255,255,255,0.30)`);
       hl.addColorStop(1, `rgba(255,255,255,0)`);
       ctx.fillStyle = hl;
       ctx.beginPath();
       ctx.arc(0,0,R,0,Math.PI*2);
       ctx.fill();
 
-      // subtle shadow bottom (depth)
-      const sh = ctx.createRadialGradient(0, R*0.65, R*0.02, 0, R*0.75, R*0.55);
-      sh.addColorStop(0, `rgba(0,0,0,0.16)`);
+      // subtle depth shadow
+      const sh = ctx.createRadialGradient(0, R*0.68, R*0.02, 0, R*0.78, R*0.55);
+      sh.addColorStop(0, `rgba(0,0,0,0.14)`);
       sh.addColorStop(1, `rgba(0,0,0,0)`);
       ctx.fillStyle = sh;
       ctx.beginPath();
       ctx.arc(0,0,R,0,Math.PI*2);
       ctx.fill();
 
-      // 123 강조
+      // ✅ 123 강조(렌즈 하단 포인트 위치)
       if(mode==="MARK"){
         const t = Date.now();
         const p = markPulse(t);
 
         ctx.save();
         ctx.translate(0, R*0.56);
-
         ctx.globalAlpha = 0.55 * p;
-        ctx.strokeStyle = "rgba(255,255,255,0.85)";
-        ctx.lineWidth = Math.max(2.5, R*0.014);
+
+        ctx.strokeStyle = "rgba(255,255,255,0.82)";
+        ctx.lineWidth = Math.max(2.5, R*0.013);
         ctx.beginPath();
         ctx.arc(0,0,R*0.14,0,Math.PI*2);
         ctx.stroke();
 
         const gg = ctx.createRadialGradient(0,0,R*0.02, 0,0,R*0.22);
-        gg.addColorStop(0, `rgba(255,255,255,0.65)`);
+        gg.addColorStop(0, `rgba(255,255,255,0.60)`);
         gg.addColorStop(1, `rgba(255,255,255,0)`);
         ctx.fillStyle = gg;
         ctx.beginPath();
@@ -981,14 +954,21 @@
         ctx.textAlign="center";
         ctx.textBaseline="middle";
         ctx.fillText("123", 0, 0);
+
         ctx.restore();
       }
 
       ctx.restore();
+
+      // ✅ 드래그 멈추면 천천히 원위치(중심 유지)
+      if(!dragging){
+        dxAcc *= 0.92;
+        dyAcc *= 0.92;
+      }
     }
 
     // =========================
-    // 눈물막 텍스처(기존 유지)
+    // 눈물막 텍스처(유지)
     // =========================
     let tearAnimT = 0;
     function drawTearOverlay(){
@@ -1052,7 +1032,8 @@
     // =========================
     function loop(){
       requestAnimationFrame(loop);
-      // ✅ (4) 자동회전 OFF: 드래그할 때만 움직임
+      // 자동 회전: 아주 미세(원하면 0으로 바꿔도 됨)
+      if(!dragging) rot += 0.0009;
       drawLens();
       if(mode==="TEAR") drawTearOverlay();
     }
@@ -1061,8 +1042,7 @@
     // init
     // =========================
     function init(){
-      productTop.textContent = CONTENT.productNameTop;
-      setGreen({ ...CONTENT.default, badge:null });
+      renderProductCards();
       resizeLensCanvas();
       window.addEventListener("resize", resizeLensCanvas);
       loop();
@@ -1071,12 +1051,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
