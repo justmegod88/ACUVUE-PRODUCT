@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>제품 카드 → 결과(AR 없이 정면 렌즈)</title>
+  <title>제품 클릭 → 결과(우아한 렌즈 프리뷰)</title>
 
   <style>
     :root{
@@ -23,7 +23,7 @@
       --green:#18a85b;
       --green2:#0f8b49;
 
-      --max: 820px;
+      --max: 760px;
     }
 
     *{box-sizing:border-box}
@@ -68,88 +68,75 @@
       padding: 16px;
       box-shadow: var(--shadow);
     }
-    .h1{ font-size: 20px; font-weight: 980; letter-spacing:-0.65px; margin:0 0 8px; line-height:1.15; }
-    .p{ margin:0; color: var(--muted); font-size: 14px; line-height:1.5; }
 
     /* ===== 제품 리스트(카드) ===== */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 14px;
+    .listTitle{
+      font-size:18px;
+      font-weight:980;
+      letter-spacing:-0.6px;
+      margin: 8px 0 10px;
     }
-    .prod{
+
+    .productCard{
       border: 1px solid rgba(230,233,242,0.95);
       border-radius: 16px;
       padding: 14px;
-      background: rgba(255,255,255,0.92);
+      display:flex;
+      gap:12px;
+      align-items:center;
       box-shadow: var(--shadow2);
+      background: rgba(255,255,255,0.96);
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       transition: transform .12s ease, box-shadow .12s ease;
     }
-    .prod:active{ transform: translateY(1px) scale(0.995); }
-    .prodTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .prodName{
-      font-weight:980;
-      letter-spacing:-0.35px;
-      font-size: 15px;
-      line-height:1.25;
-      min-width:0;
-    }
-    .prodSub{
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 4px;
-    }
-    .chips{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top: 10px;
-    }
-    .chip{
-      border-radius: 999px;
-      padding: 7px 10px;
-      font-size: 12px;
-      font-weight: 900;
-      color: rgba(11,18,32,0.78);
-      background: rgba(11,74,162,0.06);
-      border: 1px solid rgba(11,74,162,0.12);
-    }
-    .thumb{
-      width: 56px;
-      height: 38px;
-      border-radius: 10px;
+    .productCard:active{ transform: scale(0.99); }
+    .productCard:hover{ box-shadow: 0 12px 26px rgba(16,24,40,0.10); }
+
+    .pThumb{
+      width: 86px;
+      height: 52px;
+      border-radius: 12px;
       border: 1px solid rgba(230,233,242,0.95);
-      background: linear-gradient(180deg, rgba(30,120,255,0.10), rgba(11,74,162,0.06));
+      background:
+        radial-gradient(120px 60px at 30% 30%, rgba(30,120,255,0.22), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.72));
       display:grid;
       place-items:center;
+      font-weight:950;
+      color: rgba(11,74,162,0.9);
+      letter-spacing:-0.2px;
       flex: 0 0 auto;
-      overflow:hidden;
-    }
-    .thumb img{
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display:block;
     }
 
-    .trust{
-      margin-top: 12px;
-      font-size: 12px;
-      color: var(--muted);
-      display:flex;
-      align-items:flex-start;
-      gap:8px;
+    .pInfo{ min-width:0; flex:1; }
+    .pName{ font-weight:980; letter-spacing:-0.4px; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pDesc{ margin-top:4px; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .chips{ margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; }
+    .chip{
+      font-size:12px;
+      padding:7px 10px;
+      border-radius: 999px;
+      background: rgba(11,74,162,0.06);
+      border: 1px solid rgba(11,74,162,0.10);
+      color: rgba(11,74,162,0.95);
+      font-weight: 900;
+      letter-spacing:-0.2px;
     }
-    .trust .dot{ width:8px; height:8px; margin-top: 5px; border-radius: 999px; background: #16a34a; flex:0 0 auto; }
+
+    .arrow{
+      width: 34px; height: 34px;
+      border-radius: 12px;
+      border: 1px solid rgba(230,233,242,0.95);
+      background: rgba(255,255,255,0.92);
+      display:grid;
+      place-items:center;
+      color: rgba(11,74,162,0.9);
+      font-weight: 950;
+      box-shadow: var(--shadow2);
+      flex: 0 0 auto;
+    }
 
     /* ========== MODAL ========== */
     .modal{
@@ -171,6 +158,13 @@
       overflow:hidden;
       border: 1px solid rgba(230,233,242,0.95);
       box-shadow: var(--shadow);
+      transform: translateY(6px) scale(0.99);
+      opacity: 0;
+      transition: transform .18s ease, opacity .18s ease;
+    }
+    .modal.open .modalBox{
+      transform: translateY(0) scale(1);
+      opacity: 1;
     }
 
     .modalTop{
@@ -201,14 +195,14 @@
       width:100%;
       aspect-ratio: 3 / 4;
       background:
-        radial-gradient(700px 340px at 55% 5%, rgba(30,120,255,0.18), transparent 62%),
-        radial-gradient(600px 340px at 0% 40%, rgba(11,74,162,0.10), transparent 58%),
+        radial-gradient(720px 360px at 50% 8%, rgba(30,120,255,0.22), transparent 62%),
+        radial-gradient(660px 360px at 0% 40%, rgba(11,74,162,0.12), transparent 60%),
         linear-gradient(180deg, #1a2636 0%, #0f1726 100%);
       overflow:hidden;
     }
 
     /* 위쪽 제품명 바 */
-    .arHeaderBar{
+    .headerBar{
       position:absolute;
       left:10px; right:10px; top:10px;
       background: rgba(255,255,255,0.92);
@@ -223,7 +217,7 @@
       backdrop-filter: blur(10px);
       pointer-events:none;
     }
-    .arHeaderBar .name{
+    .headerBar .name{
       font-weight:980; letter-spacing:-0.2px; font-size:13px;
       color: var(--text);
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -250,6 +244,7 @@
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
     .ptBtn.active{
       border-color: rgba(11,74,162,0.35);
@@ -267,19 +262,19 @@
       font-weight: 950;
     }
 
-    /* ✅ 렌즈 캔버스: 겹침 줄이려고 위로 + 살짝 작게 */
+    /* ✅ 렌즈 캔버스(정면 원형 고정) */
     #lens2d{
       position:absolute;
       left: 50%;
-      top: 42%;
+      top: 40%;                 /* ✅ 렌즈를 위로 조금 올려서 박스 겹침 줄임 */
       transform: translate(-50%, -50%);
-      width: min(72vw, 320px);
-      height: min(72vw, 320px);
+      width: min(80vw, 390px);
+      height: min(80vw, 390px);
       pointer-events:auto;
-      filter: drop-shadow(0 18px 26px rgba(0,0,0,0.22));
+      filter: drop-shadow(0 22px 30px rgba(0,0,0,0.22));
     }
 
-    /* ✅ 초록 패널: 더 얇게 + 폰트 조금 줄이기 + 아래로 살짝 */
+    /* ✅ 초록 패널: 세로/폰트 줄임 */
     .greenPanel{
       position:absolute;
       left:0; right:0;
@@ -288,51 +283,51 @@
       background: linear-gradient(180deg, var(--green), var(--green2));
       color:#fff;
       border-radius: 14px;
-      padding: 12px 14px 12px; /* 세로 줄임 */
+      padding: 12px 14px 12px;  /* ✅ 줄임 */
       box-shadow: var(--shadow);
       pointer-events:none;
     }
     .greenTitle{
       font-weight:980;
       letter-spacing:-0.45px;
-      font-size: 15px;  /* ↓ */
-      margin:0 0 8px;   /* ↓ */
+      font-size: 15px;          /* ✅ 줄임 */
+      margin:0 0 8px;           /* ✅ 줄임 */
       line-height:1.15;
       text-align:center;
     }
     .greenBody{
-      font-size: 13px;  /* ↓ */
+      font-size: 13px;          /* ✅ 줄임 */
       line-height:1.45;
       opacity: 0.96;
       text-align:center;
     }
     .greenSubBox{
-      margin: 9px auto 0;
+      margin: 8px auto 0;       /* ✅ 줄임 */
       max-width: 92%;
       background: rgba(0,0,0,0.16);
       border: 1px solid rgba(255,255,255,0.18);
       border-radius: 10px;
-      padding: 9px 10px;
-      font-size: 12px; /* ↓ */
+      padding: 9px 10px;        /* ✅ 줄임 */
+      font-size: 12px;          /* ✅ 줄임 */
       line-height:1.45;
       text-align:center;
       opacity:0.95;
     }
     .badgeRow{
-      margin-top: 9px;
+      margin-top: 8px;          /* ✅ 줄임 */
       display:flex;
       justify-content:center;
       pointer-events:none;
     }
     .badge{
-      background: rgba(0,0,0,0.18); /* 노란 느낌 방지(완전 중립) */
+      background: rgba(0,0,0,0.20);
       border: 1px solid rgba(255,255,255,0.20);
-      padding: 9px 12px;
+      padding: 9px 11px;        /* ✅ 줄임 */
       border-radius: 12px;
       font-weight: 950;
-      font-size: 12px;
+      font-size: 12px;          /* ✅ 줄임 */
       letter-spacing:-0.2px;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
     }
 
     .modalBottom{
@@ -351,13 +346,6 @@
       gap:10px;
     }
     .status b{ color: var(--text); }
-
-    .actionRow{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      align-items:stretch;
-    }
 
     .btn{
       width:100%;
@@ -378,6 +366,13 @@
       border:1px solid var(--line);
       font-weight: 950;
       box-shadow: var(--shadow2);
+    }
+
+    .actionRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      align-items:stretch;
     }
 
     .surveyBtn{
@@ -430,7 +425,11 @@
       opacity: 1;
       transform: translateY(0) scale(1);
     }
-    .tearOverlay canvas{ width:100%; height:100%; display:block; }
+    .tearOverlay canvas{
+      width:100%;
+      height:100%;
+      display:block;
+    }
 
     .tearTags{
       position:absolute;
@@ -444,8 +443,10 @@
       transform: translateY(4px);
       transition: opacity .20s ease, transform .20s ease;
     }
-    .tearTags.on{ opacity: 1; transform: translateY(0); }
-
+    .tearTags.on{
+      opacity: 1;
+      transform: translateY(0);
+    }
     .tag{
       background: rgba(22, 27, 45, 0.88);
       color:#fff;
@@ -476,6 +477,7 @@
     .tagLine.on{ opacity: 0.9; }
 
     .miniHelp{ font-size:12px; color:var(--muted); line-height:1.45; }
+    .gap{ height: 12px; }
   </style>
 </head>
 
@@ -485,25 +487,48 @@
       <div class="headRow">
         <div class="brandBox">
           <div class="title">알림톡 랜딩 (테스트)</div>
-          <div class="sub">제품 카드 클릭 → 결과(AR 없이 정면 렌즈)</div>
+          <div class="sub">제품 카드 클릭 → 우아한 렌즈 프리뷰(스캔/AR 없음)</div>
         </div>
-        <div class="pill">스캔 제거</div>
+        <div class="pill">클릭 즉시</div>
       </div>
     </header>
 
-    <section id="viewLanding">
+    <section>
       <div class="card">
-        <div class="h1">내 제품 정보 확인</div>
-        <p class="p">
-          아래 제품 카드를 눌러 기능 포인트를 확인해 보세요.<br>
-          💧 / 123 / 🟦 버튼으로 렌즈 표현과 하단 설명이 바뀝니다.
-        </p>
+        <div class="listTitle">아큐브® 콘택트렌즈</div>
 
-        <div class="grid" id="productGrid"></div>
+        <div class="productCard" data-product="omax">
+          <div class="pThumb">OASYS<br>MAX</div>
+          <div class="pInfo">
+            <div class="pName">아큐브 오아시스 맥스 원데이</div>
+            <div class="pDesc">내가 쓰는 제품을 클릭하고 핵심 포인트를 한 번에 확인</div>
+            <div class="chips">
+              <div class="chip">#블루라이트</div>
+              <div class="chip">#눈물안정화</div>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </div>
 
-        <div class="trust">
-          <div class="dot"></div>
-          <div>“클릭 즉시” 화면이 바뀌도록 만들어서, 스캔 단계 없이도 충분히 ‘우와’ 포인트를 줍니다.</div>
+        <div class="gap"></div>
+
+        <div class="productCard" data-product="basic">
+          <div class="pThumb">OASYS<br>1-DAY</div>
+          <div class="pInfo">
+            <div class="pName">아큐브 오아시스 원데이®</div>
+            <div class="pDesc">샘플 카드(다른 제품도 동일 UI로 확장 가능)</div>
+            <div class="chips">
+              <div class="chip">#하루종일</div>
+              <div class="chip">#촉촉함</div>
+            </div>
+          </div>
+          <div class="arrow">›</div>
+        </div>
+
+        <div class="gap"></div>
+
+        <div style="font-size:12px; color:var(--muted);">
+          * 지금 버전은 “우아한 프리뷰” 연출을 위한 테스트 UI입니다. (실제 제품별 이미지/문구는 내부 확정본으로 교체)
         </div>
       </div>
     </section>
@@ -518,17 +543,17 @@
       </div>
 
       <div class="stage">
-        <div class="arHeaderBar">
+        <div class="headerBar">
           <div class="name" id="productTop">아큐브 오아시스 맥스 구면</div>
           <div class="name" style="font-weight:900; color: rgba(255,255,255,.0); font-size:12px;"></div>
         </div>
 
         <div class="points" id="points"></div>
 
-        <!-- 정면 렌즈(2D) -->
+        <!-- ✅ 정면 렌즈(2D) -->
         <canvas id="lens2d" width="800" height="800"></canvas>
 
-        <!-- 눈물막 오버레이 -->
+        <!-- ✅ 눈물막 오버레이 -->
         <div class="tearOverlay" id="tearOverlay">
           <canvas id="tearCanvas" width="256" height="256"></canvas>
         </div>
@@ -544,7 +569,7 @@
           <div class="greenBody" id="greenBody"></div>
 
           <div class="badgeRow" id="badgeRow" style="display:none;">
-            <div class="badge" id="badgeText"></div>
+            <div class="badge" id="badgeText">블루라이트 차단을 위한 블루그린 틴트</div>
           </div>
 
           <div class="greenSubBox" id="greenSub"></div>
@@ -554,11 +579,11 @@
       <div class="modalBottom">
         <div class="status">
           <span id="resStatus">상태: <b>실행 중</b></span>
-          <span>조작: <b>드래그(살짝 회전)</b></span>
+          <span>조작: <b>드래그(살짝)</b></span>
         </div>
 
         <div class="actionRow">
-          <button class="btn secondary" id="btnBack">제품 목록</button>
+          <button class="btn secondary" id="btnBack">목록으로</button>
 
           <a class="btn secondary surveyBtn" href="https://forms.office.com/r/aqt7sf0ciB" target="_blank" rel="noopener">
             <div class="surveyText">
@@ -570,7 +595,7 @@
         </div>
 
         <div class="miniHelp">
-          * 현재 버전은 <b>카메라/AR 없이</b> “제품 카드 클릭 → 결과”로 바로 진입합니다.
+          * 스캔/AR 없이 “제품 클릭 → 바로 핵심 포인트”만 보여줍니다.
         </div>
       </div>
     </div>
@@ -578,90 +603,49 @@
 
   <script>
     // =========================
-    // (A) 제품 데이터(테스트용)
-    //  - thumb은 원하면 네가 준 팩샷 경로로 바꿔도 됨(로컬/깃허브 경로)
+    // 제품/콘텐츠 (샘플)
     // =========================
-    const PRODUCTS = [
-      {
-        id: "max_spherical",
-        name: "아큐브 오아시스 맥스 구면",
-        sub: "우와 포인트: 클릭 즉시 인터랙션",
-        chips: ["#블루라이트 차단", "#눈물 안정화™"],
-        thumb: "" // 예: "assets/packshot_max.png"
-      },
-      {
-        id: "oasys_1day",
-        name: "아큐브 오아시스 원데이®",
-        sub: "테스트용 카드(원하면 삭제)",
-        chips: ["#하루종일 촉촉", "#편안함"],
-        thumb: ""
-      }
-    ];
-
-    // =========================
-    // 콘텐츠(모달 내부)
-    // =========================
-    const CONTENTS_BY_PRODUCT = {
-      max_spherical: {
+    const PRODUCTS = {
+      omax: {
         productNameTop: "아큐브 오아시스 맥스 구면",
         default: {
           title: "눈 피로까지 고려해 설계된 실리콘하이드로겔 원데이 렌즈",
           body: "추후 구매 시에도 블루라이트 차단을 통한 눈 피로를 고려한 제품인지 확인해 보세요",
           sub: ""
-        },
-        points: [
-          { id:"tear", icon:"💧", mode:"TEAR",
-            title:"눈물 안정화 기술",
-            body:"습윤 인자를 통해 오랫동안 촉촉하고 편안한 착용감을 제공",
-            sub:"수치는 내부 확정 문구로 교체하세요."
-          },
-          { id:"mark", icon:"123", mode:"MARK",
-            title:"123마크",
-            body:"콘택트렌즈가 뒤집혀 있는지 확인이 가능해요",
-            sub:"필요 시 실제 가이드 문구로 교체하면 됩니다."
-          },
-          { id:"blue", icon:"🟦", mode:"BLUE",
-            title:"블루라이트 차단",
-            body:"55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공",
-            sub:"수치는 내부 확정 문구로 교체하세요.",
-            badge:"블루라이트 차단을 위한 블루그린 틴트"
-          }
-        ]
+        }
       },
-
-      oasys_1day: {
-        productNameTop: "아큐브 오아시스 원데이®",
+      basic: {
+        productNameTop: "아큐브 오아시스 원데이® (샘플)",
         default: {
-          title: "하루종일 편안함을 목표로 한 데일리 렌즈",
-          body: "내 눈 상태/라이프스타일에 맞는 제품인지 안경사와 상담해 보세요",
+          title: "하루종일 편안함을 돕는 원데이 렌즈",
+          body: "제품별 핵심 포인트를 버튼으로 빠르게 확인할 수 있어요",
           sub: ""
-        },
-        points: [
-          { id:"tear", icon:"💧", mode:"TEAR",
-            title:"촉촉함 유지",
-            body:"건조감을 줄이는 데 도움을 줄 수 있는 설계 포인트",
-            sub:"(테스트) 내부 문구로 교체 가능"
-          },
-          { id:"mark", icon:"123", mode:"MARK",
-            title:"착용 가이드",
-            body:"처음 착용 시 체크 포인트를 안내해요",
-            sub:"(테스트) 내부 문구로 교체 가능"
-          },
-          { id:"blue", icon:"🟦", mode:"BLUE",
-            title:"디지털 환경",
-            body:"화면 시청이 많은 환경에서 착용감/편안함 고려",
-            sub:"(테스트) 내부 문구로 교체 가능",
-            badge:"(테스트) 포인트 배지"
-          }
-        ]
+        }
       }
     };
+
+    const COMMON_POINTS = [
+      { id:"tear", icon:"💧", mode:"TEAR",
+        title:"눈물 안정화 기술",
+        body:"습윤 인자를 통한 오랫동안 촉촉하고 편안한 착용감을 제공",
+        sub:"수치는 내부 확정 문구로 교체하세요."
+      },
+      { id:"mark", icon:"123", mode:"MARK",
+        title:"123마크",
+        body:"콘택트렌즈가 뒤집혀 있는지 확인이 가능해요",
+        sub:"필요 시 실제 가이드 문구로 교체하면 됩니다."
+      },
+      { id:"blue", icon:"🟦", mode:"BLUE",
+        title:"블루라이트 차단",
+        body:"55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공",
+        sub:"수치는 내부 확정 문구로 교체하세요.",
+        badge:"블루라이트 차단을 위한 블루그린 틴트"
+      }
+    ];
 
     // =========================
     // DOM
     // =========================
-    const productGrid = document.getElementById("productGrid");
-
     const resultModal = document.getElementById('resultModal');
     const btnCloseResult = document.getElementById('btnCloseResult');
     const btnBack = document.getElementById('btnBack');
@@ -701,39 +685,11 @@
     btnBack.addEventListener('click', ()=> closeModal(resultModal));
 
     // =========================
-    // 제품 목록 렌더
-    // =========================
-    function renderProductCards(){
-      productGrid.innerHTML = "";
-      PRODUCTS.forEach(p=>{
-        const el = document.createElement("div");
-        el.className = "prod";
-        el.innerHTML = `
-          <div class="prodTop">
-            <div style="min-width:0;">
-              <div class="prodName">${p.name}</div>
-              <div class="prodSub">${p.sub}</div>
-            </div>
-            <div class="thumb">
-              ${p.thumb ? `<img src="${p.thumb}" alt="packshot">` : `<span style="font-weight:950; color:rgba(11,18,32,.55); font-size:12px;">PACK</span>`}
-            </div>
-          </div>
-          <div class="chips">
-            ${p.chips.map(c=>`<div class="chip">${c}</div>`).join("")}
-          </div>
-        `;
-        el.addEventListener("click", ()=> openResult(p.id));
-        productGrid.appendChild(el);
-      });
-    }
-
-    // =========================
     // 상태/모드
     // =========================
-    let ACTIVE_CONTENT = CONTENTS_BY_PRODUCT.max_spherical;
-
     let mode = "BASIC"; // BASIC / TEAR / MARK / BLUE
     let activeIdx = -1;
+    let currentProduct = PRODUCTS.omax;
 
     function setGreen({title, body, sub, badge}){
       greenTitle.textContent = title || "";
@@ -759,26 +715,26 @@
       showTearUI(false);
 
       if(mode === "BASIC"){
-        setGreen({ ...ACTIVE_CONTENT.default, badge:null });
+        setGreen({ ...currentProduct.default, badge:null });
       }
       if(mode === "TEAR"){
-        const p = ACTIVE_CONTENT.points[0];
+        const p = COMMON_POINTS[0];
         setGreen({title:p.title, body:p.body, sub:p.sub, badge:null});
         showTearUI(true);
       }
       if(mode === "MARK"){
-        const p = ACTIVE_CONTENT.points[1];
+        const p = COMMON_POINTS[1];
         setGreen({title:p.title, body:p.body, sub:p.sub, badge:null});
       }
       if(mode === "BLUE"){
-        const p = ACTIVE_CONTENT.points[2];
+        const p = COMMON_POINTS[2];
         setGreen({title:p.title, body:p.body, sub:p.sub, badge:p.badge});
       }
     }
 
     function renderPoints(){
       pointsEl.innerHTML = "";
-      ACTIVE_CONTENT.points.forEach((p, idx)=>{
+      COMMON_POINTS.forEach((p, idx)=>{
         const btn = document.createElement("div");
         btn.className = "ptBtn";
         btn.innerHTML = `<div class="ptIcon">${p.icon}</div>`;
@@ -791,21 +747,33 @@
       });
     }
 
-    function openResult(productId){
-      ACTIVE_CONTENT = CONTENTS_BY_PRODUCT[productId] || CONTENTS_BY_PRODUCT.max_spherical;
+    function openResult(productKey){
+      currentProduct = PRODUCTS[productKey] || PRODUCTS.omax;
+      productTop.textContent = currentProduct.productNameTop;
 
-      productTop.textContent = ACTIVE_CONTENT.productNameTop;
       renderPoints();
       activeIdx = -1;
       [...pointsEl.children].forEach(el=>el.classList.remove("active"));
-      applyMode("BASIC");
 
+      applyMode("BASIC");
       openModal(resultModal);
       resizeLensCanvas();
+      // 오픈 시 우아하게 “센터로 정렬” 느낌 주기 위해 살짝 리셋
+      rot = 0;
+      offX = 0;
+      offY = 0;
     }
 
+    // ✅ 제품 카드 클릭 → 바로 결과
+    document.querySelectorAll(".productCard").forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const key = el.getAttribute("data-product");
+        openResult(key);
+      });
+    });
+
     // =========================
-    // 정면 렌즈(2D) 그리기
+    // ✅ 정면 렌즈(2D) 그리기
     // =========================
     function resizeLensCanvas(){
       const rect = lens2d.getBoundingClientRect();
@@ -814,13 +782,13 @@
       lens2d.height = Math.floor(rect.height * dpr);
     }
 
-    // ✅ “살짝” 드래그: 회전 + 아주 미세 이동
     let rot = 0;
-    let dxAcc = 0;
-    let dyAcc = 0;
-
     let dragging = false;
     let lastX = 0, lastY = 0;
+
+    // ✅ “살짝 이동”도 추가
+    let offX = 0, offY = 0;              // 픽셀(캔버스 좌표)
+    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
 
     lens2d.addEventListener("pointerdown", (e)=>{
       dragging = true;
@@ -835,16 +803,9 @@
       lastX = e.clientX;
       lastY = e.clientY;
 
-      // 회전은 아주 조금만
-      rot += dx * 0.0016;
-
-      // 이동도 아주 조금만(“움직이는 느낌”)
-      dxAcc += dx * 0.04;
-      dyAcc += dy * 0.04;
-
-      // 과도하게 안 움직이게 제한
-      dxAcc = Math.max(-18, Math.min(18, dxAcc));
-      dyAcc = Math.max(-18, Math.min(18, dyAcc));
+      rot += dx * 0.002;                 // ✅ 회전: 살짝
+      offX = clamp(offX + dx * 0.15, -18, 18); // ✅ 이동: 아주 살짝
+      offY = clamp(offY + dy * 0.12, -14, 14);
     });
     lens2d.addEventListener("pointerup", (e)=>{
       dragging = false;
@@ -856,7 +817,7 @@
       return 0.55 + (Math.sin(t*0.012)+1)*0.20; // 0.55~0.95
     }
 
-    // ✅ 렌즈: 빗살무늬 제거 + 중심 안정 + 투명/하이라이트 유지
+    // ✅ 렌즈 비주얼: 빗살무늬 제거 + 중심 초점 안정
     function drawLens(){
       const w = lens2d.width, h = lens2d.height;
       const ctx = lctx;
@@ -866,17 +827,18 @@
       const R  = Math.min(w,h) * 0.42;
 
       ctx.save();
-      ctx.translate(cx + dxAcc, cy + dyAcc);
+      ctx.translate(cx + offX, cy + offY);
       ctx.rotate(rot * 0.10); // 너무 돌지 않게
 
+      // tint by mode
       const tint = (mode==="BLUE")
-        ? {r: 170, g: 255, b: 236, a: 0.20}
-        : {r: 220, g: 245, b: 255, a: 0.18};
+        ? {r: 170, g: 255, b: 236, a: 0.22}
+        : {r: 220, g: 245, b: 255, a: 0.20};
 
-      // base glass
-      const g = ctx.createRadialGradient(-R*0.16, -R*0.20, R*0.10, 0,0,R*1.05);
-      g.addColorStop(0, `rgba(255,255,255,0.36)`);
-      g.addColorStop(0.38, `rgba(${tint.r},${tint.g},${tint.b},${tint.a})`);
+      // base glass (중심 하이라이트를 “정면” 느낌으로)
+      const g = ctx.createRadialGradient(-R*0.10, -R*0.14, R*0.10, 0,0,R*1.05);
+      g.addColorStop(0, `rgba(255,255,255,0.42)`);
+      g.addColorStop(0.35, `rgba(${tint.r},${tint.g},${tint.b},${tint.a})`);
       g.addColorStop(1, `rgba(255,255,255,0.02)`);
 
       ctx.beginPath();
@@ -885,40 +847,34 @@
       ctx.fill();
 
       // outer rim
-      ctx.strokeStyle = `rgba(255,255,255,0.22)`;
-      ctx.lineWidth = Math.max(2, R*0.010);
+      ctx.strokeStyle = `rgba(255,255,255,0.26)`;
+      ctx.lineWidth = Math.max(2, R*0.012);
       ctx.beginPath();
       ctx.arc(0,0,R*0.985,0,Math.PI*2);
       ctx.stroke();
 
       // inner soft ring
       ctx.strokeStyle = (mode==="BLUE") ? `rgba(30,120,255,0.18)` : `rgba(255,255,255,0.14)`;
-      ctx.lineWidth = Math.max(1.5, R*0.007);
+      ctx.lineWidth = Math.max(1.5, R*0.008);
       ctx.beginPath();
       ctx.arc(0,0,R*0.62,0,Math.PI*2);
       ctx.stroke();
 
-      // center glow(찌그러짐 느낌 줄이기)
-      const cg = ctx.createRadialGradient(0,0,R*0.02, 0,0,R*0.72);
-      cg.addColorStop(0, "rgba(255,255,255,0.22)");
-      cg.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = cg;
-      ctx.beginPath();
-      ctx.arc(0,0,R*0.95,0,Math.PI*2);
-      ctx.fill();
+      // ✅ 빗살무늬(하단 곡선 라인들) 완전 제거 (요청사항 3)
+      // (여기 아무것도 안 그림)
 
       // highlight blob
-      const hl = ctx.createRadialGradient(-R*0.24, -R*0.26, R*0.05, -R*0.12, -R*0.16, R*0.55);
-      hl.addColorStop(0, `rgba(255,255,255,0.30)`);
+      const hl = ctx.createRadialGradient(-R*0.22, -R*0.26, R*0.05, -R*0.12, -R*0.14, R*0.58);
+      hl.addColorStop(0, `rgba(255,255,255,0.34)`);
       hl.addColorStop(1, `rgba(255,255,255,0)`);
       ctx.fillStyle = hl;
       ctx.beginPath();
       ctx.arc(0,0,R,0,Math.PI*2);
       ctx.fill();
 
-      // subtle depth shadow
-      const sh = ctx.createRadialGradient(0, R*0.68, R*0.02, 0, R*0.78, R*0.55);
-      sh.addColorStop(0, `rgba(0,0,0,0.14)`);
+      // subtle depth shadow (아래쪽)
+      const sh = ctx.createRadialGradient(0, R*0.65, R*0.02, 0, R*0.75, R*0.55);
+      sh.addColorStop(0, `rgba(0,0,0,0.18)`);
       sh.addColorStop(1, `rgba(0,0,0,0)`);
       ctx.fillStyle = sh;
       ctx.beginPath();
@@ -933,15 +889,14 @@
         ctx.save();
         ctx.translate(0, R*0.56);
         ctx.globalAlpha = 0.55 * p;
-
-        ctx.strokeStyle = "rgba(255,255,255,0.82)";
-        ctx.lineWidth = Math.max(2.5, R*0.013);
+        ctx.strokeStyle = "rgba(255,255,255,0.85)";
+        ctx.lineWidth = Math.max(2.5, R*0.014);
         ctx.beginPath();
         ctx.arc(0,0,R*0.14,0,Math.PI*2);
         ctx.stroke();
 
         const gg = ctx.createRadialGradient(0,0,R*0.02, 0,0,R*0.22);
-        gg.addColorStop(0, `rgba(255,255,255,0.60)`);
+        gg.addColorStop(0, `rgba(255,255,255,0.65)`);
         gg.addColorStop(1, `rgba(255,255,255,0)`);
         ctx.fillStyle = gg;
         ctx.beginPath();
@@ -954,17 +909,10 @@
         ctx.textAlign="center";
         ctx.textBaseline="middle";
         ctx.fillText("123", 0, 0);
-
         ctx.restore();
       }
 
       ctx.restore();
-
-      // ✅ 드래그 멈추면 천천히 원위치(중심 유지)
-      if(!dragging){
-        dxAcc *= 0.92;
-        dyAcc *= 0.92;
-      }
     }
 
     // =========================
@@ -1032,8 +980,16 @@
     // =========================
     function loop(){
       requestAnimationFrame(loop);
-      // 자동 회전: 아주 미세(원하면 0으로 바꿔도 됨)
-      if(!dragging) rot += 0.0009;
+
+      // 드래그 없을 때 아주 미세한 자동 회전(“우아한 살아있음”)
+      if(!dragging) rot += 0.0010;
+
+      // 오프셋은 서서히 중앙으로 복귀 (중심 초점 유지)
+      if(!dragging){
+        offX *= 0.94;
+        offY *= 0.94;
+      }
+
       drawLens();
       if(mode==="TEAR") drawTearOverlay();
     }
@@ -1042,7 +998,8 @@
     // init
     // =========================
     function init(){
-      renderProductCards();
+      renderPoints();
+      setGreen({ ...currentProduct.default, badge:null });
       resizeLensCanvas();
       window.addEventListener("resize", resizeLensCanvas);
       loop();
