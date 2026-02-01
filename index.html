@@ -2,9 +2,8 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>제품 클릭 → 결과(우아한 렌즈 프리뷰)</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>제품 클릭 → 3D 프리뷰(테스트)</title>
   <style>
     :root{
       --bg:#f6f8fc;
@@ -20,28 +19,33 @@
       --shadow2: 0 6px 16px rgba(16,24,40,0.08);
 
       --radius: 18px;
+
       --green:#18a85b;
       --green2:#0f8b49;
 
       --max: 760px;
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
     }
 
     *{box-sizing:border-box}
+    html, body{height:100%}
     body{
       margin:0;
-      background: radial-gradient(1200px 500px at 20% -10%, rgba(30,120,255,0.12), transparent 60%),
-                  radial-gradient(900px 450px at 90% 0%, rgba(11,74,162,0.10), transparent 55%),
-                  var(--bg);
       color:var(--text);
       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",Arial,sans-serif;
       line-height:1.35;
+      background:
+        radial-gradient(1200px 500px at 20% -10%, rgba(30,120,255,0.12), transparent 60%),
+        radial-gradient(900px 450px at 90% 0%, rgba(11,74,162,0.10), transparent 55%),
+        var(--bg);
     }
 
-    .wrap{ max-width: var(--max); margin:0 auto; padding: 18px 16px 44px; }
+    .wrap{ max-width: var(--max); margin:0 auto; padding: 18px 16px calc(44px + var(--safeBottom)); }
 
     header{
       position: sticky; top: 0; z-index: 5;
-      padding: 12px 0 12px;
+      padding: calc(10px + var(--safeTop)) 0 10px;
       backdrop-filter: blur(10px);
       background: rgba(246,248,252,0.72);
       border-bottom: 1px solid rgba(230,233,242,0.75);
@@ -73,9 +77,11 @@
       font-size:18px;
       font-weight:980;
       letter-spacing:-0.6px;
-      margin: 8px 0 10px;
+      margin: 8px 0 12px;
     }
+    .hint{ font-size:12px; color:var(--muted); margin-top:10px; line-height:1.45; }
 
+    /* ===== 제품 카드 ===== */
     .productCard{
       border: 1px solid rgba(230,233,242,0.95);
       border-radius: 16px;
@@ -94,8 +100,8 @@
     .productCard:hover{ box-shadow: 0 12px 26px rgba(16,24,40,0.10); }
 
     .pThumb{
-      width: 86px;
-      height: 52px;
+      width: 92px;
+      height: 56px;
       border-radius: 12px;
       border: 1px solid rgba(230,233,242,0.95);
       background:
@@ -107,6 +113,9 @@
       color: rgba(11,74,162,0.9);
       letter-spacing:-0.2px;
       flex: 0 0 auto;
+      text-align:center;
+      font-size:12px;
+      line-height:1.1;
     }
 
     .pInfo{ min-width:0; flex:1; }
@@ -137,20 +146,23 @@
       flex: 0 0 auto;
     }
 
+    .gap{ height: 12px; }
+
+    /* ========== MODAL ========== */
     .modal{
       position: fixed; inset:0;
       background: rgba(0,0,0,0.55);
       display:none;
       align-items:center;
       justify-content:center;
-      padding: 16px;
+      padding: 12px;
       z-index: 50;
     }
     .modal.open{ display:flex; }
 
     .modalBox{
       width:100%;
-      max-width: 640px;
+      max-width: 720px;
       background:#fff;
       border-radius: var(--radius);
       overflow:hidden;
@@ -188,6 +200,7 @@
       box-shadow: var(--shadow2);
     }
 
+    /* ===== 3D Stage ===== */
     .stage{
       position: relative;
       width:100%;
@@ -197,8 +210,10 @@
         radial-gradient(660px 360px at 0% 40%, rgba(11,74,162,0.12), transparent 60%),
         linear-gradient(180deg, #1a2636 0%, #0f1726 100%);
       overflow:hidden;
+      touch-action: none;
     }
 
+    /* 상단 제품명 바 */
     .headerBar{
       position:absolute;
       left:10px; right:10px; top:10px;
@@ -220,7 +235,8 @@
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
 
-    .points{
+    /* 우측 핫스팟 + 기능 버튼 */
+    .rail{
       position:absolute;
       right: 10px;
       top: 56px;
@@ -228,6 +244,14 @@
       flex-direction:column;
       gap:10px;
       pointer-events:auto;
+    }
+    .railGroupTitle{
+      font-size:11px;
+      color: rgba(255,255,255,0.70);
+      letter-spacing:-0.1px;
+      margin: 4px 0 -4px;
+      text-align:center;
+      user-select:none;
     }
     .ptBtn{
       width: 46px; height: 46px;
@@ -242,6 +266,7 @@
       -webkit-tap-highlight-color: transparent;
       transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
     }
+    .ptBtn:active{ transform: translateY(1px) scale(0.99); }
     .ptBtn.active{
       border-color: rgba(11,74,162,0.35);
       box-shadow: 0 10px 24px rgba(11,74,162,0.18);
@@ -258,76 +283,184 @@
       font-weight: 950;
     }
 
-    /* ✅ 렌즈 캔버스(이미지 기반) */
-    #lens2d{
+    /* 중앙 렌즈 캔버스 */
+    #lens3d{
       position:absolute;
       left: 50%;
-      top: 40%;
+      top: 38%;
       transform: translate(-50%, -50%);
-      width: min(80vw, 390px);
-      height: min(80vw, 390px);
+      width: min(84vw, 430px);
+      height: min(84vw, 430px);
       pointer-events:auto;
-      filter: drop-shadow(0 24px 34px rgba(0,0,0,0.26));
+      filter: drop-shadow(0 26px 34px rgba(0,0,0,0.22));
+      touch-action: none;
     }
 
-    /* ✅ 초록 패널(세로/폰트 작게) */
-    .greenPanel{
-      position:absolute;
-      left:0; right:0;
-      bottom: 58px;
-      margin: 0 10px;
-      background: linear-gradient(180deg, var(--green), var(--green2));
-      color:#fff;
-      border-radius: 14px;
-      padding: 12px 14px 12px;
-      box-shadow: var(--shadow);
+    /* "우아한" 광원 파티클 */
+    .glowDust{
+      position:absolute; inset:-30px;
+      background:
+        radial-gradient(8px 8px at 20% 30%, rgba(255,255,255,0.18), transparent 60%),
+        radial-gradient(10px 10px at 70% 20%, rgba(120,210,255,0.14), transparent 60%),
+        radial-gradient(9px 9px at 55% 60%, rgba(255,255,255,0.10), transparent 60%),
+        radial-gradient(12px 12px at 35% 75%, rgba(30,120,255,0.10), transparent 60%);
+      mix-blend-mode: screen;
+      opacity: 0.75;
+      animation: floatDust 6.5s ease-in-out infinite;
       pointer-events:none;
     }
-    .greenTitle{
-      font-weight:980;
-      letter-spacing:-0.45px;
-      font-size: 15px;
-      margin:0 0 8px;
-      line-height:1.15;
-      text-align:center;
+    @keyframes floatDust{
+      0%{ transform: translateY(0) }
+      50%{ transform: translateY(-10px) }
+      100%{ transform: translateY(0) }
     }
-    .greenBody{
-      font-size: 13px;
+
+    /* 하단 설명 카드 */
+    .infoCard{
+      position:absolute;
+      left:10px; right:10px;
+      bottom: calc(64px + var(--safeBottom));
+      border-radius: 16px;
+      background: rgba(19, 27, 44, 0.58);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.22);
+      color:#fff;
+      padding: 12px 12px;
+      pointer-events:auto;
+      overflow:hidden;
+    }
+    .infoTopRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .infoTitle{
+      font-weight:980;
+      letter-spacing:-0.35px;
+      font-size: 14px;
+      line-height:1.2;
+      margin:0 0 6px;
+    }
+    .infoBody{
+      font-size: 12.5px;
       line-height:1.45;
       opacity: 0.96;
-      text-align:center;
+      margin:0;
     }
-    .greenSubBox{
-      margin: 8px auto 0;
-      max-width: 92%;
-      background: rgba(0,0,0,0.16);
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 10px;
-      padding: 9px 10px;
-      font-size: 12px;
-      line-height:1.45;
-      text-align:center;
-      opacity:0.95;
-    }
-    .badgeRow{
-      margin-top: 8px;
+    .miniPills{
       display:flex;
-      justify-content:center;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .miniPill{
+      font-size:11px;
+      padding:6px 9px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.92);
+      font-weight: 900;
+      letter-spacing:-0.15px;
+    }
+    .infoActions{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+    }
+    .ghostBtn{
+      border:1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.08);
+      color:#fff;
+      font-weight:950;
+      font-size:12px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .ghostBtn:active{ transform: translateY(1px); }
+
+    /* 확장 패널(탭/퀴즈) */
+    .sheet{
+      position:absolute;
+      left:10px; right:10px;
+      bottom: calc(64px + var(--safeBottom));
+      transform: translateY(120%);
+      opacity: 0;
+      transition: transform .22s ease, opacity .22s ease;
       pointer-events:none;
     }
-    .badge{
-      background: rgba(0,0,0,0.20);
-      border: 1px solid rgba(255,255,255,0.20);
-      padding: 9px 11px;
-      border-radius: 12px;
+    .sheet.open{
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events:auto;
+    }
+    .sheetBox{
+      border-radius: 16px;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(230,233,242,0.95);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+      overflow:hidden;
+    }
+    .sheetTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid rgba(230,233,242,0.95);
+    }
+    .sheetTop .st{
+      font-weight:980; letter-spacing:-0.2px; font-size:13px;
+    }
+    .tabs{
+      display:flex;
+      gap:6px;
+      padding: 10px 12px 0;
+      flex-wrap:wrap;
+    }
+    .tab{
+      font-size:12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(230,233,242,0.95);
+      background:#fff;
+      color: var(--text);
       font-weight: 950;
-      font-size: 12px;
-      letter-spacing:-0.2px;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab.active{
+      border-color: rgba(11,74,162,0.26);
+      background: rgba(11,74,162,0.06);
+      color: rgba(11,74,162,0.95);
+    }
+    .tabBody{
+      padding: 12px;
+      color: var(--text);
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+    .check{
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: rgba(11,18,32,0.92);
+    }
+    .check li{ margin: 6px 0; }
+    .smallNote{
+      margin-top:10px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.45;
     }
 
+    /* 하단 바(상태/CTA) */
     .modalBottom{
-      padding: 12px 14px 14px;
+      padding: 12px 14px calc(14px + var(--safeBottom));
       border-top: 1px solid rgba(230,233,242,0.95);
       display:grid;
       gap: 10px;
@@ -343,12 +476,18 @@
     }
     .status b{ color: var(--text); }
 
+    .actionRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      align-items:stretch;
+    }
     .btn{
       width:100%;
       border:0;
       border-radius: 14px;
       padding: 14px 14px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 950;
       background: linear-gradient(180deg, var(--brand2), var(--brand));
       color: #fff;
@@ -363,14 +502,6 @@
       font-weight: 950;
       box-shadow: var(--shadow2);
     }
-
-    .actionRow{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      align-items:stretch;
-    }
-
     .surveyBtn{
       display:flex;
       align-items:center;
@@ -387,7 +518,6 @@
     }
     .surveyText .t1{ font-weight:980; font-size:14px; color: var(--text); line-height:1.2; }
     .surveyText .t2{ font-size:12px; color: var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
     .surveyThumb{
       width: 44px; height: 44px;
       border-radius: 10px;
@@ -399,81 +529,73 @@
       font-size: 18px;
     }
 
-    /* 눈물막(옵션) */
-    .tearOverlay{
+    /* 블링크(눈 깜빡임) 오버레이 */
+    .blink{
       position:absolute;
-      left: 20px;
-      top: 92px;
-      width: 120px;
-      height: 120px;
+      inset:0;
+      background: #000;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    /* 작은 토스트 */
+    .toast{
+      position:absolute;
+      left:50%;
+      top: 64px;
+      transform: translateX(-50%) translateY(-8px);
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(230,233,242,0.95);
       border-radius: 999px;
-      border: 2px solid rgba(255,255,255,0.92);
-      box-shadow: 0 12px 26px rgba(16,24,40,0.18);
+      box-shadow: var(--shadow2);
+      padding: 8px 10px;
+      font-size:12px;
+      font-weight: 900;
+      color: rgba(11,18,32,0.92);
+      opacity:0;
+      transition: opacity .18s ease, transform .18s ease;
+      pointer-events:none;
+    }
+    .toast.on{
+      opacity:1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 가이드 진행바 */
+    .tourBar{
+      position:absolute;
+      left:10px; right:10px;
+      top: 56px;
+      height: 6px;
       background: rgba(255,255,255,0.10);
-      backdrop-filter: blur(2px);
-      overflow:hidden;
-      pointer-events:none;
-      opacity: 0;
-      transform: translateY(4px) scale(0.98);
-      transition: opacity .20s ease, transform .20s ease;
-    }
-    .tearOverlay.on{ opacity: 1; transform: translateY(0) scale(1); }
-    .tearOverlay canvas{ width:100%; height:100%; display:block; }
-
-    .tearTags{
-      position:absolute;
-      left: 118px;
-      top: 96px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      pointer-events:none;
-      opacity: 0;
-      transform: translateY(4px);
-      transition: opacity .20s ease, transform .20s ease;
-    }
-    .tearTags.on{ opacity: 1; transform: translateY(0); }
-    .tag{
-      background: rgba(22, 27, 45, 0.88);
-      color:#fff;
-      padding: 6px 10px;
+      border: 1px solid rgba(255,255,255,0.10);
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 950;
-      letter-spacing:-0.2px;
-      box-shadow: 0 8px 18px rgba(16,24,40,0.18);
-      width: fit-content;
-      max-width: 170px;
-      white-space:nowrap;
       overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .tagLine{
-      position:absolute;
-      left: 92px;
-      top: 144px;
-      width: 64px;
-      height: 2px;
-      background: rgba(255,255,255,0.82);
-      transform: rotate(10deg);
-      opacity: 0;
+      opacity:0;
       pointer-events:none;
-      transition: opacity .20s ease;
     }
-    .tagLine.on{ opacity: 0.9; }
+    .tourBar.on{ opacity:1; }
+    .tourFill{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(30,120,255,0.9), rgba(120,210,255,0.9));
+      border-radius: 999px;
+      transition: width .30s ease;
+    }
 
-    .miniHelp{ font-size:12px; color:var(--muted); line-height:1.45; }
-    .gap{ height: 12px; }
+    @media (max-width: 420px){
+      .pThumb{ width: 84px; height: 52px; }
+      #lens3d{ width: min(86vw, 400px); height: min(86vw, 400px); }
+    }
   </style>
 </head>
-
 <body>
   <div class="wrap">
     <header>
       <div class="headRow">
         <div class="brandBox">
           <div class="title">알림톡 랜딩 (테스트)</div>
-          <div class="sub">제품 카드 클릭 → 우아한 렌즈 프리뷰(스캔/AR 없음)</div>
+          <div class="sub">제품 카드 클릭 → 3D 프리뷰(핫스팟/가이드/정보/퀴즈)</div>
         </div>
         <div class="pill">클릭 즉시</div>
       </div>
@@ -487,10 +609,11 @@
           <div class="pThumb">OASYS<br>MAX</div>
           <div class="pInfo">
             <div class="pName">아큐브 오아시스 맥스 원데이</div>
-            <div class="pDesc">내가 쓰는 제품을 클릭하고 핵심 포인트를 한 번에 확인</div>
+            <div class="pDesc">클릭하면 3D 프리뷰 + 핵심 3포인트</div>
             <div class="chips">
               <div class="chip">#블루라이트</div>
               <div class="chip">#눈물안정화</div>
+              <div class="chip">#123마크</div>
             </div>
           </div>
           <div class="arrow">›</div>
@@ -498,23 +621,23 @@
 
         <div class="gap"></div>
 
-        <div class="productCard" data-product="basic">
+        <div class="productCard" data-product="o1day">
           <div class="pThumb">OASYS<br>1-DAY</div>
           <div class="pInfo">
-            <div class="pName">아큐브 오아시스 원데이®</div>
-            <div class="pDesc">샘플 카드(다른 제품도 동일 UI로 확장 가능)</div>
+            <div class="pName">아큐브 오아시스 원데이® (샘플)</div>
+            <div class="pDesc">동일 UI로 다른 렌즈 확장 가능</div>
             <div class="chips">
-              <div class="chip">#하루종일</div>
-              <div class="chip">#촉촉함</div>
+              <div class="chip">#착용감</div>
+              <div class="chip">#보습</div>
+              <div class="chip">#관리</div>
             </div>
           </div>
           <div class="arrow">›</div>
         </div>
 
-        <div class="gap"></div>
-
-        <div style="font-size:12px; color:var(--muted);">
-          * 지금 버전은 “우아한 프리뷰” 연출을 위한 테스트 UI입니다. (실제 제품별 이미지/문구는 내부 확정본으로 교체)
+        <div class="hint">
+          * 테스트용 3D는 “고급스럽게 느껴지는 인터랙션” 중심입니다.<br>
+          (실제 제품별 문구/주의사항/관리/착용·제거는 너가 요청하면 콘텐츠만 교체 가능)
         </div>
       </div>
     </section>
@@ -524,53 +647,72 @@
   <div class="modal" id="resultModal" aria-hidden="true">
     <div class="modalBox">
       <div class="modalTop">
-        <div class="t">결과</div>
-        <button class="x" id="btnCloseResult">닫기</button>
+        <div class="t">3D 프리뷰</div>
+        <button class="x" id="btnClose">닫기</button>
       </div>
 
-      <div class="stage">
+      <div class="stage" id="stage">
+        <div class="glowDust"></div>
+        <div class="blink" id="blink"></div>
+
         <div class="headerBar">
-          <div class="name" id="productTop">아큐브 오아시스 맥스 구면</div>
-          <div class="name" style="font-weight:900; color: rgba(255,255,255,.0); font-size:12px;"></div>
+          <div class="name" id="productTop">제품명</div>
+          <div class="name" style="opacity:0; font-size:12px;">.</div>
         </div>
 
-        <div class="points" id="points"></div>
+        <div class="tourBar" id="tourBar"><div class="tourFill" id="tourFill"></div></div>
+        <div class="toast" id="toast">안내</div>
 
-        <!-- ✅ 정면 렌즈(이미지 기반) -->
-        <canvas id="lens2d" width="800" height="800"></canvas>
+        <div class="rail">
+          <div class="railGroupTitle">핵심</div>
+          <div class="ptBtn" id="btnHot1" title="핫스팟 1"><div class="ptIcon" id="hot1Icon">💧</div></div>
+          <div class="ptBtn" id="btnHot2" title="핫스팟 2"><div class="ptIcon" id="hot2Icon">123</div></div>
+          <div class="ptBtn" id="btnHot3" title="핫스팟 3"><div class="ptIcon" id="hot3Icon">🟦</div></div>
 
-        <!-- ✅ 눈물막 오버레이(옵션) -->
-        <div class="tearOverlay" id="tearOverlay">
-          <canvas id="tearCanvas" width="256" height="256"></canvas>
+          <div class="railGroupTitle" style="margin-top:8px;">효과</div>
+          <div class="ptBtn" id="btnTour" title="1분 가이드"><div class="ptIcon">▶︎</div></div>
+          <div class="ptBtn" id="btnBlink" title="눈 깜빡임"><div class="ptIcon">👁</div></div>
+          <div class="ptBtn" id="btnReset" title="리셋"><div class="ptIcon">⟲</div></div>
         </div>
-        <div class="tagLine" id="tagLine"></div>
-        <div class="tearTags" id="tearTags">
-          <div class="tag">PVP 습윤인자</div>
-          <div class="tag">수분</div>
-        </div>
 
-        <!-- 초록 패널 -->
-        <div class="greenPanel">
-          <div class="greenTitle" id="greenTitle"></div>
-          <div class="greenBody" id="greenBody"></div>
+        <canvas id="lens3d" width="900" height="900"></canvas>
 
-          <div class="badgeRow" id="badgeRow" style="display:none;">
-            <div class="badge" id="badgeText">블루라이트 차단을 위한 블루그린 틴트</div>
+        <!-- 하단 설명 카드 -->
+        <div class="infoCard" id="infoCard">
+          <div class="infoTopRow">
+            <div style="min-width:0; flex:1">
+              <div class="infoTitle" id="infoTitle">타이틀</div>
+              <p class="infoBody" id="infoBody">바디</p>
+              <div class="miniPills" id="miniPills"></div>
+            </div>
           </div>
+          <div class="infoActions">
+            <button class="ghostBtn" id="btnOpenInfo">주의/관리/착용</button>
+            <button class="ghostBtn" id="btnOpenQuiz">퀴즈(3문항)</button>
+          </div>
+        </div>
 
-          <div class="greenSubBox" id="greenSub"></div>
+        <!-- 확장 시트(탭/퀴즈) -->
+        <div class="sheet" id="sheet">
+          <div class="sheetBox">
+            <div class="sheetTop">
+              <div class="st" id="sheetTitle">정보</div>
+              <button class="x" id="btnCloseSheet">닫기</button>
+            </div>
+            <div class="tabs" id="tabs"></div>
+            <div class="tabBody" id="tabBody"></div>
+          </div>
         </div>
       </div>
 
       <div class="modalBottom">
         <div class="status">
-          <span id="resStatus">상태: <b>실행 중</b></span>
-          <span>조작: <b>드래그(살짝)</b></span>
+          <span>상태: <b id="statusLeft">실행 중</b></span>
+          <span>조작: <b>드래그/핀치 줌</b></span>
         </div>
 
         <div class="actionRow">
           <button class="btn secondary" id="btnBack">목록으로</button>
-
           <a class="btn secondary surveyBtn" href="https://forms.office.com/r/aqt7sf0ciB" target="_blank" rel="noopener">
             <div class="surveyText">
               <div class="t1">만족도 조사</div>
@@ -579,475 +721,734 @@
             <div class="surveyThumb">☕️</div>
           </a>
         </div>
-
-        <div class="miniHelp">
-          * 스캔/AR 없이 “제품 클릭 → 바로 핵심 포인트”만 보여줍니다.
-        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // =========================================================
-    // ✅ 렌즈 이미지(정면 3D 렌더) — 너가 마지막에 보낸 이미지로 교체됨
-    //   - 단일 파일 유지하려고 base64로 내장했어.
-    // =========================================================
-    const LENS_IMG_DATA =
-      "data:image/png;base64,{{BASE64_WAS_INLINED_HERE}}";
-
-    // ⚠️ 위 {{BASE64_WAS_INLINED_HERE}} 는 아래에서 자동으로 치환돼 있어야 정상인데,
-    // 이 환경에서 길이가 너무 길어져서 표시를 줄였어.
-    // → 바로 아래 “실사용 방법”을 따라줘 (30초 컷).
-
     // =========================
-    // 제품/콘텐츠 (샘플)
+    // 1) 테스트용 "콘텐츠 데이터"
+    //    -> 너가 나중에 여기만 바꾸면 됨
     // =========================
     const PRODUCTS = {
       omax: {
-        productNameTop: "아큐브 오아시스 맥스 구면",
-        default: {
-          title: "눈 피로까지 고려해 설계된 실리콘하이드로겔 원데이 렌즈",
-          body: "추후 구매 시에도 블루라이트 차단을 통한 눈 피로를 고려한 제품인지 확인해 보세요",
-          sub: ""
+        name: "아큐브 오아시스 맥스 원데이",
+        pills: ["#블루라이트", "#눈물안정화", "#123마크"],
+        hotspots: [
+          { key:"TEAR", icon:"💧", title:"눈물 안정화 기술", body:"습윤 인자를 통해 오래 촉촉하고 편안한 착용감을 제공", focus:{rx: 0.25, ry:-0.15, zoom: 1.08} },
+          { key:"MARK", icon:"123", title:"123마크", body:"렌즈 뒤집힘 여부를 직관적으로 확인할 수 있어요", focus:{rx:-0.18, ry: 0.22, zoom: 1.12} },
+          { key:"BLUE", icon:"🟦", title:"블루라이트 차단", body:"디지털 화면 시청 시 눈 편안함을 고려한 기능(수치 문구는 내부 확정본으로 교체)", focus:{rx: 0.06, ry: 0.08, zoom: 1.10} }
+        ],
+        tabs: {
+          "주의사항": [
+            "통증/충혈/시야 이상이 있으면 즉시 착용을 중단하고 전문가와 상담하세요.",
+            "타인과 공유 금지, 손 위생 후 착용/제거.",
+            "정해진 교체주기를 지키고, 사용기한을 넘기지 마세요."
+          ],
+          "관리방법": [
+            "원데이는 재사용하지 마세요(테스트 문구).",
+            "케이스를 사용한다면 정기 교체/건조 유지.",
+            "제품/상황에 맞는 관리법 문구로 교체 가능."
+          ],
+          "착용·제거": [
+            "착용: 손 씻기 → 렌즈 올리기 → 눈에 부드럽게 착용",
+            "제거: 아래를 보고 렌즈를 살짝 모아 제거",
+            "초보자용 팁/주의사항을 3~5단계로 정리 가능"
+          ]
         }
       },
-      basic: {
-        productNameTop: "아큐브 오아시스 원데이® (샘플)",
-        default: {
-          title: "하루종일 편안함을 돕는 원데이 렌즈",
-          body: "제품별 핵심 포인트를 버튼으로 빠르게 확인할 수 있어요",
-          sub: ""
+      o1day: {
+        name: "아큐브 오아시스 원데이® (샘플)",
+        pills: ["#착용감", "#보습", "#관리"],
+        hotspots: [
+          { key:"TEAR", icon:"💧", title:"촉촉함 포인트", body:"하루 중 건조감을 줄이도록 설계된 콘셉트(테스트)", focus:{rx: 0.18, ry:-0.10, zoom: 1.06} },
+          { key:"MARK", icon:"123", title:"사용 팁", body:"초보자가 확인하기 쉬운 포인트를 제공(테스트)", focus:{rx:-0.10, ry: 0.18, zoom: 1.10} },
+          { key:"BLUE", icon:"🟦", title:"특징 3", body:"핫스팟 3개 구조로 제품별 설명을 통일(테스트)", focus:{rx: 0.00, ry: 0.06, zoom: 1.08} }
+        ],
+        tabs: {
+          "주의사항": [
+            "테스트: 이상 시 중단/상담, 손 위생, 공유 금지",
+            "테스트: 사용기한/교체주기 준수"
+          ],
+          "관리방법": [
+            "테스트: 제품 유형에 맞게 문구 교체",
+            "테스트: 매장/브랜드 가이드에 맞춰 조정"
+          ],
+          "착용·제거": [
+            "테스트: 3~5단계로 시각화 가능",
+            "테스트: 짧은 요약 + 펼치기 구조 추천"
+          ]
         }
       }
     };
 
-    const COMMON_POINTS = [
-      { id:"tear", icon:"💧", mode:"TEAR",
-        title:"눈물 안정화 기술",
-        body:"습윤 인자를 통한 오랫동안 촉촉하고 편안한 착용감을 제공",
-        sub:"수치는 내부 확정 문구로 교체하세요."
-      },
-      { id:"mark", icon:"123", mode:"MARK",
-        title:"123마크",
-        body:"콘택트렌즈가 뒤집혀 있는지 확인이 가능해요",
-        sub:"필요 시 실제 가이드 문구로 교체하면 됩니다."
-      },
-      { id:"blue", icon:"🟦", mode:"BLUE",
-        title:"블루라이트 차단",
-        body:"55% 블루라이트 차단을 통한 눈 보호로 디지털 화면 시청 시 편안함 제공",
-        sub:"수치는 내부 확정 문구로 교체하세요.",
-        badge:"블루라이트 차단을 위한 블루그린 틴트"
-      }
-    ];
+    // =========================
+    // 2) DOM
+    // =========================
+    const modal = document.getElementById("resultModal");
+    const btnClose = document.getElementById("btnClose");
+    const btnBack = document.getElementById("btnBack");
+    const stage = document.getElementById("stage");
+
+    const productTop = document.getElementById("productTop");
+    const infoTitle = document.getElementById("infoTitle");
+    const infoBody = document.getElementById("infoBody");
+    const miniPills = document.getElementById("miniPills");
+    const statusLeft = document.getElementById("statusLeft");
+
+    const btnHot1 = document.getElementById("btnHot1");
+    const btnHot2 = document.getElementById("btnHot2");
+    const btnHot3 = document.getElementById("btnHot3");
+    const hot1Icon = document.getElementById("hot1Icon");
+    const hot2Icon = document.getElementById("hot2Icon");
+    const hot3Icon = document.getElementById("hot3Icon");
+
+    const btnTour = document.getElementById("btnTour");
+    const btnBlink = document.getElementById("btnBlink");
+    const btnReset = document.getElementById("btnReset");
+
+    const blink = document.getElementById("blink");
+    const toast = document.getElementById("toast");
+    const tourBar = document.getElementById("tourBar");
+    const tourFill = document.getElementById("tourFill");
+
+    const btnOpenInfo = document.getElementById("btnOpenInfo");
+    const btnOpenQuiz = document.getElementById("btnOpenQuiz");
+    const sheet = document.getElementById("sheet");
+    const sheetTitle = document.getElementById("sheetTitle");
+    const btnCloseSheet = document.getElementById("btnCloseSheet");
+    const tabsEl = document.getElementById("tabs");
+    const tabBody = document.getElementById("tabBody");
+
+    const lens = document.getElementById("lens3d");
+    const ctx = lens.getContext("2d", { alpha:true });
 
     // =========================
-    // DOM
+    // 3) Modal helpers
     // =========================
-    const resultModal = document.getElementById('resultModal');
-    const btnCloseResult = document.getElementById('btnCloseResult');
-    const btnBack = document.getElementById('btnBack');
-
-    const productTop = document.getElementById('productTop');
-    const pointsEl = document.getElementById('points');
-
-    const greenTitle = document.getElementById('greenTitle');
-    const greenBody = document.getElementById('greenBody');
-    const greenSub = document.getElementById('greenSub');
-    const badgeRow = document.getElementById('badgeRow');
-    const badgeText = document.getElementById('badgeText');
-
-    const lens2d = document.getElementById('lens2d');
-    const lctx = lens2d.getContext('2d');
-
-    const tearOverlay  = document.getElementById('tearOverlay');
-    const tearCanvas   = document.getElementById('tearCanvas');
-    const tearCtx      = tearCanvas.getContext('2d');
-    const tearTags     = document.getElementById('tearTags');
-    const tagLine      = document.getElementById('tagLine');
-
-    // =========================
-    // modal helpers
-    // =========================
-    function openModal(modal){
-      modal.classList.add('open');
-      modal.setAttribute('aria-hidden','false');
+    function openModal(){
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden","false");
     }
-    function closeModal(modal){
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden','true');
-    }
-
-    btnCloseResult.addEventListener('click', ()=> closeModal(resultModal));
-    resultModal.addEventListener('click', (e)=>{ if(e.target===resultModal) closeModal(resultModal); });
-    btnBack.addEventListener('click', ()=> closeModal(resultModal));
-
-    // =========================
-    // 상태/모드
-    // =========================
-    let mode = "BASIC"; // BASIC / TEAR / MARK / BLUE
-    let activeIdx = -1;
-    let currentProduct = PRODUCTS.omax;
-
-    function setGreen({title, body, sub, badge}){
-      greenTitle.textContent = title || "";
-      greenBody.textContent = body || "";
-      greenSub.textContent = sub || "";
-
-      if(badge){
-        badgeText.textContent = badge;
-        badgeRow.style.display = "flex";
-      } else {
-        badgeRow.style.display = "none";
-      }
+    function closeModal(){
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden","true");
+      closeSheet();
+      stopTour();
     }
 
-    function showTearUI(on){
-      tearOverlay.classList.toggle("on", on);
-      tearTags.classList.toggle("on", on);
-      tagLine.classList.toggle("on", on);
+    btnClose.addEventListener("click", closeModal);
+    btnBack.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e)=>{ if(e.target === modal) closeModal(); });
+
+    // =========================
+    // 4) 작은 UI helpers
+    // =========================
+    let toastTimer = null;
+    function showToast(text){
+      toast.textContent = text;
+      toast.classList.add("on");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=> toast.classList.remove("on"), 1400);
     }
 
-    function applyMode(next){
-      mode = next;
-      showTearUI(false);
-
-      if(mode === "BASIC"){
-        setGreen({ ...currentProduct.default, badge:null });
-      }
-      if(mode === "TEAR"){
-        const p = COMMON_POINTS[0];
-        setGreen({title:p.title, body:p.body, sub:p.sub, badge:null});
-        showTearUI(true);
-      }
-      if(mode === "MARK"){
-        const p = COMMON_POINTS[1];
-        setGreen({title:p.title, body:p.body, sub:p.sub, badge:null});
-      }
-      if(mode === "BLUE"){
-        const p = COMMON_POINTS[2];
-        setGreen({title:p.title, body:p.body, sub:p.sub, badge:p.badge});
-      }
+    function haptic(){
+      try{ navigator.vibrate && navigator.vibrate(12); }catch(_){}
     }
 
-    function renderPoints(){
-      pointsEl.innerHTML = "";
-      COMMON_POINTS.forEach((p, idx)=>{
-        const btn = document.createElement("div");
-        btn.className = "ptBtn";
-        btn.innerHTML = `<div class="ptIcon">${p.icon}</div>`;
-        btn.addEventListener("click", ()=>{
-          activeIdx = idx;
-          [...pointsEl.children].forEach((el,i)=>el.classList.toggle("active", i===idx));
-          applyMode(p.mode);
-        });
-        pointsEl.appendChild(btn);
+    // =========================
+    // 5) State
+    // =========================
+    let current = PRODUCTS.omax;
+    let activeHot = -1;
+
+    // "우아한 3D 느낌"을 내는 가짜 렌즈 파라미터
+    let rx = 0.12, ry = -0.08;     // 회전 느낌(가짜)
+    let offX = 0, offY = 0;        // 살짝 이동
+    let zoom = 1.0;                // 줌
+    let dragging = false;
+    let pointers = new Map();
+    let lastCenter = null;
+    let lastDist = null;
+
+    // 포커스 애니메이션
+    let target = { rx, ry, zoom, offX, offY };
+    function setFocus(f){
+      target.rx = f.rx ?? target.rx;
+      target.ry = f.ry ?? target.ry;
+      target.zoom = f.zoom ?? target.zoom;
+      // 이동은 너무 튀지 않게
+      target.offX = f.offX ?? 0;
+      target.offY = f.offY ?? 0;
+    }
+
+    function resetView(){
+      rx = 0.12; ry = -0.08; offX = 0; offY = 0; zoom = 1.0;
+      target = { rx, ry, zoom, offX, offY };
+      showToast("리셋");
+      haptic();
+    }
+
+    // =========================
+    // 6) Open product
+    // =========================
+    function openProduct(key){
+      current = PRODUCTS[key] || PRODUCTS.omax;
+      productTop.textContent = current.name;
+
+      // pills
+      miniPills.innerHTML = "";
+      (current.pills || []).forEach(p=>{
+        const el = document.createElement("div");
+        el.className = "miniPill";
+        el.textContent = p;
+        miniPills.appendChild(el);
       });
-    }
 
-    function openResult(productKey){
-      currentProduct = PRODUCTS[productKey] || PRODUCTS.omax;
-      productTop.textContent = currentProduct.productNameTop;
+      // hotspots icons
+      hot1Icon.textContent = current.hotspots[0].icon;
+      hot2Icon.textContent = current.hotspots[1].icon;
+      hot3Icon.textContent = current.hotspots[2].icon;
 
-      renderPoints();
-      activeIdx = -1;
-      [...pointsEl.children].forEach(el=>el.classList.remove("active"));
+      // default card
+      activeHot = -1;
+      setActiveHot(-1);
+      infoTitle.textContent = "제품 핵심 3포인트를 눌러보세요";
+      infoBody.textContent = "드래그로 회전, 핀치로 확대/축소. 탭하면 물결 효과가 살짝 보여요.";
+      statusLeft.textContent = "실행 중";
 
-      applyMode("BASIC");
-      openModal(resultModal);
-      resizeLensCanvas();
-
-      rot = 0;
-      offX = 0;
-      offY = 0;
+      resetView();
+      openModal();
+      resizeCanvas();
+      showToast("드래그/핀치로 조작");
     }
 
     document.querySelectorAll(".productCard").forEach(el=>{
       el.addEventListener("click", ()=>{
-        const key = el.getAttribute("data-product");
-        openResult(key);
+        openProduct(el.getAttribute("data-product"));
       });
     });
 
     // =========================
-    // ✅ 렌즈 이미지 로딩
+    // 7) Hotspots
     // =========================
-    const lensImg = new Image();
-    lensImg.decoding = "async";
-    lensImg.crossOrigin = "anonymous";
-    let lensReady = false;
+    function setActiveHot(idx){
+      [btnHot1, btnHot2, btnHot3].forEach((b,i)=> b.classList.toggle("active", i===idx));
+      activeHot = idx;
 
-    // (1) base64를 쓰는 경우
-    // lensImg.src = LENS_IMG_DATA;
+      if(idx < 0){
+        return;
+      }
+      const h = current.hotspots[idx];
+      infoTitle.textContent = h.title;
+      infoBody.textContent = h.body;
+      setFocus(h.focus || {});
 
-    // (2) ✅ 추천: 그냥 파일로 올리고 경로로 쓰는 방식(가장 안정적)
-    //    - GitHub에 lens_front.png 같이 올려두고 아래만 유지하면 끝!
-    lensImg.src = "./lens_front.png";
-
-    lensImg.onload = ()=>{ lensReady = true; };
-    lensImg.onerror = ()=>{ lensReady = false; };
-
-    // =========================
-    // ✅ 정면 렌즈(2D) 캔버스
-    // =========================
-    function resizeLensCanvas(){
-      const rect = lens2d.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      lens2d.width = Math.floor(rect.width * dpr);
-      lens2d.height = Math.floor(rect.height * dpr);
+      showToast(h.title);
+      haptic();
     }
 
-    let rot = 0;
-    let dragging = false;
-    let lastX = 0, lastY = 0;
+    btnHot1.addEventListener("click", ()=> setActiveHot(0));
+    btnHot2.addEventListener("click", ()=> setActiveHot(1));
+    btnHot3.addEventListener("click", ()=> setActiveHot(2));
 
-    let offX = 0, offY = 0;
-    function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+    // =========================
+    // 8) Blink / Ripple / Reset
+    // =========================
+    function doBlink(){
+      // 눈꺼풀 느낌: 빠르게 닫혔다 열림
+      blink.style.opacity = "0";
+      blink.style.transition = "none";
+      requestAnimationFrame(()=>{
+        blink.style.transition = "opacity .10s ease";
+        blink.style.opacity = "0.75";
+        setTimeout(()=>{
+          blink.style.transition = "opacity .16s ease";
+          blink.style.opacity = "0";
+        }, 90);
+      });
+      showToast("Blink");
+      haptic();
+    }
+    btnBlink.addEventListener("click", doBlink);
+    btnReset.addEventListener("click", resetView);
 
-    lens2d.addEventListener("pointerdown", (e)=>{
-      dragging = true;
-      lastX = e.clientX;
-      lastY = e.clientY;
-      lens2d.setPointerCapture(e.pointerId);
+    // 탭 리플(물결) - 렌즈 표면에 은은하게
+    let ripples = [];
+    function addRipple(x, y){
+      ripples.push({x,y,t:0});
+      if(ripples.length > 6) ripples.shift();
+    }
+    lens.addEventListener("click", (e)=>{
+      // 드래그 중 클릭 방지 느낌으로 아주 작은 조건
+      if(dragging) return;
+      const r = lens.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width;
+      const y = (e.clientY - r.top) / r.height;
+      addRipple(x, y);
+      showToast("✨");
     });
-    lens2d.addEventListener("pointermove", (e)=>{
-      if(!dragging) return;
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
-      lastX = e.clientX;
-      lastY = e.clientY;
 
-      rot += dx * 0.002;                       // 살짝 회전
-      offX = clamp(offX + dx * 0.15, -18, 18); // 살짝 이동
-      offY = clamp(offY + dy * 0.12, -14, 14);
-    });
-    lens2d.addEventListener("pointerup", (e)=>{
-      dragging = false;
-      try{ lens2d.releasePointerCapture(e.pointerId); }catch(_){}
+    // =========================
+    // 9) Info sheet (tabs) & Quiz
+    // =========================
+    function openSheet(title){
+      sheetTitle.textContent = title;
+      sheet.classList.add("open");
+    }
+    function closeSheet(){
+      sheet.classList.remove("open");
+    }
+    btnCloseSheet.addEventListener("click", closeSheet);
+
+    btnOpenInfo.addEventListener("click", ()=>{
+      buildInfoTabs();
+      openSheet("주의/관리/착용");
+      showToast("정보");
+      haptic();
     });
 
-    function markPulse(t){
-      return 0.55 + (Math.sin(t*0.012)+1)*0.20;
+    btnOpenQuiz.addEventListener("click", ()=>{
+      buildQuiz();
+      openSheet("퀴즈");
+      showToast("퀴즈");
+      haptic();
+    });
+
+    function buildInfoTabs(){
+      tabsEl.innerHTML = "";
+      tabBody.innerHTML = "";
+
+      const tabNames = Object.keys(current.tabs || {});
+      const safeTabs = tabNames.length ? tabNames : ["주의사항","관리방법","착용·제거"];
+
+      safeTabs.forEach((name, i)=>{
+        const t = document.createElement("button");
+        t.className = "tab";
+        t.textContent = name;
+        t.addEventListener("click", ()=> selectTab(name));
+        tabsEl.appendChild(t);
+        if(i===0) t.classList.add("active");
+      });
+
+      selectTab(safeTabs[0]);
+
+      function selectTab(name){
+        [...tabsEl.children].forEach(el=> el.classList.toggle("active", el.textContent===name));
+        const list = (current.tabs && current.tabs[name]) ? current.tabs[name] : [];
+        tabBody.innerHTML = `
+          <div style="font-weight:980; letter-spacing:-0.2px; margin-bottom:6px;">${name}</div>
+          <ul class="check">${list.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+          <div class="smallNote">* 테스트 문구입니다. 내부 확정본으로 교체하면 됩니다.</div>
+        `;
+      }
     }
 
-    // ✅ 핵심: 이미지 기반 렌즈(도넛 링 마스크)
-    function drawLens(){
-      const w = lens2d.width, h = lens2d.height;
-      const ctx = lctx;
-      ctx.clearRect(0,0,w,h);
+    function buildQuiz(){
+      tabsEl.innerHTML = "";
+      tabBody.innerHTML = "";
 
-      const cx = w/2, cy = h/2;
-      const R  = Math.min(w,h) * 0.43;
+      const Q = [
+        { q:"Q1) 123 마크는 무엇을 확인하나요?", a:["블루라이트 차단","렌즈 뒤집힘 여부","렌즈 재고"], correct:1 },
+        { q:"Q2) 블루라이트 차단 설명의 목적은?", a:["디지털 화면 시청 시 눈 편안함 고려","렌즈 두께 증가","색상 변경"], correct:0 },
+        { q:"Q3) 관리/주의에서 가장 먼저 떠올릴 행동은?", a:["손 위생 후 착용/제거","공유 착용","이상 있어도 계속 착용"], correct:0 }
+      ];
 
-      ctx.save();
-      ctx.translate(cx + offX, cy + offY);
-      ctx.rotate(rot * 0.10);
+      let idx = 0;
+      let score = 0;
 
-      // --- 도넛 마스크(외곽 - 내측 구멍) ---
-      const inner = R * 0.58; // 🔧 두께 조정(필요하면 0.55~0.62 사이로 조절)
-      ctx.beginPath();
-      ctx.arc(0,0,R,0,Math.PI*2,false);
-      ctx.arc(0,0,inner,0,Math.PI*2,true);
-      ctx.clip("evenodd");
+      render();
 
-      if(lensReady){
-        // 이미지를 렌즈 영역에 꽉 차게
-        const s = (R*2) / Math.min(lensImg.width, lensImg.height);
-        const dw = lensImg.width * s;
-        const dh = lensImg.height * s;
+      function render(){
+        const item = Q[idx];
+        tabBody.innerHTML = `
+          <div style="font-weight:980; letter-spacing:-0.2px; margin-bottom:10px;">${escapeHtml(item.q)}</div>
+          <div style="display:grid; gap:8px;">
+            ${item.a.map((t,i)=>`
+              <button class="tab" style="border-radius:14px; text-align:left;" data-i="${i}">
+                ${escapeHtml(t)}
+              </button>
+            `).join("")}
+          </div>
+          <div class="smallNote">* 정답/오답 시 자동 피드백(핫스팟 이동) 테스트</div>
+        `;
 
-        // 살짝 “떠있는” 느낌을 위해 약간 위로
-        ctx.globalAlpha = 0.98;
-        ctx.drawImage(lensImg, -dw/2, -dh/2 - R*0.02, dw, dh);
+        tabBody.querySelectorAll("button[data-i]").forEach(btn=>{
+          btn.addEventListener("click", ()=>{
+            const pick = Number(btn.getAttribute("data-i"));
+            const ok = pick === item.correct;
 
-        // 모드별 틴트(블루라이트)
-        if(mode === "BLUE"){
-          ctx.globalCompositeOperation = "screen";
-          ctx.globalAlpha = 0.18;
-          const tg = ctx.createRadialGradient(-R*0.12,-R*0.18,R*0.10, 0,0,R*1.1);
-          tg.addColorStop(0, "rgba(170,255,236,0.65)");
-          tg.addColorStop(1, "rgba(30,120,255,0.00)");
-          ctx.fillStyle = tg;
-          ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fill();
-          ctx.globalCompositeOperation = "source-over";
+            if(ok){
+              score++;
+              showToast("정답 ✅");
+              haptic();
+            } else {
+              showToast("오답 → 복습");
+              haptic();
+              // 오답이면 관련 핫스팟으로 이동(간단 규칙)
+              if(idx === 0) setActiveHot(1);
+              if(idx === 1) setActiveHot(2);
+              if(idx === 2) setActiveHot(0);
+            }
+
+            idx++;
+            if(idx >= Q.length){
+              finish();
+            } else {
+              render();
+            }
+          });
+        });
+      }
+
+      function finish(){
+        tabBody.innerHTML = `
+          <div style="font-weight:980; letter-spacing:-0.2px; margin-bottom:8px;">완료!</div>
+          <div style="font-size:13px; line-height:1.6;">
+            점수: <b>${score} / ${Q.length}</b><br>
+            핵심 포인트를 다시 눌러보며 내용을 확인해보세요.
+          </div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="tab" id="quizAgain">다시 풀기</button>
+            <button class="tab" id="quizClose">닫기</button>
+          </div>
+        `;
+        document.getElementById("quizAgain").addEventListener("click", ()=>{
+          idx = 0; score = 0;
+          render();
+        });
+        document.getElementById("quizClose").addEventListener("click", closeSheet);
+      }
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // =========================
+    // 10) 1-minute tour (auto guide)
+    // =========================
+    let tourRunning = false;
+    let tourStep = 0;
+    let tourTimer = null;
+
+    function startTour(){
+      if(tourRunning) return;
+      tourRunning = true;
+      tourStep = 0;
+      tourBar.classList.add("on");
+      statusLeft.textContent = "1분 가이드";
+
+      runStep();
+      showToast("가이드 시작");
+      haptic();
+    }
+
+    function stopTour(){
+      tourRunning = false;
+      clearTimeout(tourTimer);
+      tourBar.classList.remove("on");
+      tourFill.style.width = "0%";
+      if(modal.classList.contains("open")) statusLeft.textContent = "실행 중";
+    }
+
+    function runStep(){
+      if(!tourRunning) return;
+
+      const steps = [0,1,2];
+      const idx = steps[tourStep] ?? 2;
+
+      setActiveHot(idx);
+
+      const pct = Math.round(((tourStep+1)/steps.length)*100);
+      tourFill.style.width = pct + "%";
+
+      // 다음 스텝
+      tourTimer = setTimeout(()=>{
+        tourStep++;
+        if(tourStep >= steps.length){
+          showToast("가이드 완료");
+          stopTour();
+        } else {
+          runStep();
         }
-      } else {
-        // 이미지 로딩 실패 대비(임시 렌즈)
-        const g = ctx.createRadialGradient(-R*0.10, -R*0.14, R*0.10, 0,0,R*1.05);
-        g.addColorStop(0, `rgba(255,255,255,0.42)`);
-        g.addColorStop(0.35, `rgba(220,245,255,0.20)`);
-        g.addColorStop(1, `rgba(255,255,255,0.02)`);
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fill();
-      }
-
-      // 스페큘러(고급 하이라이트)
-      ctx.globalCompositeOperation = "screen";
-      ctx.globalAlpha = 0.25;
-      const hl = ctx.createRadialGradient(-R*0.18,-R*0.25,R*0.04, -R*0.08,-R*0.12,R*0.62);
-      hl.addColorStop(0, "rgba(255,255,255,0.70)");
-      hl.addColorStop(1, "rgba(255,255,255,0.00)");
-      ctx.fillStyle = hl;
-      ctx.beginPath(); ctx.arc(0,0,R,0,Math.PI*2); ctx.fill();
-      ctx.globalCompositeOperation = "source-over";
-      ctx.globalAlpha = 1;
-
-      // 외곽 림 라인
-      ctx.strokeStyle = `rgba(255,255,255,0.24)`;
-      ctx.lineWidth = Math.max(2, R*0.012);
-      ctx.beginPath();
-      ctx.arc(0,0,R*0.985,0,Math.PI*2);
-      ctx.stroke();
-
-      // 내측 림 라인
-      ctx.strokeStyle = `rgba(255,255,255,0.16)`;
-      ctx.lineWidth = Math.max(1.5, R*0.008);
-      ctx.beginPath();
-      ctx.arc(0,0,inner*1.01,0,Math.PI*2);
-      ctx.stroke();
-
-      // 123 포인트
-      if(mode==="MARK"){
-        const t = Date.now();
-        const p = markPulse(t);
-
-        ctx.save();
-        ctx.translate(0, R*0.56);
-        ctx.globalAlpha = 0.55 * p;
-        ctx.strokeStyle = "rgba(255,255,255,0.85)";
-        ctx.lineWidth = Math.max(2.5, R*0.014);
-        ctx.beginPath();
-        ctx.arc(0,0,R*0.14,0,Math.PI*2);
-        ctx.stroke();
-
-        const gg = ctx.createRadialGradient(0,0,R*0.02, 0,0,R*0.22);
-        gg.addColorStop(0, `rgba(255,255,255,0.65)`);
-        gg.addColorStop(1, `rgba(255,255,255,0)`);
-        ctx.fillStyle = gg;
-        ctx.beginPath();
-        ctx.arc(0,0,R*0.22,0,Math.PI*2);
-        ctx.fill();
-
-        ctx.globalAlpha = 0.90;
-        ctx.fillStyle = "rgba(15,23,38,0.92)";
-        ctx.font = `900 ${Math.max(18, R*0.14)}px Arial`;
-        ctx.textAlign="center";
-        ctx.textBaseline="middle";
-        ctx.fillText("123", 0, 0);
-        ctx.restore();
-      }
-
-      ctx.restore();
+      }, 1700);
     }
 
+    btnTour.addEventListener("click", ()=>{
+      if(tourRunning) stopTour();
+      else startTour();
+    });
+
     // =========================
-    // 눈물막 텍스처(유지)
+    // 11) Canvas rendering ("우아한 가짜 3D 렌즈")
     // =========================
-    let tearAnimT = 0;
-    function drawTearOverlay(){
-      const w = tearCanvas.width, h = tearCanvas.height;
-      const ctx = tearCtx;
-      ctx.clearRect(0,0,w,h);
+    function resizeCanvas(){
+      const r = lens.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      lens.width = Math.floor(r.width * dpr);
+      lens.height = Math.floor(r.height * dpr);
+    }
+    window.addEventListener("resize", resizeCanvas);
 
-      const bg = ctx.createRadialGradient(w*0.45, h*0.42, 10, w*0.5, h*0.5, w*0.55);
-      bg.addColorStop(0, "rgba(255,255,255,0.08)");
-      bg.addColorStop(1, "rgba(0,0,0,0.06)");
-      ctx.fillStyle = bg;
-      ctx.fillRect(0,0,w,h);
-
-      tearAnimT += 0.016;
-      ctx.save();
-      ctx.translate(w/2, h/2);
-
-      ctx.strokeStyle = "rgba(255,255,255,0.28)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(0,0,w*0.44,0,Math.PI*2);
-      ctx.stroke();
-
-      for(let i=0;i<42;i++){
-        const a = i * 0.38 + Math.sin(tearAnimT*0.7+i)*0.12;
-        const r1 = 30 + (i%7)*8;
-        const r2 = 92 + (i%11)*6;
-        ctx.strokeStyle = `rgba(120, 210, 255, ${0.06 + (i%5)*0.01})`;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.moveTo(Math.cos(a)*r1, Math.sin(a)*r1);
-        ctx.quadraticCurveTo(
-          Math.cos(a+0.9)*55, Math.sin(a+0.9)*55,
-          Math.cos(a+0.25)*r2, Math.sin(a+0.25)*r2
-        );
-        ctx.stroke();
+    // pointer gestures: drag rotate + pinch zoom
+    function getCenterAndDist(){
+      const pts = [...pointers.values()];
+      if(pts.length === 1){
+        return { center: {x: pts[0].x, y: pts[0].y}, dist: 0 };
       }
-
-      for(let k=0;k<26;k++){
-        const a = k*0.62 + tearAnimT*0.45;
-        const r = 16 + (k%9)*10;
-        ctx.fillStyle = "rgba(255,255,255,0.22)";
-        ctx.beginPath();
-        ctx.arc(Math.cos(a)*r, Math.sin(a)*r, 2.2, 0, Math.PI*2);
-        ctx.fill();
+      if(pts.length >= 2){
+        const a = pts[0], b = pts[1];
+        const cx = (a.x + b.x)/2;
+        const cy = (a.y + b.y)/2;
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const dist = Math.hypot(dx, dy);
+        return { center: {x: cx, y: cy}, dist };
       }
-
-      const hl = ctx.createRadialGradient(-30,-40, 6, -20,-30, 90);
-      hl.addColorStop(0, "rgba(255,255,255,0.18)");
-      hl.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = hl;
-      ctx.beginPath();
-      ctx.arc(0,0,w*0.48,0,Math.PI*2);
-      ctx.fill();
-
-      ctx.restore();
+      return null;
     }
 
-    // =========================
-    // Loop
-    // =========================
-    function loop(){
-      requestAnimationFrame(loop);
+    lens.addEventListener("pointerdown", (e)=>{
+      lens.setPointerCapture(e.pointerId);
+      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      dragging = true;
+      lastCenter = null;
+      lastDist = null;
+    });
 
-      // 드래그 없을 때 아주 미세한 자동 회전(“우아한 살아있음”)
-      if(!dragging) rot += 0.0010;
+    lens.addEventListener("pointermove", (e)=>{
+      if(!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
 
-      // 오프셋은 서서히 중앙으로 복귀 (중심 초점 유지)
+      const cd = getCenterAndDist();
+      if(!cd) return;
+
+      // 1 pointer = rotate + slight translate
+      if(pointers.size === 1){
+        if(!lastCenter){ lastCenter = cd.center; return; }
+        const dx = cd.center.x - lastCenter.x;
+        const dy = cd.center.y - lastCenter.y;
+        lastCenter = cd.center;
+
+        // 회전(가짜) 느낌
+        rx += dy * 0.0022;
+        ry += dx * 0.0022;
+
+        // 살짝 이동(너무 크게 안)
+        offX += dx * 0.08;
+        offY += dy * 0.06;
+
+        offX = clamp(offX, -24, 24);
+        offY = clamp(offY, -18, 18);
+      }
+
+      // 2 pointers = pinch zoom
+      if(pointers.size >= 2){
+        if(lastDist == null){ lastDist = cd.dist; return; }
+        const dd = cd.dist - lastDist;
+        lastDist = cd.dist;
+        zoom += dd * 0.0012;
+        zoom = clamp(zoom, 0.88, 1.22);
+      }
+    });
+
+    lens.addEventListener("pointerup", (e)=>{
+      pointers.delete(e.pointerId);
+      if(pointers.size === 0){
+        dragging = false;
+        lastCenter = null;
+        lastDist = null;
+      }
+    });
+    lens.addEventListener("pointercancel", (e)=> {
+      pointers.delete(e.pointerId);
+      if(pointers.size === 0){
+        dragging = false;
+        lastCenter = null;
+        lastDist = null;
+      }
+    });
+
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+    // main draw
+    let t = 0;
+    function draw(){
+      requestAnimationFrame(draw);
+      if(!modal.classList.contains("open")) return;
+
+      t += 0.016;
+
+      // idle motion (우아한 살아있음)
+      if(!dragging && !tourRunning){
+        ry += 0.0009;
+        rx += Math.sin(t*0.7) * 0.00012;
+      }
+
+      // focus easing
+      rx += (target.rx - rx) * 0.08;
+      ry += (target.ry - ry) * 0.08;
+      zoom += (target.zoom - zoom) * 0.08;
+      offX += (target.offX - offX) * 0.08;
+      offY += (target.offY - offY) * 0.08;
+
+      // center return (드래그 없을 때 살짝 중앙 복귀)
       if(!dragging){
         offX *= 0.94;
         offY *= 0.94;
       }
 
-      drawLens();
-      if(mode==="TEAR") drawTearOverlay();
+      const w = lens.width, h = lens.height;
+      ctx.clearRect(0,0,w,h);
+
+      const cx = w/2 + offX;
+      const cy = h/2 + offY;
+      const R = Math.min(w,h) * 0.40 * zoom;
+
+      // light direction based on rx/ry
+      const lx = cx + (ry * R * 1.2) - R*0.20;
+      const ly = cy + (rx * R * 1.2) - R*0.26;
+
+      // base glass gradient
+      const g = ctx.createRadialGradient(lx, ly, R*0.08, cx, cy, R*1.12);
+      const isBlue = (activeHot === 2);
+      const tint = isBlue ? [170,255,236,0.22] : [220,245,255,0.20];
+
+      g.addColorStop(0, `rgba(255,255,255,0.48)`);
+      g.addColorStop(0.35, `rgba(${tint[0]},${tint[1]},${tint[2]},${tint[3]})`);
+      g.addColorStop(1, `rgba(255,255,255,0.03)`);
+
+      // disk
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      // rim
+      ctx.strokeStyle = `rgba(255,255,255,0.26)`;
+      ctx.lineWidth = Math.max(2, R*0.010);
+      ctx.beginPath();
+      ctx.arc(cx, cy, R*0.985, 0, Math.PI*2);
+      ctx.stroke();
+
+      // inner ring
+      ctx.strokeStyle = isBlue ? `rgba(30,120,255,0.20)` : `rgba(255,255,255,0.14)`;
+      ctx.lineWidth = Math.max(1.5, R*0.007);
+      ctx.beginPath();
+      ctx.arc(cx, cy, R*0.62, 0, Math.PI*2);
+      ctx.stroke();
+
+      // highlight streaks (우아함)
+      ctx.save();
+      ctx.globalCompositeOperation = "screen";
+      const hl1 = ctx.createRadialGradient(cx - R*0.18, cy - R*0.20, R*0.02, cx - R*0.10, cy - R*0.14, R*0.62);
+      hl1.addColorStop(0, "rgba(255,255,255,0.30)");
+      hl1.addColorStop(1, "rgba(255,255,255,0.00)");
+      ctx.fillStyle = hl1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.fill();
+
+      const hl2 = ctx.createRadialGradient(cx + R*0.14, cy + R*0.08, R*0.02, cx + R*0.18, cy + R*0.12, R*0.70);
+      hl2.addColorStop(0, "rgba(120,210,255,0.12)");
+      hl2.addColorStop(1, "rgba(120,210,255,0.00)");
+      ctx.fillStyle = hl2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // subtle depth shadow
+      const sh = ctx.createRadialGradient(cx, cy + R*0.68, R*0.02, cx, cy + R*0.78, R*0.56);
+      sh.addColorStop(0, `rgba(0,0,0,0.18)`);
+      sh.addColorStop(1, `rgba(0,0,0,0)`);
+      ctx.fillStyle = sh;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, 0, Math.PI*2);
+      ctx.fill();
+
+      // Hotspot highlight (영역 글로우)
+      if(activeHot >= 0){
+        const hidx = activeHot;
+        // 영역별 위치(렌즈 위 상대좌표)
+        const spots = [
+          {x: cx - R*0.22, y: cy - R*0.20}, // tear
+          {x: cx,          y: cy + R*0.56}, // mark
+          {x: cx + R*0.16, y: cy + R*0.06}  // blue
+        ];
+        const s = spots[hidx];
+        const pulse = 0.55 + (Math.sin(t*3.0)+1)*0.20;
+
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        const gg = ctx.createRadialGradient(s.x, s.y, R*0.02, s.x, s.y, R*0.26);
+        gg.addColorStop(0, `rgba(255,255,255,${0.35*pulse})`);
+        gg.addColorStop(1, `rgba(255,255,255,0)`);
+        ctx.fillStyle = gg;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, R*0.28, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+
+        // MARK일 때 123 표시
+        if(hidx === 1){
+          ctx.save();
+          ctx.globalAlpha = 0.90;
+          ctx.fillStyle = "rgba(15,23,38,0.92)";
+          ctx.font = `900 ${Math.max(18, R*0.14)}px Arial`;
+          ctx.textAlign="center";
+          ctx.textBaseline="middle";
+          ctx.fillText("123", s.x, s.y);
+          ctx.restore();
+        }
+      }
+
+      // Ripples
+      if(ripples.length){
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+        for(const r0 of ripples){
+          r0.t += 0.020;
+          const rr = r0.t * R*0.45;
+          const alpha = Math.max(0, 0.14 - r0.t*0.10);
+
+          const rxp = cx + (r0.x - 0.5) * R*1.3;
+          const ryp = cy + (r0.y - 0.5) * R*1.3;
+
+          ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+          ctx.lineWidth = Math.max(1.2, R*0.006);
+          ctx.beginPath();
+          ctx.arc(rxp, ryp, rr, 0, Math.PI*2);
+          ctx.stroke();
+        }
+        ctx.restore();
+        // cleanup
+        ripples = ripples.filter(x=> x.t < 1.2);
+      }
     }
 
     // =========================
-    // init
+    // 12) Sheet open/close
+    // =========================
+    function closeSheet(){
+      sheet.classList.remove("open");
+    }
+    btnCloseSheet.addEventListener("click", closeSheet);
+
+    // =========================
+    // 13) Init
     // =========================
     function init(){
-      renderPoints();
-      setGreen({ ...currentProduct.default, badge:null });
-      resizeLensCanvas();
-      window.addEventListener("resize", resizeLensCanvas);
-      loop();
+      resizeCanvas();
+      draw();
     }
     init();
-
-    // =========================
-    // Tear UI show/hide
-    // =========================
-    function showTearUI(on){
-      tearOverlay.classList.toggle("on", on);
-      tearTags.classList.toggle("on", on);
-      tagLine.classList.toggle("on", on);
-    }
   </script>
-
-  <!-- =======================================================
-    ✅ 실사용 방법(30초)
-    1) 이 index.html 파일을 GitHub Pages 폴더에 올리고
-    2) 너가 보낸 “정면 렌즈 3D 이미지”를 PNG로 저장해서
-       파일명: lens_front.png 로 같은 폴더에 같이 업로드하면 끝.
-       (지금 코드는 lensImg.src = "./lens_front.png"; 로 되어있음)
-    3) 만약 base64로 한 파일만 쓰고 싶으면:
-       lensImg.src = LENS_IMG_DATA; 줄을 켜고, 위에서 경로 src는 주석 처리하면 됨.
-  ======================================================== -->
 </body>
 </html>
