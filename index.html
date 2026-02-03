@@ -2,84 +2,56 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>ACUVUE 3D Test (Netlify)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WebGL Cube Test</title>
   <style>
-    html,body{height:100%;margin:0;background:#081625;overflow:hidden;font-family:-apple-system,system-ui;}
-    #msg{
-      position:fixed; left:12px; right:12px; top:12px; z-index:10;
-      padding:10px 12px; border-radius:12px;
-      background:rgba(0,0,0,.45); color:#eaf2ff; font-size:13px; line-height:1.35;
-      white-space:pre-wrap; border:1px solid rgba(255,255,255,.12);
-    }
+    html,body{margin:0;height:100%;background:#081625;overflow:hidden;}
+    #msg{position:fixed;left:12px;top:12px;right:12px;z-index:10;
+      color:#eaf2ff;background:rgba(0,0,0,.55);padding:10px 12px;border-radius:12px;
+      font-family:-apple-system,system-ui;font-size:13px;white-space:pre-wrap}
     canvas{display:block;width:100vw;height:100vh;}
   </style>
 </head>
 <body>
-  <div id="msg">로딩 준비중…</div>
+  <div id="msg">로딩중…</div>
   <canvas id="c"></canvas>
 
-  <!-- iPad Safari 안정: non-module -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
-
   <script>
     const msg = document.getElementById('msg');
 
     if(!window.THREE){
-      msg.textContent = '❌ THREE 로딩 실패 (CDN 접근 문제)';
+      msg.textContent = '❌ three.min.js 로딩 실패 (CDN/캐시 문제)';
       throw new Error('THREE not loaded');
     }
 
-    const canvas = document.getElementById('c');
-    const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+    const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'), antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
     renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x081625);
 
-    const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 200);
-    camera.position.set(0, 0.2, 3.2);
+    const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
+    camera.position.set(0,0,3);
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
+    const light = new THREE.DirectionalLight(0xffffff, 1.2);
+    light.position.set(2,2,2);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
-    scene.add(new THREE.HemisphereLight(0xcfe7ff, 0x081625, 0.9));
-    const key = new THREE.DirectionalLight(0xffffff, 1.1);
-    key.position.set(3,2,3);
-    scene.add(key);
+    // ★ 모델 대신 큐브 1개
+    const geo = new THREE.BoxGeometry(1,1,1);
+    const mat = new THREE.MeshStandardMaterial();
+    const cube = new THREE.Mesh(geo, mat);
+    scene.add(cube);
 
-    // 같은 폴더에 test.glb가 있다고 가정
-    const glbUrl = './test.glb';
-    msg.textContent = 'GLB 로딩중...\n' + glbUrl;
-
-    const loader = new THREE.GLTFLoader();
-    loader.load(glbUrl, (gltf)=>{
-      const model = gltf.scene;
-
-      // 중앙정렬 + 자동스케일
-      const box = new THREE.Box3().setFromObject(model);
-      const center = box.getCenter(new THREE.Vector3());
-      const size = box.getSize(new THREE.Vector3());
-      model.position.sub(center);
-
-      const maxDim = Math.max(size.x, size.y, size.z) || 1;
-      model.scale.setScalar(1.6 / maxDim);
-
-      scene.add(model);
-      msg.textContent = '✅ test.glb 로드 성공!\n드래그: 회전 / 핀치: 확대';
-
-    }, undefined, (err)=>{
-      console.error(err);
-      msg.textContent = '❌ test.glb 로딩 실패\n(파일이 같은 폴더에 있는지 확인)';
-    });
+    msg.textContent = '✅ WebGL 정상: 회전 큐브가 보여야 합니다.';
 
     function animate(){
       requestAnimationFrame(animate);
-      controls.update();
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.013;
       renderer.render(scene, camera);
     }
     animate();
@@ -92,4 +64,3 @@
   </script>
 </body>
 </html>
-
