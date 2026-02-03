@@ -16,7 +16,6 @@
       border:1px solid rgba(255,255,255,.14);
     }
 
-    /* 우측 원형 버튼 */
     #rightBtns{
       position:fixed; right:14px; top:120px; z-index:30;
       display:flex; flex-direction:column; gap:10px;
@@ -33,7 +32,6 @@
     .pill.on{ background:rgba(0,255,140,.14); border-color:rgba(0,255,140,.35); }
     .pill.disabled{ opacity:.35; }
 
-    /* 하단 모드 버튼 */
     #bottomBtns{
       position:fixed;left:12px;right:12px;bottom:12px;z-index:30;
       display:flex;gap:8px;flex-wrap:wrap;
@@ -48,7 +46,6 @@
     }
     .btn.primary{ background:rgba(0,255,140,.12); border-color:rgba(0,255,140,.35); }
 
-    /* PVP 오버레이 */
     #pvpOverlay{
       position:fixed; left:12px; right:12px; bottom:92px; z-index:40;
       background:rgba(0,0,0,.62);
@@ -74,23 +71,21 @@
 <body>
   <div id="msg">준비중…</div>
 
-  <!-- 우측 기능 버튼 -->
   <div id="rightBtns">
     <div id="btnBL"  class="pill">BL</div>
     <div id="btnPVP" class="pill">PVP</div>
     <div id="btnBlink" class="pill">순목</div>
   </div>
 
-  <!-- PVP 내부 재질 오버레이 (파일명: pvp_inside.png) -->
   <div id="pvpOverlay">
-    <img id="pvpImg" src="pvp_inside.jpg" alt="PVP 내부 재질" onerror="this.style.display='none'; document.getElementById('pvpText').innerHTML = '<div id=&quot;pvpTitle&quot;>PVP 습윤 인자</div><div id=&quot;hint&quot;>pvp_inside.png 파일을 같은 폴더에 넣으면 이미지가 표시돼요.</div>';">
+    <img id="pvpImg" src="pvp_inside.jpg" alt="PVP 내부 재질"
+      onerror="this.style.display='none'; document.getElementById('pvpText').innerHTML = '<div id=&quot;pvpTitle&quot;>PVP 습윤 인자</div><div id=&quot;hint&quot;>pvp_inside.jpg 파일을 같은 폴더에 넣으면 이미지가 표시돼요.</div>';">
     <div id="pvpText">
       <div id="pvpTitle">PVP 습윤 인자</div>
       <div id="hint">확대 시 렌즈 내부/표면의 습윤 유지 컨셉을 시각적으로 보여줍니다.</div>
     </div>
   </div>
 
-  <!-- model-viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 
@@ -104,7 +99,6 @@
     style="display:block;">
   </model-viewer>
 
-  <!-- 하단 모드 버튼 -->
   <div id="bottomBtns">
     <button id="modeLens" class="btn primary">렌즈(test.glb)</button>
     <button id="modeEye" class="btn">눈(eye_animation.glb)</button>
@@ -123,22 +117,23 @@
 
     const pvpOverlay = document.getElementById('pvpOverlay');
 
-    // 상태
     let currentMode = 'lens'; // 'lens' | 'eye'
     let blOn = false;
     let pvpOn = false;
 
-    // 줌 감지용
     let baseRadius = null;
 
-    // 렌즈 색상(브랜드 정확 컬러는 나중에 HEX로 고정 가능)
-    const BL_TEAL = [0.0, 0.72, 0.70, 1.0]; // bluish-green (teal)
-    let originalBaseColor = null; // [r,g,b,a]
+    const BL_TEAL = [0.0, 0.72, 0.70, 1.0];
+    let originalBaseColor = null;
+
+    // ✅ (1) “처음 정면” 고정값
+    // theta: 좌우 회전(0deg가 정면), phi: 위/아래 각도(90deg가 정면 수평)
+    const FRONT_THETA = 0;
+    const FRONT_PHI   = 90;
 
     function setMsg(t){ msg.textContent = t; }
 
     function setBtnState(){
-      // 렌즈 모드: BL/PVP 가능, 순목 비활성
       if(currentMode === 'lens'){
         btnBL.classList.remove('disabled');
         btnPVP.classList.remove('disabled');
@@ -161,10 +156,19 @@
       setBtnState();
     }
 
+    // ✅ 정면 카메라로 강제 세팅
+    function forceFrontView(){
+      try{
+        const orbit = mv.getCameraOrbit();
+        const r = orbit?.radius || 2.5;
+        // 정면(0deg, 90deg) + 기존 반경 유지
+        mv.cameraOrbit = `${FRONT_THETA}deg ${FRONT_PHI}deg ${r}m`;
+      }catch(e){}
+    }
+
     async function setModel(file, mode){
       currentMode = mode;
 
-      // 기능 상태 초기화
       blOn = false;
       pvpOn = false;
       btnBL.classList.remove('on');
@@ -176,35 +180,47 @@
       setModeUI();
       setMsg(`로딩중…\n${file}`);
 
-      // 캐시 회피
       mv.src = file + '?v=' + Date.now();
-
-      // eye는 자동 재생 금지(순목 버튼으로만)
-      // model-viewer는 src 바뀌면 애니메이션 상태가 초기화되므로,
-      // load 이벤트에서 확실히 pause 처리
     }
 
-    // 로드 완료
+    // ✅ (2) 순목: 끝나면 항상 0초로 복귀(다음 클릭 준비)
+    mv.addEventListener('finished', ()=>{
+      if(currentMode !== 'eye') return;
+      try{
+        mv.pause();
+        mv.currentTime = 0;
+      }catch(e){}
+    });
+
     mv.addEventListener('load', async ()=>{
-      // 초기 카메라 반경 저장(줌 감지용)
+      // 초기 카메라 반경 저장
       try{
         const orbit = mv.getCameraOrbit();
         baseRadius = orbit.radius;
       }catch(e){ baseRadius = null; }
 
+      // ✅ 로드 후 무조건 “정면”으로 맞춤 (요청 1)
+      // 약간의 타이밍 이슈가 있어 2번 호출(바로 + 200ms 후) 해두면 안정적
+      forceFrontView();
+      setTimeout(forceFrontView, 200);
+
       if(currentMode === 'eye'){
-        // 자동 깜박임 방지: 로드되면 멈춤 + 루프 끔
+        // 자동 깜박임 방지
         try{
           mv.loop = false;
           mv.pause();
           mv.currentTime = 0;
+
+          // 혹시 기본 애니메이션이 여러개면 첫번째를 지정
+          if (mv.availableAnimations && mv.availableAnimations.length){
+            mv.animationName = mv.availableAnimations[0];
+          }
         }catch(e){}
         setMsg('✅ 로드 성공!\n순목 버튼을 눌러야 깜박입니다.');
       } else {
         setMsg('✅ 로드 성공!\n드래그 회전 / 핀치 확대');
       }
 
-      // 렌즈 모드에서만: 원래 색 저장(첫 재질 기준)
       if(currentMode === 'lens'){
         try{
           const model = mv.model;
@@ -223,7 +239,7 @@
       setMsg('❌ 로딩 실패\n' + JSON.stringify(e.detail || {}, null, 2));
     });
 
-    // ===== 1) BL: 렌즈 색상 변경 =====
+    // BL
     btnBL.addEventListener('click', ()=>{
       if(currentMode !== 'lens') return;
 
@@ -238,24 +254,18 @@
         }
         const mat = model.materials[0];
         const pbr = mat.pbrMetallicRoughness;
-
         if(!pbr) return;
 
-        // 원래색이 없으면 지금 값을 백업
         if(!originalBaseColor && pbr.baseColorFactor) originalBaseColor = [...pbr.baseColorFactor];
-
         pbr.setBaseColorFactor(blOn ? BL_TEAL : (originalBaseColor || [1,1,1,1]));
 
-        setMsg(blOn
-          ? 'BL ON: 렌즈 색상을 블루그린 톤으로 표시'
-          : 'BL OFF: 렌즈 색상을 원래대로 복원'
-        );
+        setMsg(blOn ? 'BL ON: 렌즈 색상을 블루그린 톤으로 표시' : 'BL OFF: 렌즈 색상을 원래대로 복원');
       }catch(err){
         setMsg('❌ BL 적용 실패\n' + (err?.message || err));
       }
     });
 
-    // ===== 2) PVP: 줌 + 내부재질 오버레이 =====
+    // PVP
     function showPVPOverlay(show){
       pvpOverlay.classList.toggle('show', show);
     }
@@ -263,7 +273,7 @@
     function zoomInForPVP(){
       try{
         const orbit = mv.getCameraOrbit();
-        const targetRadius = orbit.radius * 0.62; // 가까이
+        const targetRadius = orbit.radius * 0.62;
         mv.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${targetRadius}m`;
       }catch(e){}
     }
@@ -284,11 +294,8 @@
       }
     });
 
-    // 사용자가 핀치 확대했을 때도 자동 표시(일정 이상 가까워지면)
     mv.addEventListener('camera-change', ()=>{
       if(currentMode !== 'lens') return;
-
-      // PVP를 꺼둔 상태라도, 너무 가까우면 자동 오버레이(요청사항)
       try{
         if(!baseRadius) return;
         const orbit = mv.getCameraOrbit();
@@ -297,32 +304,40 @@
         if(nearEnough){
           showPVPOverlay(true);
         } else if(!pvpOn){
-          // 사용자가 멀리 빼면, PVP가 ON이 아닐 때만 자동 숨김
           showPVPOverlay(false);
         }
       }catch(e){}
     });
 
-    // ===== 3) 순목 버튼: eye에서만 1회 재생 =====
+    // ✅ 순목(버튼 누를때마다 “무조건 1회”)
     btnBlink.addEventListener('click', ()=>{
       if(currentMode !== 'eye') return;
 
       try{
+        // 재생 중이어도 강제 리셋 후 재생
         mv.loop = false;
+
+        // 애니메이션 지정(있다면)
+        if (mv.availableAnimations && mv.availableAnimations.length){
+          mv.animationName = mv.availableAnimations[0];
+        }
+
         mv.pause();
         mv.currentTime = 0;
-        mv.play();
-        setMsg('순목(1회) 재생');
+
+        // iOS에서 바로 play가 씹히는 경우가 있어 한 프레임 뒤에 재생
+        requestAnimationFrame(()=>{
+          mv.play();
+          setMsg('순목(1회) 재생');
+        });
       }catch(err){
         setMsg('❌ 순목 재생 실패\n(eye_animation.glb에 애니메이션이 없을 수 있어요)');
       }
     });
 
-    // 모드 전환
     modeLens.addEventListener('click', ()=> setModel('test.glb', 'lens'));
     modeEye.addEventListener('click',  ()=> setModel('eye_animation.glb', 'eye'));
 
-    // 시작
     setModeUI();
     setModel('test.glb', 'lens');
   </script>
