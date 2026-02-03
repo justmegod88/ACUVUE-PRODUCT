@@ -3,114 +3,328 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>ACUVUE GLB Viewer (model-viewer)</title>
+  <title>ACUVUE GLB Viewer (Optician)</title>
+
   <style>
     html,body{height:100%;margin:0;background:#081625;overflow:hidden;font-family:-apple-system,system-ui;}
+    model-viewer{width:100vw;height:100vh;background:transparent;display:block;}
+
     #msg{
-      position:fixed;left:12px;right:12px;top:12px;z-index:20;
+      position:fixed;left:12px;right:12px;top:12px;z-index:30;
       padding:10px 12px;border-radius:12px;
-      background:rgba(0,0,0,.60);color:#eaf2ff;font-size:13px;white-space:pre-wrap;
+      background:rgba(0,0,0,.60);color:#eaf2ff;font-size:13px;line-height:1.35;white-space:pre-wrap;
       border:1px solid rgba(255,255,255,.14);
     }
-    #btns{
-      position:fixed;left:12px;right:12px;bottom:12px;z-index:20;
+
+    /* 우측 원형 버튼 */
+    #rightBtns{
+      position:fixed; right:14px; top:120px; z-index:30;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .pill{
+      width:54px;height:54px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      color:#eaf2ff;font-weight:900;font-size:12px;
+      display:flex;align-items:center;justify-content:center;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .pill.on{ background:rgba(0,255,140,.14); border-color:rgba(0,255,140,.35); }
+    .pill.disabled{ opacity:.35; }
+
+    /* 하단 모드 버튼 */
+    #bottomBtns{
+      position:fixed;left:12px;right:12px;bottom:12px;z-index:30;
       display:flex;gap:8px;flex-wrap:wrap;
     }
-    button{
-      flex:1;min-width:120px;
+    .btn{
+      flex:1;min-width:140px;
       padding:12px 12px;border-radius:14px;
       border:1px solid rgba(255,255,255,.18);
       background:rgba(255,255,255,.08);
-      color:#eaf2ff;font-weight:800;font-size:13px;
+      color:#eaf2ff;font-weight:900;font-size:13px;
       -webkit-tap-highlight-color: transparent;
     }
-    button.primary{ background:rgba(0,255,140,.12); border-color:rgba(0,255,140,.35); }
+    .btn.primary{ background:rgba(0,255,140,.12); border-color:rgba(0,255,140,.35); }
 
-    model-viewer{
-      width:100vw;height:100vh;
-      background:transparent;
+    /* PVP 오버레이 */
+    #pvpOverlay{
+      position:fixed; left:12px; right:12px; bottom:92px; z-index:40;
+      background:rgba(0,0,0,.62);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:14px;
+      padding:10px 10px;
+      display:none;
+      gap:10px;
+      align-items:center;
     }
+    #pvpOverlay.show{ display:flex; }
+    #pvpOverlay img{
+      width:88px;height:88px;object-fit:cover;border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+    }
+    #pvpText{color:#eaf2ff;font-size:12.5px;line-height:1.35;}
+    #pvpTitle{font-weight:900;margin-bottom:2px;}
+    #hint{opacity:.85;}
   </style>
 </head>
+
 <body>
   <div id="msg">준비중…</div>
 
-  <div id="btns">
-    <button id="btnTest" class="primary">test.glb 보기</button>
-    <button id="btnEye">eye_animation.glb 보기</button>
-    <button id="btnAnim">애니메이션 재생</button>
+  <!-- 우측 기능 버튼 -->
+  <div id="rightBtns">
+    <div id="btnBL"  class="pill">BL</div>
+    <div id="btnPVP" class="pill">PVP</div>
+    <div id="btnBlink" class="pill">순목</div>
   </div>
 
-  <!-- ✅ model-viewer 로더 (Three.js 내장) -->
+  <!-- PVP 내부 재질 오버레이 (파일명: pvp_inside.png) -->
+  <div id="pvpOverlay">
+    <img id="pvpImg" src="pvp_inside.jpg" alt="PVP 내부 재질" onerror="this.style.display='none'; document.getElementById('pvpText').innerHTML = '<div id=&quot;pvpTitle&quot;>PVP 습윤 인자</div><div id=&quot;hint&quot;>pvp_inside.png 파일을 같은 폴더에 넣으면 이미지가 표시돼요.</div>';">
+    <div id="pvpText">
+      <div id="pvpTitle">PVP 습윤 인자</div>
+      <div id="hint">확대 시 렌즈 내부/표면의 습윤 유지 컨셉을 시각적으로 보여줍니다.</div>
+    </div>
+  </div>
+
+  <!-- model-viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 
-  <!-- ✅ 뷰어 -->
   <model-viewer
     id="mv"
     src="test.glb"
     camera-controls
     touch-action="pan-y"
-    autoplay
     exposure="1.1"
     shadow-intensity="0"
     style="display:block;">
   </model-viewer>
 
+  <!-- 하단 모드 버튼 -->
+  <div id="bottomBtns">
+    <button id="modeLens" class="btn primary">렌즈(test.glb)</button>
+    <button id="modeEye" class="btn">눈(eye_animation.glb)</button>
+  </div>
+
   <script>
+    const mv = document.getElementById('mv');
     const msg = document.getElementById('msg');
-    const mv  = document.getElementById('mv');
 
-    // 에러를 화면에 표시
-    window.addEventListener('error', (e)=>{
-      msg.textContent = '❌ JS 에러\n' + (e.message || e);
-    });
+    const btnBL = document.getElementById('btnBL');
+    const btnPVP = document.getElementById('btnPVP');
+    const btnBlink = document.getElementById('btnBlink');
 
-    // GLB 파일이 실제로 접근 가능한지(404면 여기서 바로 잡힘)
-    async function probe(url){
-      try{
-        const r = await fetch(url + '?v=' + Date.now(), { method:'GET' });
-        return r.ok ? '✅ 파일 접근 OK: ' + url : `❌ 파일 접근 실패: ${url}\nstatus: ${r.status}`;
-      }catch(err){
-        return `❌ 네트워크/권한 문제: ${url}\n${err}`;
+    const modeLens = document.getElementById('modeLens');
+    const modeEye  = document.getElementById('modeEye');
+
+    const pvpOverlay = document.getElementById('pvpOverlay');
+
+    // 상태
+    let currentMode = 'lens'; // 'lens' | 'eye'
+    let blOn = false;
+    let pvpOn = false;
+
+    // 줌 감지용
+    let baseRadius = null;
+
+    // 렌즈 색상(브랜드 정확 컬러는 나중에 HEX로 고정 가능)
+    const BL_TEAL = [0.0, 0.72, 0.70, 1.0]; // bluish-green (teal)
+    let originalBaseColor = null; // [r,g,b,a]
+
+    function setMsg(t){ msg.textContent = t; }
+
+    function setBtnState(){
+      // 렌즈 모드: BL/PVP 가능, 순목 비활성
+      if(currentMode === 'lens'){
+        btnBL.classList.remove('disabled');
+        btnPVP.classList.remove('disabled');
+        btnBlink.classList.add('disabled');
+      } else {
+        btnBL.classList.add('disabled');
+        btnPVP.classList.add('disabled');
+        btnBlink.classList.remove('disabled');
       }
     }
 
-    async function setModel(file){
-      msg.textContent = '로딩중…\n' + file;
+    function setModeUI(){
+      if(currentMode === 'lens'){
+        modeLens.classList.add('primary');
+        modeEye.classList.remove('primary');
+      } else {
+        modeEye.classList.add('primary');
+        modeLens.classList.remove('primary');
+      }
+      setBtnState();
+    }
 
-      // 파일 접근 테스트 결과 먼저 표시
-      const p = await probe(file);
-      msg.textContent = p + '\n\n모델 로딩 시도중…';
+    async function setModel(file, mode){
+      currentMode = mode;
 
-      // model-viewer에 src 변경(캐시 회피)
+      // 기능 상태 초기화
+      blOn = false;
+      pvpOn = false;
+      btnBL.classList.remove('on');
+      btnPVP.classList.remove('on');
+      pvpOverlay.classList.remove('show');
+      originalBaseColor = null;
+      baseRadius = null;
+
+      setModeUI();
+      setMsg(`로딩중…\n${file}`);
+
+      // 캐시 회피
       mv.src = file + '?v=' + Date.now();
+
+      // eye는 자동 재생 금지(순목 버튼으로만)
+      // model-viewer는 src 바뀌면 애니메이션 상태가 초기화되므로,
+      // load 이벤트에서 확실히 pause 처리
     }
 
-    // model-viewer 이벤트
-    mv.addEventListener('load', ()=>{
-      msg.textContent = '✅ 로드 성공!\n드래그 회전 / 핀치 확대';
-    });
-    mv.addEventListener('error', (e)=>{
-      msg.textContent = '❌ model-viewer 로딩 실패\n' + JSON.stringify(e.detail || {}, null, 2);
-    });
-
-    // 버튼
-    document.getElementById('btnTest').onclick = ()=>setModel('test.glb');
-    document.getElementById('btnEye').onclick  = ()=>setModel('eye_animation.glb');
-
-    // 애니메이션 재생(eye_animation.glb에 애니메이션이 들어있다면 동작)
-    document.getElementById('btnAnim').onclick = ()=>{
+    // 로드 완료
+    mv.addEventListener('load', async ()=>{
+      // 초기 카메라 반경 저장(줌 감지용)
       try{
-        mv.play();
-        msg.textContent = '▶️ 애니메이션 재생 시도';
-      }catch(e){
-        msg.textContent = '❌ 애니메이션 재생 실패\n(파일에 애니메이션이 없을 수 있어요)';
+        const orbit = mv.getCameraOrbit();
+        baseRadius = orbit.radius;
+      }catch(e){ baseRadius = null; }
+
+      if(currentMode === 'eye'){
+        // 자동 깜박임 방지: 로드되면 멈춤 + 루프 끔
+        try{
+          mv.loop = false;
+          mv.pause();
+          mv.currentTime = 0;
+        }catch(e){}
+        setMsg('✅ 로드 성공!\n순목 버튼을 눌러야 깜박입니다.');
+      } else {
+        setMsg('✅ 로드 성공!\n드래그 회전 / 핀치 확대');
       }
-    };
+
+      // 렌즈 모드에서만: 원래 색 저장(첫 재질 기준)
+      if(currentMode === 'lens'){
+        try{
+          const model = mv.model;
+          if(model && model.materials && model.materials.length){
+            const mat = model.materials[0];
+            const pbr = mat.pbrMetallicRoughness;
+            if(pbr && pbr.baseColorFactor){
+              originalBaseColor = [...pbr.baseColorFactor];
+            }
+          }
+        }catch(e){}
+      }
+    });
+
+    mv.addEventListener('error', (e)=>{
+      setMsg('❌ 로딩 실패\n' + JSON.stringify(e.detail || {}, null, 2));
+    });
+
+    // ===== 1) BL: 렌즈 색상 변경 =====
+    btnBL.addEventListener('click', ()=>{
+      if(currentMode !== 'lens') return;
+
+      blOn = !blOn;
+      btnBL.classList.toggle('on', blOn);
+
+      try{
+        const model = mv.model;
+        if(!model || !model.materials || !model.materials.length){
+          setMsg('⚠️ 재질을 찾지 못했어요(모델 materials 없음).');
+          return;
+        }
+        const mat = model.materials[0];
+        const pbr = mat.pbrMetallicRoughness;
+
+        if(!pbr) return;
+
+        // 원래색이 없으면 지금 값을 백업
+        if(!originalBaseColor && pbr.baseColorFactor) originalBaseColor = [...pbr.baseColorFactor];
+
+        pbr.setBaseColorFactor(blOn ? BL_TEAL : (originalBaseColor || [1,1,1,1]));
+
+        setMsg(blOn
+          ? 'BL ON: 렌즈 색상을 블루그린 톤으로 표시'
+          : 'BL OFF: 렌즈 색상을 원래대로 복원'
+        );
+      }catch(err){
+        setMsg('❌ BL 적용 실패\n' + (err?.message || err));
+      }
+    });
+
+    // ===== 2) PVP: 줌 + 내부재질 오버레이 =====
+    function showPVPOverlay(show){
+      pvpOverlay.classList.toggle('show', show);
+    }
+
+    function zoomInForPVP(){
+      try{
+        const orbit = mv.getCameraOrbit();
+        const targetRadius = orbit.radius * 0.62; // 가까이
+        mv.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${targetRadius}m`;
+      }catch(e){}
+    }
+
+    btnPVP.addEventListener('click', ()=>{
+      if(currentMode !== 'lens') return;
+
+      pvpOn = !pvpOn;
+      btnPVP.classList.toggle('on', pvpOn);
+
+      if(pvpOn){
+        zoomInForPVP();
+        showPVPOverlay(true);
+        setMsg('PVP: 확대 + 내부 재질 오버레이 표시');
+      }else{
+        showPVPOverlay(false);
+        setMsg('PVP: 오버레이 숨김');
+      }
+    });
+
+    // 사용자가 핀치 확대했을 때도 자동 표시(일정 이상 가까워지면)
+    mv.addEventListener('camera-change', ()=>{
+      if(currentMode !== 'lens') return;
+
+      // PVP를 꺼둔 상태라도, 너무 가까우면 자동 오버레이(요청사항)
+      try{
+        if(!baseRadius) return;
+        const orbit = mv.getCameraOrbit();
+        const nearEnough = orbit.radius < baseRadius * 0.68;
+
+        if(nearEnough){
+          showPVPOverlay(true);
+        } else if(!pvpOn){
+          // 사용자가 멀리 빼면, PVP가 ON이 아닐 때만 자동 숨김
+          showPVPOverlay(false);
+        }
+      }catch(e){}
+    });
+
+    // ===== 3) 순목 버튼: eye에서만 1회 재생 =====
+    btnBlink.addEventListener('click', ()=>{
+      if(currentMode !== 'eye') return;
+
+      try{
+        mv.loop = false;
+        mv.pause();
+        mv.currentTime = 0;
+        mv.play();
+        setMsg('순목(1회) 재생');
+      }catch(err){
+        setMsg('❌ 순목 재생 실패\n(eye_animation.glb에 애니메이션이 없을 수 있어요)');
+      }
+    });
+
+    // 모드 전환
+    modeLens.addEventListener('click', ()=> setModel('test.glb', 'lens'));
+    modeEye.addEventListener('click',  ()=> setModel('eye_animation.glb', 'eye'));
 
     // 시작
-    setModel('test.glb');
+    setModeUI();
+    setModel('test.glb', 'lens');
   </script>
 </body>
 </html>
