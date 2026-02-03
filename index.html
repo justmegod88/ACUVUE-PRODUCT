@@ -3,168 +3,79 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>GLB Viewer (test.glb)</title>
+  <title>ACUVUE 3D Test (Netlify)</title>
   <style>
     html,body{height:100%;margin:0;background:#081625;overflow:hidden;font-family:-apple-system,system-ui;}
     #msg{
       position:fixed; left:12px; right:12px; top:12px; z-index:10;
       padding:10px 12px; border-radius:12px;
       background:rgba(0,0,0,.45); color:#eaf2ff; font-size:13px; line-height:1.35;
-      white-space:pre-wrap;
-      border:1px solid rgba(255,255,255,.12);
+      white-space:pre-wrap; border:1px solid rgba(255,255,255,.12);
     }
-    #msg b{color:#ffd26a;}
-    #msg .ok{color:#20c65a;font-weight:800;}
-    #msg .bad{color:#ff3b30;font-weight:800;}
-    canvas{display:block;width:100%;height:100%;}
-    .btn{
-      position:fixed; right:12px; bottom:12px; z-index:10;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.08);
-      color:#eaf2ff; border-radius:14px;
-      padding:10px 12px;
-      font-weight:800; font-size:12px;
-      -webkit-tap-highlight-color: transparent;
-    }
+    canvas{display:block;width:100vw;height:100vh;}
   </style>
 </head>
 <body>
   <div id="msg">로딩 준비중…</div>
-  <button class="btn" id="btnReload">캐시 우회 새로고침</button>
   <canvas id="c"></canvas>
 
-  <!-- ✅ iPad Safari 안정: non-module -->
+  <!-- iPad Safari 안정: non-module -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <script>
-  (function(){
     const msg = document.getElementById('msg');
-    const btnReload = document.getElementById('btnReload');
-    btnReload.onclick = () => {
-      const u = new URL(location.href);
-      u.searchParams.set('v', Date.now().toString()); // 캐시 강제 무력화
-      location.href = u.toString();
-    };
 
-    function setMsg(text){ msg.innerHTML = text; }
-
-    // 0) THREE 로딩 체크
-    if (!window.THREE) {
-      setMsg('<span class="bad">❌ THREE 로딩 실패</span>\nCDN 접근이 막혔거나 네트워크 문제일 수 있어요.');
-      return;
-    }
-
-    // 1) WebGL 체크
-    try{
-      const t = document.createElement('canvas');
-      const gl = t.getContext('webgl') || t.getContext('experimental-webgl');
-      if(!gl){
-        setMsg('<span class="bad">❌ WebGL 비활성</span>\n브라우저/디바이스 설정 확인이 필요해요.');
-        return;
-      }
-    }catch(e){
-      setMsg('<span class="bad">❌ WebGL 오류</span>\n' + String(e));
-      return;
+    if(!window.THREE){
+      msg.textContent = '❌ THREE 로딩 실패 (CDN 접근 문제)';
+      throw new Error('THREE not loaded');
     }
 
     const canvas = document.getElementById('c');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x081625);
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 200);
+    const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 200);
     camera.position.set(0, 0.2, 3.2);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.enablePan = false;
 
-    // 라이트
     scene.add(new THREE.HemisphereLight(0xcfe7ff, 0x081625, 0.9));
     const key = new THREE.DirectionalLight(0xffffff, 1.1);
-    key.position.set(3, 2, 3);
+    key.position.set(3,2,3);
     scene.add(key);
 
-    // 빈 화면 방지용 기준 오브젝트(작은 점)
-    scene.add(new THREE.Mesh(
-      new THREE.SphereGeometry(0.02, 16, 16),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 })
-    ));
+    // 같은 폴더에 test.glb가 있다고 가정
+    const glbUrl = './test.glb';
+    msg.textContent = 'GLB 로딩중...\n' + glbUrl;
 
-    // 2) GLB URL (상대경로 꼬임 방지)
-    const glbUrl = new URL('test.glb', window.location.href).toString();
+    const loader = new THREE.GLTFLoader();
+    loader.load(glbUrl, (gltf)=>{
+      const model = gltf.scene;
 
-    setMsg('로딩중…\n<b>GLB URL</b>\n' + glbUrl);
+      // 중앙정렬 + 자동스케일
+      const box = new THREE.Box3().setFromObject(model);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      model.position.sub(center);
 
-    // 3) 먼저 fetch로 404 여부 확인 (진단용)
-    fetch(glbUrl, { method:'GET' })
-      .then(r=>{
-        if(!r.ok) throw new Error('HTTP ' + r.status + ' (파일 접근 불가)');
-        return r.arrayBuffer(); // 다운로드 가능 확인만
-      })
-      .then(()=>{
-        setMsg('<span class="ok">✅ 파일 접근 OK</span>\n이제 3D 로딩을 시작합니다.\n<b>GLB URL</b>\n' + glbUrl);
-        loadGLB();
-      })
-      .catch(err=>{
-        console.error(err);
-        setMsg('<span class="bad">❌ test.glb 접근 실패</span>\n' +
-               String(err) + '\n\n' +
-               '확인:\n- GitHub Pages 주소가 /ACUVUE-PRODUCT/ 인지\n- test.glb가 index.html과 같은 폴더인지\n- 캐시 때문에 이전 파일을 보는 건 아닌지 (?v=로 우회)');
-      });
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+      model.scale.setScalar(1.6 / maxDim);
 
-    let modelRoot = null;
+      scene.add(model);
+      msg.textContent = '✅ test.glb 로드 성공!\n드래그: 회전 / 핀치: 확대';
 
-    function loadGLB(){
-      const loader = new THREE.GLTFLoader();
-      loader.load(
-        glbUrl,
-        (gltf)=>{
-          if(modelRoot) scene.remove(modelRoot);
-
-          modelRoot = new THREE.Group();
-          modelRoot.add(gltf.scene);
-          scene.add(modelRoot);
-
-          // 자동 센터링/스케일/카메라
-          const box = new THREE.Box3().setFromObject(modelRoot);
-          const size = box.getSize(new THREE.Vector3());
-          const center = box.getCenter(new THREE.Vector3());
-
-          modelRoot.position.sub(center);
-
-          const maxDim = Math.max(size.x, size.y, size.z) || 1;
-          const targetSize = 1.6;
-          const scale = targetSize / maxDim;
-          modelRoot.scale.setScalar(scale);
-
-          // 카메라 거리 자동 조정
-          const dist = 3.2;
-          camera.position.set(0, 0.2, dist);
-          controls.target.set(0, 0, 0);
-          controls.update();
-
-          setMsg('<span class="ok">✅ GLB 로드 성공</span>\n드래그: 회전 / 핀치: 확대\n<b>GLB</b>: test.glb');
-        },
-        (xhr)=>{
-          if(xhr.total){
-            const p = Math.round((xhr.loaded/xhr.total)*100);
-            msg.innerHTML = '3D 로딩중… ' + p + '%\n<b>GLB URL</b>\n' + glbUrl;
-          }
-        },
-        (err)=>{
-          console.error(err);
-          setMsg('<span class="bad">❌ GLB 로딩 실패</span>\n콘솔 에러가 발생했어요.\n' +
-                 '대부분 파일 포맷/압축/드라코(Draco) 문제거나, 파일이 완전하지 않은 경우예요.');
-        }
-      );
-    }
+    }, undefined, (err)=>{
+      console.error(err);
+      msg.textContent = '❌ test.glb 로딩 실패\n(파일이 같은 폴더에 있는지 확인)';
+    });
 
     function animate(){
       requestAnimationFrame(animate);
@@ -173,12 +84,11 @@
     }
     animate();
 
-    window.addEventListener('resize', ()=>{
-      camera.aspect = window.innerWidth/window.innerHeight;
+    addEventListener('resize', ()=>{
+      camera.aspect = innerWidth/innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(innerWidth, innerHeight);
     });
-  })();
   </script>
 </body>
 </html>
