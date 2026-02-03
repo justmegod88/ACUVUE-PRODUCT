@@ -3,16 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>ACUVUE 3D Viewer (Module)</title>
+  <title>ACUVUE GLB Viewer (model-viewer)</title>
   <style>
     html,body{height:100%;margin:0;background:#081625;overflow:hidden;font-family:-apple-system,system-ui;}
-    canvas{display:block;width:100vw;height:100vh;}
-
     #msg{
       position:fixed;left:12px;right:12px;top:12px;z-index:20;
       padding:10px 12px;border-radius:12px;
-      background:rgba(0,0,0,.60);
-      color:#eaf2ff;font-size:13px;line-height:1.35;white-space:pre-wrap;
+      background:rgba(0,0,0,.60);color:#eaf2ff;font-size:13px;white-space:pre-wrap;
       border:1px solid rgba(255,255,255,.14);
     }
     #btns{
@@ -28,6 +25,11 @@
       -webkit-tap-highlight-color: transparent;
     }
     button.primary{ background:rgba(0,255,140,.12); border-color:rgba(0,255,140,.35); }
+
+    model-viewer{
+      width:100vw;height:100vh;
+      background:transparent;
+    }
   </style>
 </head>
 <body>
@@ -36,172 +38,79 @@
   <div id="btns">
     <button id="btnTest" class="primary">test.glb 보기</button>
     <button id="btnEye">eye_animation.glb 보기</button>
-    <button id="btnFrame">가운데 맞춤</button>
+    <button id="btnAnim">애니메이션 재생</button>
   </div>
 
-  <canvas id="c"></canvas>
+  <!-- ✅ model-viewer 로더 (Three.js 내장) -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 
-  <script type="module">
-    const msgEl = document.getElementById('msg');
-    const setMsg = (t)=>{ msgEl.textContent = t; };
+  <!-- ✅ 뷰어 -->
+  <model-viewer
+    id="mv"
+    src="test.glb"
+    camera-controls
+    touch-action="pan-y"
+    autoplay
+    exposure="1.1"
+    shadow-intensity="0"
+    style="display:block;">
+  </model-viewer>
 
-    // ✅ iPhone에서 “왜 안되는지” 바로 보이게
+  <script>
+    const msg = document.getElementById('msg');
+    const mv  = document.getElementById('mv');
+
+    // 에러를 화면에 표시
     window.addEventListener('error', (e)=>{
-      setMsg('❌ JS 에러\n' + (e?.message || e));
-    });
-    window.addEventListener('unhandledrejection', (e)=>{
-      setMsg('❌ Promise 에러\n' + (e?.reason?.message || e?.reason || e));
+      msg.textContent = '❌ JS 에러\n' + (e.message || e);
     });
 
-    // ✅ Module 방식(ios safari 안정)
-    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-    import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
-
-    // Renderer
-    const canvas = document.getElementById('c');
-    const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-    // Scene
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x081625);
-
-    // Lights (밝게)
-    scene.add(new THREE.AmbientLight(0xffffff, 1.25));
-    const d1 = new THREE.DirectionalLight(0xffffff, 1.7);
-    d1.position.set(5,5,5);
-    scene.add(d1);
-    const d2 = new THREE.DirectionalLight(0xffffff, 1.1);
-    d2.position.set(-5,3,-3);
-    scene.add(d2);
-
-    // Camera
-    const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.001, 5000);
-    camera.position.set(0, 0.2, 3.2);
-
-    // Controls (모바일 드래그/핀치)
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-
-    const loader = new GLTFLoader();
-    let currentRoot = null;
-
-    function disposeObject(obj){
-      obj.traverse((o)=>{
-        if(o.isMesh){
-          o.geometry?.dispose?.();
-          if(o.material){
-            if(Array.isArray(o.material)) o.material.forEach(m=>m?.dispose?.());
-            else o.material?.dispose?.();
-          }
-        }
-      });
-    }
-
-    function applySafariSafeMaterials(root){
-      let meshCount = 0;
-      root.traverse((o)=>{
-        if(o.isMesh){
-          meshCount++;
-          o.frustumCulled = false;
-
-          const mats = Array.isArray(o.material) ? o.material : [o.material];
-          mats.forEach((m)=>{
-            if(!m) return;
-            m.side = THREE.DoubleSide;
-            m.transparent = false;
-            m.opacity = 1.0;
-            m.depthWrite = true;
-            m.needsUpdate = true;
-          });
-        }
-      });
-      return meshCount;
-    }
-
-    function frameObject(obj){
-      const box = new THREE.Box3().setFromObject(obj);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-
-      const maxDim = Math.max(size.x, size.y, size.z) || 1;
-      const fov = camera.fov * Math.PI/180;
-      const camZ = Math.abs((maxDim/2) / Math.tan(fov/2)) * 2.2;
-
-      camera.near = maxDim / 1000;
-      camera.far  = maxDim * 1000;
-      camera.updateProjectionMatrix();
-
-      camera.position.set(center.x, center.y + maxDim*0.15, center.z + camZ);
-      controls.target.copy(center);
-      controls.update();
-
-      return {maxDim, center};
-    }
-
-    async function loadGLB(filename){
+    // GLB 파일이 실제로 접근 가능한지(404면 여기서 바로 잡힘)
+    async function probe(url){
       try{
-        setMsg(`로딩중…\n${filename}`);
-
-        if(currentRoot){
-          scene.remove(currentRoot);
-          try{ disposeObject(currentRoot); }catch(e){}
-          currentRoot = null;
-        }
-
-        // 캐시 회피
-        const url = `${filename}?v=${Date.now()}`;
-
-        const gltf = await new Promise((resolve, reject)=>{
-          loader.load(url, resolve, undefined, reject);
-        });
-
-        currentRoot = gltf.scene;
-        scene.add(currentRoot);
-
-        const meshCount = applySafariSafeMaterials(currentRoot);
-        const info = frameObject(currentRoot);
-
-        setMsg(
-          `✅ 로드 성공: ${filename}\n` +
-          `Mesh: ${meshCount}\n` +
-          `maxDim: ${info.maxDim.toFixed(4)}\n` +
-          `드래그 회전 / 핀치 확대`
-        );
+        const r = await fetch(url + '?v=' + Date.now(), { method:'GET' });
+        return r.ok ? '✅ 파일 접근 OK: ' + url : `❌ 파일 접근 실패: ${url}\nstatus: ${r.status}`;
       }catch(err){
-        console.error(err);
-        setMsg(`❌ 로딩 실패: ${filename}\n${err?.message || String(err)}`);
+        return `❌ 네트워크/권한 문제: ${url}\n${err}`;
       }
     }
 
-    // 버튼 연결
-    document.getElementById('btnTest').onclick = ()=>loadGLB('test.glb');
-    document.getElementById('btnEye').onclick  = ()=>loadGLB('eye_animation.glb');
-    document.getElementById('btnFrame').onclick = ()=>{
-      if(currentRoot) frameObject(currentRoot);
-      else setMsg('모델이 아직 없습니다.');
-    };
+    async function setModel(file){
+      msg.textContent = '로딩중…\n' + file;
 
-    // render loop
-    function animate(){
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
+      // 파일 접근 테스트 결과 먼저 표시
+      const p = await probe(file);
+      msg.textContent = p + '\n\n모델 로딩 시도중…';
+
+      // model-viewer에 src 변경(캐시 회피)
+      mv.src = file + '?v=' + Date.now();
     }
-    animate();
 
-    addEventListener('resize', ()=>{
-      camera.aspect = innerWidth/innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(innerWidth, innerHeight);
+    // model-viewer 이벤트
+    mv.addEventListener('load', ()=>{
+      msg.textContent = '✅ 로드 성공!\n드래그 회전 / 핀치 확대';
+    });
+    mv.addEventListener('error', (e)=>{
+      msg.textContent = '❌ model-viewer 로딩 실패\n' + JSON.stringify(e.detail || {}, null, 2);
     });
 
-    // 시작: test.glb 로드
-    loadGLB('test.glb');
+    // 버튼
+    document.getElementById('btnTest').onclick = ()=>setModel('test.glb');
+    document.getElementById('btnEye').onclick  = ()=>setModel('eye_animation.glb');
+
+    // 애니메이션 재생(eye_animation.glb에 애니메이션이 들어있다면 동작)
+    document.getElementById('btnAnim').onclick = ()=>{
+      try{
+        mv.play();
+        msg.textContent = '▶️ 애니메이션 재생 시도';
+      }catch(e){
+        msg.textContent = '❌ 애니메이션 재생 실패\n(파일에 애니메이션이 없을 수 있어요)';
+      }
+    };
+
+    // 시작
+    setModel('test.glb');
   </script>
 </body>
 </html>
