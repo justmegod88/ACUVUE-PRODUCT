@@ -3,455 +3,672 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>ACUVUE TORIC 3D MVP</title>
+  <title>ACUVUE TORIC Web 3D MVP</title>
   <style>
     :root{
-      --bg:#0b0f17;
-      --card:#111a2a;
-      --card2:#0f1625;
-      --text:#e9eefb;
-      --muted:#a9b6d3;
-      --accent:#ff2d2d;
-      --btn:#1a2742;
-      --btnOn:#24365f;
-      --warn:#ffcc00;
+      --bg1:#081625;
+      --bg2:#0a1f33;
+      --panel:rgba(10,24,40,.72);
+      --bd:rgba(255,255,255,.10);
+      --text:#eaf2ff;
+      --muted:rgba(234,242,255,.72);
+      --pill:rgba(255,255,255,.10);
+      --accent:#2fd1ff;
+      --green:#20c65a;
+      --green2:#12a34a;
+      --danger:#ff3b30;
+      --yellow:#ffd26a;
     }
-    html,body{height:100%; margin:0; background:var(--bg); color:var(--text); font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial;}
-    #app{position:fixed; inset:0; display:flex; flex-direction:column;}
-    header{
-      position:sticky; top:0; z-index:5;
-      padding:10px 12px 8px;
-      background:linear-gradient(180deg, rgba(11,15,23,.98), rgba(11,15,23,.75));
-      backdrop-filter: blur(8px);
+
+    html,body{height:100%; margin:0; font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial; color:var(--text); background:linear-gradient(180deg,var(--bg1),var(--bg2));}
+    #app{position:fixed; inset:0; overflow:hidden;}
+    canvas{position:absolute; inset:0; width:100%; height:100%; display:block;}
+
+    /* Top bar */
+    .topbar{
+      position:absolute; left:0; right:0; top:0;
+      padding:14px 14px 10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      background:linear-gradient(180deg, rgba(5,12,20,.92), rgba(5,12,20,.40));
+      backdrop-filter: blur(10px);
       border-bottom:1px solid rgba(255,255,255,.06);
+      z-index:5;
     }
-    .toprow{display:flex; align-items:center; justify-content:space-between; gap:10px;}
-    .brand{font-weight:800; letter-spacing:.3px;}
-    .pill{font-size:12px; padding:4px 8px; border-radius:999px; background:rgba(255,255,255,.08); color:var(--muted);}
-    .toggle{
-      margin-top:8px;
-      display:flex; gap:8px; width:100%;
-    }
-    .toggle button{
-      flex:1;
-      border:1px solid rgba(255,255,255,.10);
+    .top-left{font-weight:800; font-size:14px; letter-spacing:.2px;}
+    .top-right{display:flex; align-items:center; gap:10px;}
+    .btn-close{
+      border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
       color:var(--text);
-      padding:10px 10px;
-      border-radius:12px;
-      font-weight:700;
-    }
-    .toggle button.active{
-      background:rgba(255,45,45,.18);
-      border-color: rgba(255,45,45,.45);
-    }
-
-    #stageWrap{position:relative; flex:1; min-height:0;}
-    #stage{position:absolute; inset:0;}
-    #status{
-      position:absolute; left:12px; right:12px; top:12px; z-index:2;
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
-      pointer-events:none;
-    }
-    .statusChip{
-      pointer-events:none;
-      background:rgba(17,26,42,.72);
-      border:1px solid rgba(255,255,255,.08);
-      padding:8px 10px;
-      border-radius:12px;
+      border-radius:999px;
+      padding:8px 12px;
+      font-weight:800;
       font-size:12px;
-      color:var(--muted);
     }
 
-    /* bottom controls */
-    footer{
-      position:sticky; bottom:0; z-index:5;
-      padding:10px 12px 12px;
-      background:linear-gradient(0deg, rgba(11,15,23,.98), rgba(11,15,23,.75));
-      backdrop-filter: blur(8px);
+    /* Product pill (center-ish like your sample) */
+    .product-pill{
+      position:absolute; left:50%; transform:translateX(-50%);
+      top:62px; z-index:6;
+      max-width:86%;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.14);
+      font-weight:900;
+      font-size:14px;
+      text-align:center;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .tag{
+      display:inline-block;
+      margin-left:8px;
+      padding:3px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      background:rgba(47,209,255,.16);
+      border:1px solid rgba(47,209,255,.35);
+      color:var(--text);
+      vertical-align:middle;
+    }
+
+    /* Right icon stack */
+    .right-stack{
+      position:absolute;
+      right:14px;
+      top:120px;
+      z-index:6;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .iconbtn{
+      width:44px; height:44px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      font-size:12px;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .iconbtn.on{
+      background:rgba(47,209,255,.18);
+      border-color:rgba(47,209,255,.45);
+    }
+
+    /* Bottom action & tabs */
+    .bottom{
+      position:absolute; left:0; right:0; bottom:0;
+      padding:12px 14px 16px;
+      z-index:6;
+      background:linear-gradient(0deg, rgba(5,12,20,.94), rgba(5,12,20,.22));
+      backdrop-filter: blur(10px);
       border-top:1px solid rgba(255,255,255,.06);
     }
-    .tabs{display:flex; gap:8px;}
-    .tabs button{
-      flex:1;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.06);
-      color:var(--text);
-      padding:12px 10px;
+    .tabs{
+      display:flex; justify-content:center; gap:10px; margin-bottom:10px;
+    }
+    .tab{
+      width:44px; height:44px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      display:grid; place-items:center;
+      font-weight:900; font-size:12px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab.on{background:rgba(255,255,255,.16);}
+    .cta{
+      width:100%;
+      border:0;
       border-radius:14px;
-      font-weight:800;
+      padding:14px 14px;
+      color:#062012;
+      background:linear-gradient(180deg,var(--green),var(--green2));
+      font-weight:1000;
+      font-size:14px;
+      -webkit-tap-highlight-color: transparent;
     }
-    .tabs button.on{background:rgba(36,54,95,.75); border-color:rgba(255,255,255,.16);}
-    .tabs button:disabled{opacity:.35}
-
-    .card{
-      margin-top:10px;
-      background:rgba(17,26,42,.68);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:16px;
-      padding:12px 12px;
-    }
-    .card h3{margin:0 0 6px 0; font-size:14px;}
-    .card p{margin:0; font-size:13px; color:var(--muted); line-height:1.35;}
-    .actions{
-      margin-top:10px;
-      display:flex; gap:8px;
-    }
-    .actions button{
-      flex:1;
-      border:1px solid rgba(255,255,255,.10);
-      background:var(--btn);
-      color:var(--text);
-      padding:10px 10px;
-      border-radius:12px;
-      font-weight:800;
-    }
-    .actions button.primary{
-      background:rgba(255,45,45,.20);
-      border-color:rgba(255,45,45,.45);
-    }
-    .hint{
+    .sub{
       margin-top:8px;
+      text-align:center;
       font-size:12px;
-      color:rgba(233,238,251,.70);
+      color:rgba(234,242,255,.72);
     }
-    .hint span{color:var(--warn); font-weight:800;}
+
+    /* Info sheet */
+    .sheet{
+      position:absolute;
+      left:14px; right:14px;
+      bottom:92px;
+      z-index:7;
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:18px;
+      padding:12px 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      display:none;
+    }
+    .sheet.show{display:block;}
+    .sheet h3{margin:0 0 6px 0; font-size:14px;}
+    .sheet p{margin:0; font-size:13px; color:var(--muted); line-height:1.35;}
+    .row{
+      display:flex; gap:8px; margin-top:10px;
+    }
+    .smallbtn{
+      flex:1;
+      border-radius:12px;
+      padding:10px 10px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      font-weight:900;
+      font-size:13px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .smallbtn.primary{
+      background:rgba(255,59,48,.18);
+      border-color:rgba(255,59,48,.45);
+    }
+
+    /* Quiz modal */
+    .modal{
+      position:absolute; inset:0;
+      background:rgba(0,0,0,.55);
+      display:none;
+      z-index:10;
+      padding:18px;
+    }
+    .modal.show{display:block;}
+    .modalcard{
+      position:absolute;
+      left:18px; right:18px;
+      top:50%; transform:translateY(-50%);
+      background:rgba(10,24,40,.94);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:18px;
+      padding:14px;
+    }
+    .qtitle{font-weight:1000; margin:0 0 10px 0;}
+    .qnum{color:rgba(234,242,255,.78); font-size:12px; margin-bottom:6px;}
+    .opt{
+      width:100%;
+      text-align:left;
+      margin-top:8px;
+      border-radius:14px;
+      padding:12px 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      font-weight:800;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .opt.correct{border-color:rgba(32,198,90,.7); background:rgba(32,198,90,.14);}
+    .opt.wrong{border-color:rgba(255,59,48,.7); background:rgba(255,59,48,.14);}
+    .modalfoot{display:flex; gap:10px; margin-top:12px;}
+    .modalfoot button{
+      flex:1;
+      border-radius:14px;
+      padding:12px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      font-weight:1000;
+    }
+
+    /* Tiny status text */
+    .status{
+      position:absolute;
+      left:14px; right:70px;
+      top:110px;
+      z-index:6;
+      font-size:12px;
+      color:rgba(234,242,255,.78);
+      text-shadow: 0 2px 8px rgba(0,0,0,.35);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .status b{color:var(--yellow);}
   </style>
 </head>
 <body>
 <div id="app">
-  <header>
-    <div class="toprow">
-      <div class="brand">ACUVUE TORIC 3D</div>
-      <div class="pill" id="badge">Optician MVP</div>
-    </div>
-    <div class="toggle" role="tablist" aria-label="제품 선택">
-      <button id="btnOneDay" class="active">오아시스 원데이 난시</button>
-      <button id="btnMax">오아시스 맥스 난시</button>
-    </div>
-  </header>
+  <canvas id="c"></canvas>
 
-  <div id="stageWrap">
-    <div id="status">
-      <div class="statusChip" id="chipLeft">⦿ 착용 직후: 축 안정화 진행 중</div>
-      <div class="statusChip" id="chipRight">드래그: 회전 · 핀치: 확대</div>
+  <div class="topbar">
+    <div class="top-left">결과</div>
+    <div class="top-right">
+      <button class="btn-close" id="btnClose">닫기</button>
     </div>
-    <canvas id="stage"></canvas>
   </div>
 
-  <footer>
-    <div class="tabs">
-      <button id="tabASD" class="on">ASD</button>
-      <button id="tabPVP">PVP</button>
-      <button id="tabBL" disabled>BL</button>
-    </div>
+  <div class="product-pill" id="productPill">
+    아큐브 오아시스 원데이 난시
+  </div>
 
-    <div class="card">
-      <h3 id="cardTitle">ASD 디자인</h3>
-      <p id="cardBody">
-        순목 시 눈꺼풀과 렌즈의 상호작용으로 난시 축이 빠르게 제자리로 안정됩니다.
-      </p>
-      <div class="actions">
-        <button id="btnBlink" class="primary">Blink (ASD)</button>
-        <button id="btnBeforeAfter">Before/After</button>
-      </div>
-      <div class="hint">팁: <span>Blink</span>를 눌러 2~3회 깜박임 후 축이 정렬되는 연출을 확인하세요.</div>
+  <div class="status" id="statusText">드래그: 회전 · 핀치: 확대 · <b>Blink</b>: ASD 축 안정 연출</div>
+
+  <div class="right-stack">
+    <div class="iconbtn" id="btnRotate" title="360">360</div>
+    <div class="iconbtn on" id="btnASD" title="ASD">ASD</div>
+    <div class="iconbtn" id="btnPVP" title="PVP">PVP</div>
+    <div class="iconbtn" id="btnBL" title="BL">BL</div>
+  </div>
+
+  <div class="sheet" id="sheet">
+    <h3 id="sheetTitle">ASD 난시 디자인</h3>
+    <p id="sheetBody">순목(눈깜박임) 시 눈꺼풀과 렌즈의 상호작용으로 난시 축이 빠르게 제자리로 안정됩니다.</p>
+    <div class="row" id="sheetRow">
+      <button class="smallbtn primary" id="btnBlink">순목(눈깜박임) 버튼</button>
+      <button class="smallbtn" id="btnBeforeAfter">Before / After</button>
     </div>
-  </footer>
+  </div>
+
+  <div class="bottom">
+    <div class="tabs">
+      <div class="tab on" id="tab1">1D</div>
+      <div class="tab" id="tab2">MAX</div>
+      <div class="tab" id="tabQuiz">Q</div>
+    </div>
+    <button class="cta" id="ctaBtn">123마크</button>
+    <div class="sub" id="ctaSub">콘택트렌즈가 뒤집혀 있는지 확인이 가능해요 (테스트 문구)</div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modalcard">
+      <div class="qnum" id="qnum">퀴즈 1/2</div>
+      <h3 class="qtitle" id="qtitle">Q. ASD 디자인에서 ‘순목’이 하는 역할은?</h3>
+      <button class="opt" data-idx="0" id="opt0">렌즈를 건조하게 만든다</button>
+      <button class="opt" data-idx="1" id="opt1">축 안정화를 돕는다</button>
+      <button class="opt" data-idx="2" id="opt2">블루라이트를 차단한다</button>
+      <div class="modalfoot">
+        <button id="btnModalClose">닫기</button>
+        <button id="btnNext">다음</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Three.js (module) -->
 <script type="module">
   import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
   import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+  import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
   // ---------- DOM ----------
-  const canvas = document.getElementById('stage');
-  const chipLeft = document.getElementById('chipLeft');
-  const btnOneDay = document.getElementById('btnOneDay');
-  const btnMax = document.getElementById('btnMax');
+  const canvas = document.getElementById('c');
+  const productPill = document.getElementById('productPill');
+  const statusText = document.getElementById('statusText');
 
-  const tabASD = document.getElementById('tabASD');
-  const tabPVP = document.getElementById('tabPVP');
-  const tabBL  = document.getElementById('tabBL');
+  const btnRotate = document.getElementById('btnRotate');
+  const btnASD = document.getElementById('btnASD');
+  const btnPVP = document.getElementById('btnPVP');
+  const btnBL = document.getElementById('btnBL');
 
-  const cardTitle = document.getElementById('cardTitle');
-  const cardBody  = document.getElementById('cardBody');
+  const tab1 = document.getElementById('tab1');
+  const tab2 = document.getElementById('tab2');
+  const tabQuiz = document.getElementById('tabQuiz');
 
+  const sheet = document.getElementById('sheet');
+  const sheetTitle = document.getElementById('sheetTitle');
+  const sheetBody = document.getElementById('sheetBody');
+  const sheetRow = document.getElementById('sheetRow');
   const btnBlink = document.getElementById('btnBlink');
   const btnBeforeAfter = document.getElementById('btnBeforeAfter');
 
-  // ---------- Scene ----------
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const ctaBtn = document.getElementById('ctaBtn');
+  const ctaSub = document.getElementById('ctaSub');
+
+  const modal = document.getElementById('modal');
+  const qnum = document.getElementById('qnum');
+  const qtitle = document.getElementById('qtitle');
+  const opt0 = document.getElementById('opt0');
+  const opt1 = document.getElementById('opt1');
+  const opt2 = document.getElementById('opt2');
+  const btnModalClose = document.getElementById('btnModalClose');
+  const btnNext = document.getElementById('btnNext');
+
+  document.getElementById('btnClose').addEventListener('click', ()=> alert('닫기(데모)'));
+
+  // ---------- Three.js base ----------
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x0b0f17, 3.5, 10);
+  scene.fog = new THREE.Fog(0x071322, 5, 18);
 
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 50);
-  camera.position.set(0, 0.7, 4.2);
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(0, 0.4, 4.8);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.enablePan = false;
-  controls.minDistance = 2.4;
-  controls.maxDistance = 6.5;
-  controls.rotateSpeed = 0.8;
+  controls.minDistance = 3.0;
+  controls.maxDistance = 7.0;
+  controls.rotateSpeed = 0.9;
 
-  // Lights
-  const hemi = new THREE.HemisphereLight(0xcfe7ff, 0x17223a, 0.9);
-  scene.add(hemi);
-
-  const key = new THREE.DirectionalLight(0xffffff, 0.9);
-  key.position.set(2.8, 2.2, 2.2);
+  // Lighting
+  scene.add(new THREE.HemisphereLight(0xcfe7ff, 0x0a1b2f, 0.9));
+  const key = new THREE.DirectionalLight(0xffffff, 1.0);
+  key.position.set(3, 2, 3);
   scene.add(key);
-
-  const rim = new THREE.DirectionalLight(0x7fb3ff, 0.55);
-  rim.position.set(-3, 1.0, -2.0);
+  const rim = new THREE.DirectionalLight(0x5aa6ff, 0.55);
+  rim.position.set(-3, 1, -2);
   scene.add(rim);
 
-  // ---------- Eye (simple sphere + iris) ----------
-  const group = new THREE.Group();
-  scene.add(group);
+  // ---------- Groups ----------
+  const root = new THREE.Group();
+  scene.add(root);
 
-  const eyeGeo = new THREE.SphereGeometry(1.05, 64, 64);
-  const eyeMat = new THREE.MeshStandardMaterial({
-    color: 0xf2f5ff,
-    roughness: 0.35,
-    metalness: 0.0,
+  const eyeGroup = new THREE.Group();
+  root.add(eyeGroup);
+
+  const lensGroup = new THREE.Group();
+  root.add(lensGroup);
+
+  // ---------- Load eye GLB (blink animation) ----------
+  const loader = new GLTFLoader();
+  let mixer = null;
+  let blinkAction = null;
+
+  loader.load('./eye_animation.glb', (gltf)=>{
+    const model = gltf.scene;
+    model.traverse(o=>{
+      if (o.isMesh){
+        o.castShadow = false;
+        o.receiveShadow = false;
+      }
+    });
+    // center / scale safely
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3()).length();
+    const center = box.getCenter(new THREE.Vector3());
+    model.position.sub(center);
+    const s = 2.2 / (size || 1);
+    model.scale.setScalar(s);
+    eyeGroup.add(model);
+
+    // animation
+    if (gltf.animations && gltf.animations.length){
+      mixer = new THREE.AnimationMixer(model);
+      // 가장 첫번째 클립을 blink로 사용 (이름 몰라도 안전)
+      blinkAction = mixer.clipAction(gltf.animations[0]);
+      blinkAction.setLoop(THREE.LoopOnce, 1);
+      blinkAction.clampWhenFinished = true;
+    }
+  }, undefined, (e)=>{
+    console.error(e);
+    alert('eye_animation.glb 로딩 실패: 파일이 같은 폴더에 있는지 확인해줘');
   });
-  const eye = new THREE.Mesh(eyeGeo, eyeMat);
-  group.add(eye);
 
-  const irisGeo = new THREE.CircleGeometry(0.38, 64);
-  const irisMat = new THREE.MeshStandardMaterial({ color: 0x2a6b7a, roughness: 0.8 });
-  const iris = new THREE.Mesh(irisGeo, irisMat);
-  iris.position.set(0, 0, 1.02);
-  group.add(iris);
-
-  const pupilGeo = new THREE.CircleGeometry(0.14, 64);
-  const pupilMat = new THREE.MeshStandardMaterial({ color: 0x0b0f17, roughness: 0.9 });
-  const pupil = new THREE.Mesh(pupilGeo, pupilMat);
-  pupil.position.set(0, 0, 1.03);
-  group.add(pupil);
-
-  // ---------- Toric Lens (transparent disc) ----------
-  const lensGeo = new THREE.CircleGeometry(0.88, 96);
+  // ---------- Generate TEMP lens (until vendor GLB arrives) ----------
+  // Lens disc
+  const lensGeo = new THREE.CircleGeometry(1.05, 96);
   const lensMat = new THREE.MeshPhysicalMaterial({
-    color: 0x7fd1ff,
+    color: 0x86ddff,
     transparent: true,
     opacity: 0.18,
-    roughness: 0.18,
-    transmission: 0.9,     // glass-like
+    roughness: 0.14,
+    transmission: 0.95,
     thickness: 0.12,
     ior: 1.33,
-    clearcoat: 0.6,
-    clearcoatRoughness: 0.15
+    clearcoat: 0.7,
+    clearcoatRoughness: 0.12
   });
   const lens = new THREE.Mesh(lensGeo, lensMat);
-  lens.position.set(0, 0, 1.10);
-  group.add(lens);
+  lens.position.set(0, 0, 1.35);
+  lensGroup.add(lens);
 
-  // Toric axis marker (line)
-  const markerMat = new THREE.LineBasicMaterial({ color: 0xfff2a6, transparent:true, opacity:0.9 });
-  const markerPts = [ new THREE.Vector3(-0.70, 0.0, 1.105), new THREE.Vector3(0.70, 0.0, 1.105) ];
-  const markerGeo = new THREE.BufferGeometry().setFromPoints(markerPts);
-  const marker = new THREE.Line(markerGeo, markerMat);
-  group.add(marker);
+  // Axis line (toric axis marker)
+  const axisMat = new THREE.LineBasicMaterial({ color: 0xffd26a, transparent:true, opacity:0.9 });
+  const axisGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(-0.85, 0, 1.36),
+    new THREE.Vector3( 0.85, 0, 1.36),
+  ]);
+  const axisLine = new THREE.Line(axisGeo, axisMat);
+  lensGroup.add(axisLine);
 
-  // Small tick on top (to make rotation obvious)
-  const tickGeo = new THREE.BoxGeometry(0.06, 0.18, 0.02);
-  const tickMat = new THREE.MeshStandardMaterial({ color: 0xffd15a, roughness: 0.4 });
-  const tick = new THREE.Mesh(tickGeo, tickMat);
-  tick.position.set(0, 0.78, 1.11);
-  group.add(tick);
+  // 12 o'clock mark
+  const markGeo = new THREE.BoxGeometry(0.08, 0.22, 0.02);
+  const markMat = new THREE.MeshStandardMaterial({ color: 0xffd26a, roughness: 0.4 });
+  const mark = new THREE.Mesh(markGeo, markMat);
+  mark.position.set(0, 0.92, 1.36);
+  lensGroup.add(mark);
 
-  // ---------- Eyelid (blink) ----------
-  // Simple "lid" plane that moves down/up (MVP)
-  const lidGeo = new THREE.PlaneGeometry(2.6, 1.6);
-  const lidMat = new THREE.MeshStandardMaterial({
-    color: 0x0b0f17,
-    transparent: true,
-    opacity: 0.92,
-    side: THREE.DoubleSide
-  });
-  const lid = new THREE.Mesh(lidGeo, lidMat);
-  lid.position.set(0, 1.2, 1.25);
-  lid.rotation.x = Math.PI * 0.02;
-  group.add(lid);
+  // Blue-light rays (MAX only)
+  const rays = new THREE.Group();
+  rays.visible = false;
+  scene.add(rays);
 
-  // ---------- Blue-light rays (MAX only) ----------
-  const raysGroup = new THREE.Group();
-  scene.add(raysGroup);
-  raysGroup.visible = false;
-
-  function makeRay(angleDeg){
-    const g = new THREE.CylinderGeometry(0.01, 0.06, 3.0, 10, 1, true);
-    const m = new THREE.MeshStandardMaterial({ color: 0x4aa3ff, transparent:true, opacity:0.35, emissive:0x2255aa });
+  function makeRay(x, y, z, len=4){
+    const g = new THREE.CylinderGeometry(0.01, 0.08, len, 10, 1, true);
+    const m = new THREE.MeshStandardMaterial({ color: 0x4aa3ff, transparent:true, opacity:0.25, emissive:0x1b4faa });
     const ray = new THREE.Mesh(g, m);
-    ray.rotation.z = THREE.MathUtils.degToRad(angleDeg);
-    ray.position.set(-1.9, 0.2, 1.1);
     ray.rotation.x = Math.PI/2;
+    ray.position.set(x, y, z);
     return ray;
   }
-  const ray1 = makeRay(8);
-  const ray2 = makeRay(-8);
-  raysGroup.add(ray1, ray2);
+  const rayA = makeRay(-2.2, 0.25, 1.2);
+  const rayB = makeRay(-2.2,-0.05, 1.2);
+  rays.add(rayA, rayB);
 
-  // ---------- State ----------
-  let product = 'oneday'; // 'oneday' | 'max'
-  let tab = 'ASD';        // 'ASD' | 'PVP' | 'BL'
-  let isBlinking = false;
-
-  // Toric axis simulation: start misaligned, then align to 0
-  const MISALIGN = THREE.MathUtils.degToRad(18);
+  // ---------- ASD rotation logic ----------
+  const MISALIGN = THREE.MathUtils.degToRad(18); // 착용 직후 축 어긋남(연출)
   let axisAngle = MISALIGN;
   let axisTarget = MISALIGN;
-
-  // before/after toggle
   let afterMode = false;
 
-  // Apply axis angle to marker + tick + lens
   function applyAxis(angle){
-    // rotate around Z axis (screen-facing axis)
-    lens.rotation.z = angle;
-    marker.rotation.z = angle;
-    tick.rotation.z = angle;
+    lensGroup.rotation.z = angle;
   }
   applyAxis(axisAngle);
 
-  // ---------- UI helpers ----------
-  function setProduct(next){
-    product = next;
-
-    btnOneDay.classList.toggle('active', product === 'oneday');
-    btnMax.classList.toggle('active', product === 'max');
-
-    // BL tab enabled only for MAX
-    tabBL.disabled = (product !== 'max');
-    if (tab === 'BL' && product !== 'max') setTab('ASD');
-
-    // Badge
-    document.getElementById('badge').textContent =
-      (product === 'max') ? 'Optician MVP · MAX' : 'Optician MVP · 1-Day';
-
-    // small visual: MAX slightly warmer lens tint (just for demo)
-    lensMat.color.set(product === 'max' ? 0x8be1ff : 0x7fd1ff);
-
-    // reset BL visuals
-    raysGroup.visible = (tab === 'BL' && product === 'max');
-  }
-
-  function setTab(next){
-    tab = next;
-    tabASD.classList.toggle('on', tab === 'ASD');
-    tabPVP.classList.toggle('on', tab === 'PVP');
-    tabBL.classList.toggle('on',  tab === 'BL');
-
-    if (tab === 'ASD'){
-      cardTitle.textContent = 'ASD 디자인';
-      cardBody.textContent = '순목 시 눈꺼풀과 렌즈의 상호작용으로 난시 축이 빠르게 제자리로 안정됩니다.';
-      btnBlink.style.display = '';
-      btnBeforeAfter.style.display = '';
-      raysGroup.visible = false;
-      markerMat.opacity = 0.9;
-    } else if (tab === 'PVP'){
-      cardTitle.textContent = 'PVP 습윤 인자';
-      cardBody.textContent = 'PVP 습윤 인자가 표면 젖음성을 유지하도록 도와 편안함에 기여합니다. (MVP: 표면 강조 연출)';
-      btnBlink.style.display = 'none';
-      btnBeforeAfter.style.display = 'none';
-      raysGroup.visible = false;
-      markerMat.opacity = 0.35;
-      // visual: slightly increase gloss/transmission to imply wet surface
-      lensMat.opacity = 0.16;
-      lensMat.clearcoat = 0.85;
-    } else if (tab === 'BL'){
-      cardTitle.textContent = '블루라이트 (MAX)';
-      cardBody.textContent = '블루라이트가 눈으로 들어오는 경로 중 일부가 렌즈에서 감소/필터링되는 연출을 확인합니다. (MVP: 광선 + 감쇠)';
-      btnBlink.style.display = 'none';
-      btnBeforeAfter.style.display = 'none';
-      raysGroup.visible = (product === 'max');
-      markerMat.opacity = 0.35;
-      // visual: slightly warm lens tint to cue filtering (demo only)
-      lensMat.color.set(0x98e6ff);
-    }
-  }
-
-  function setStatus(text){
-    chipLeft.textContent = text;
-  }
-
-  // ---------- ASD interactions ----------
   function setBefore(){
     afterMode = false;
     axisTarget = MISALIGN;
-    setStatus('⦿ 착용 직후: 축 안정화 진행 중');
+    statusText.innerHTML = '드래그: 회전 · 핀치: 확대 · <b>Blink</b>: ASD 축 안정 연출 (착용 직후)';
   }
-
   function setAfter(){
     afterMode = true;
     axisTarget = 0;
-    setStatus('⦿ 순목 후: 축 안정화 완료');
+    statusText.innerHTML = '드래그: 회전 · 핀치: 확대 · <b>축 안정화 완료</b>';
   }
 
-  btnBlink.addEventListener('click', async () => {
-    if (isBlinking) return;
-    isBlinking = true;
-    setStatus('⦿ Blink 중: 축 안정화 진행…');
+  // ---------- Modes / UI ----------
+  let product = '1D'; // '1D' | 'MAX'
+  let mode = 'ASD';   // 'ASD' | 'PVP' | 'BL'
+  let sheetOpen = false;
 
-    // blink 3 times
-    const blinks = 3;
-    for (let i=0;i<blinks;i++){
-      await blinkOnce(170);
-      // during blink, nudge axis toward 0 (simulate stabilization)
-      axisTarget = 0;
-      await sleep(70);
+  function setProduct(p){
+    product = p;
+    tab1.classList.toggle('on', product==='1D');
+    tab2.classList.toggle('on', product==='MAX');
+
+    if (product==='1D'){
+      productPill.textContent = '아큐브 오아시스 원데이 난시';
+      // BL 비활성 느낌
+      btnBL.style.opacity = 0.35;
+      btnBL.style.pointerEvents = 'none';
+      if (mode==='BL') setMode('ASD');
+    } else {
+      productPill.innerHTML = '아큐브 오아시스 맥스 난시 <span class="tag">Blue Light</span>';
+      btnBL.style.opacity = 1;
+      btnBL.style.pointerEvents = 'auto';
+    }
+    // 렌즈 색감 살짝 차이(데모)
+    lensMat.color.set(product==='MAX' ? 0x9ae6ff : 0x86ddff);
+  }
+
+  function setMode(m){
+    mode = m;
+    btnASD.classList.toggle('on', mode==='ASD');
+    btnPVP.classList.toggle('on', mode==='PVP');
+    btnBL.classList.toggle('on',  mode==='BL');
+
+    rays.visible = (mode==='BL' && product==='MAX');
+
+    // reset visuals
+    lensMat.opacity = 0.18;
+    lensMat.clearcoat = 0.7;
+    axisMat.opacity = 0.9;
+
+    if (mode==='ASD'){
+      sheetTitle.textContent = 'ASD 난시 디자인';
+      sheetBody.textContent = '순목(눈깜박임) 시 눈꺼풀과 렌즈의 상호작용으로 난시 축이 빠르게 제자리로 안정됩니다.';
+      sheetRow.style.display = 'flex';
+      ctaBtn.textContent = '순목(눈깜박임)';
+      ctaSub.textContent = '버튼 클릭 시 눈이 깜박이며(eye GLB), 렌즈 축이 안정화되는 연출을 확인합니다.';
+    }
+    if (mode==='PVP'){
+      sheetTitle.textContent = 'PVP 습윤 인자';
+      sheetBody.textContent = 'PVP 습윤 인자가 렌즈 표면 젖음성을 유지하도록 돕고, 수분 유지에 기여합니다. (테스트: 표면 강조 연출)';
+      sheetRow.style.display = 'none';
+      // “표면 확대” 느낌: 더 맑고 유광
+      lensMat.opacity = 0.14;
+      lensMat.clearcoat = 0.9;
+      axisMat.opacity = 0.35;
+      ctaBtn.textContent = 'PVP 보기';
+      ctaSub.textContent = '렌즈 표면(젖음성) 포인트를 간단히 확인합니다. (추후 내부 단면/레이어로 확장)';
+    }
+    if (mode==='BL'){
+      sheetTitle.textContent = '블루라이트 차단 (MAX)';
+      sheetBody.textContent = '블루라이트가 눈으로 들어오는 경로 중 일부가 렌즈에서 감소/필터링되는 연출을 확인합니다. (테스트: 광선 + 감쇠)';
+      sheetRow.style.display = 'none';
+      axisMat.opacity = 0.35;
+      ctaBtn.textContent = 'BL 보기';
+      ctaSub.textContent = 'MAX 난시에서만 제공되는 블루라이트 관련 연출(테스트)을 확인합니다.';
     }
 
-    setAfter();
-    isBlinking = false;
-  });
-
-  btnBeforeAfter.addEventListener('click', () => {
-    if (!afterMode) setAfter();
-    else setBefore();
-  });
-
-  async function blinkOnce(durationMs=160){
-    // lid down
-    await animateValue(1.2, 0.15, durationMs*0.55, (v)=>{ lid.position.y = v; });
-    // lid up
-    await animateValue(0.15, 1.2, durationMs*0.45, (v)=>{ lid.position.y = v; });
+    openSheet(true);
   }
 
-  // ---------- UI event bindings ----------
-  btnOneDay.addEventListener('click', ()=> setProduct('oneday'));
-  btnMax.addEventListener('click', ()=> setProduct('max'));
+  function openSheet(forceOpen){
+    sheetOpen = forceOpen ?? !sheetOpen;
+    sheet.classList.toggle('show', sheetOpen);
+  }
 
-  tabASD.addEventListener('click', ()=> { setTab('ASD'); lensMat.opacity = 0.18; lensMat.clearcoat = 0.6; });
-  tabPVP.addEventListener('click', ()=> setTab('PVP'));
-  tabBL.addEventListener('click', ()=> { if (product==='max') setTab('BL'); });
+  // Right icon actions
+  btnRotate.addEventListener('click', ()=>{
+    // 360 자동 회전 토글
+    autoSpin = !autoSpin;
+    btnRotate.classList.toggle('on', autoSpin);
+  });
+  btnASD.addEventListener('click', ()=> setMode('ASD'));
+  btnPVP.addEventListener('click', ()=> setMode('PVP'));
+  btnBL.addEventListener('click', ()=> { if (product==='MAX') setMode('BL'); });
 
-  // ---------- animation helpers ----------
+  // product tabs
+  tab1.addEventListener('click', ()=> setProduct('1D'));
+  tab2.addEventListener('click', ()=> setProduct('MAX'));
+
+  // CTA: mode별 행동 (이미지 참고처럼 하단 큰 버튼이 핵심 트리거)
+  ctaBtn.addEventListener('click', ()=>{
+    if (mode==='ASD') triggerBlinkASD();
+    else openSheet(true);
+  });
+
+  // Sheet buttons
+  btnBlink.addEventListener('click', triggerBlinkASD);
+  btnBeforeAfter.addEventListener('click', ()=>{ afterMode ? setBefore() : setAfter(); });
+
+  // ---------- Blink + ASD action ----------
+  let isBlinking = false;
+
+  async function triggerBlinkASD(){
+    if (isBlinking) return;
+    isBlinking = true;
+    openSheet(true);
+
+    // play eye blink animation (if exists)
+    if (blinkAction){
+      try{
+        blinkAction.reset();
+        blinkAction.play();
+      }catch(e){}
+    }
+
+    // simulate 3 blinks stabilization
+    // (blink clip length unknown; we just run axis alignment quickly)
+    axisTarget = 0;
+    await sleep(520);
+    setAfter();
+
+    isBlinking = false;
+  }
+
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-  function animateValue(from, to, ms, onUpdate){
-    return new Promise(resolve=>{
-      const t0 = performance.now();
-      function step(t){
-        const p = Math.min((t - t0)/ms, 1);
-        // easeInOut
-        const e = p<0.5 ? 2*p*p : 1 - Math.pow(-2*p+2,2)/2;
-        const v = from + (to-from)*e;
-        onUpdate(v);
-        if (p<1) requestAnimationFrame(step);
-        else resolve();
-      }
-      requestAnimationFrame(step);
+  // ---------- Quiz (2 questions) ----------
+  const quiz = [
+    {
+      title: 'Q. ASD 디자인에서 ‘순목’이 하는 역할은?',
+      options: ['렌즈를 건조하게 만든다', '축 안정화를 돕는다', '블루라이트를 차단한다'],
+      answer: 1
+    },
+    {
+      title: 'Q. 두 제품(원데이 난시/맥스 난시) 공통으로 맞는 것은?',
+      options: ['ASD 디자인 + PVP 습윤 인자', '블루라이트 차단', '블루라이트 + UV 차단만 제공'],
+      answer: 0
+    }
+  ];
+  let qi = 0;
+  let locked = false;
+
+  function showQuiz(){
+    qi = 0;
+    locked = false;
+    renderQuiz();
+    modal.classList.add('show');
+  }
+  function closeQuiz(){
+    modal.classList.remove('show');
+  }
+  function renderQuiz(){
+    const q = quiz[qi];
+    qnum.textContent = `퀴즈 ${qi+1}/${quiz.length}`;
+    qtitle.textContent = q.title;
+    [opt0,opt1,opt2].forEach((b,idx)=>{
+      b.textContent = q.options[idx];
+      b.classList.remove('correct','wrong');
+      b.disabled = false;
+    });
+    locked = false;
+    btnNext.textContent = (qi === quiz.length-1) ? '완료' : '다음';
+  }
+  function markAnswer(idx){
+    if (locked) return;
+    locked = true;
+    const q = quiz[qi];
+    [opt0,opt1,opt2].forEach((b,i)=>{
+      b.disabled = true;
+      if (i === q.answer) b.classList.add('correct');
+      if (i === idx && i !== q.answer) b.classList.add('wrong');
     });
   }
+  [opt0,opt1,opt2].forEach((b)=>{
+    b.addEventListener('click', ()=> markAnswer(parseInt(b.dataset.idx,10)));
+  });
+  btnModalClose.addEventListener('click', closeQuiz);
+  btnNext.addEventListener('click', ()=>{
+    if (!locked){
+      alert('답을 선택해줘!');
+      return;
+    }
+    if (qi === quiz.length-1){
+      closeQuiz();
+      alert('퀴즈 완료! (데모)');
+      return;
+    }
+    qi += 1;
+    renderQuiz();
+  });
+  tabQuiz.addEventListener('click', showQuiz);
 
-  // ---------- resize ----------
+  // ---------- Resize ----------
   function resize(){
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
@@ -461,28 +678,34 @@
   }
   window.addEventListener('resize', resize);
 
-  // ---------- render loop ----------
+  // ---------- Animation loop ----------
   const clock = new THREE.Clock();
+  let autoSpin = false;
 
-  function animate(){
-    requestAnimationFrame(animate);
+  function tick(){
+    requestAnimationFrame(tick);
     const dt = Math.min(clock.getDelta(), 0.033);
 
     controls.update();
+    if (mixer) mixer.update(dt);
 
-    // axis smooth approach
-    const speed = 2.2; // higher = faster alignment
+    // axis lerp (ASD stabilization)
+    const speed = 2.4;
     axisAngle = THREE.MathUtils.lerp(axisAngle, axisTarget, 1 - Math.exp(-speed * dt));
     applyAxis(axisAngle);
 
-    // subtle floating
-    group.position.y = Math.sin(performance.now()*0.0007)*0.02;
+    // auto 360 spin (demo)
+    if (autoSpin){
+      root.rotation.y += dt * 0.8;
+    }
 
-    // BL rays attenuation (MVP)
-    if (tab === 'BL' && product === 'max'){
+    // BL rays pulse
+    if (rays.visible){
       const t = performance.now()*0.0012;
-      ray1.material.opacity = 0.22 + 0.10*Math.sin(t);
-      ray2.material.opacity = 0.22 + 0.10*Math.cos(t*1.1);
+      rayA.material.opacity = 0.18 + 0.10*Math.sin(t);
+      rayB.material.opacity = 0.18 + 0.10*Math.cos(t*1.1);
+      // "filter" 느낌: 렌즈 앞에서 약간 감쇠(데모)
+      lensMat.opacity = 0.16;
     }
 
     renderer.render(scene, camera);
@@ -490,10 +713,11 @@
 
   // init
   resize();
-  setProduct('oneday');
-  setTab('ASD');
+  setProduct('1D');
+  setMode('ASD');
   setBefore();
-  animate();
+  openSheet(true);
+  tick();
 </script>
 </body>
 </html>
