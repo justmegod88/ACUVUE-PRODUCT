@@ -40,11 +40,43 @@
     scene.add(light);
     scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
-    // ★ 모델 대신 큐브 1개
-    const geo = new THREE.BoxGeometry(1,1,1);
-    const mat = new THREE.MeshStandardMaterial();
-    const cube = new THREE.Mesh(geo, mat);
-    scene.add(cube);
+// ===== GLB 로딩 =====
+const loader = new THREE.GLTFLoader();
+loader.load('./test.glb', (gltf)=>{
+  const model = gltf.scene;
+  scene.add(model);
+
+  // 자동 프레이밍 (핵심)
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
+  const fov = camera.fov * Math.PI / 180;
+  let camZ = Math.abs((maxDim / 2) / Math.tan(fov / 2)) * 2.2;
+
+  camera.near = maxDim / 1000;
+  camera.far  = maxDim * 1000;
+  camera.updateProjectionMatrix();
+
+  camera.position.set(center.x, center.y, center.z + camZ);
+  camera.lookAt(center);
+
+  // 재질 강제 보정 (Safari 대응)
+  model.traverse(o=>{
+    if(o.isMesh){
+      o.frustumCulled = false;
+      if(o.material){
+        o.material.side = THREE.DoubleSide;
+        o.material.transparent = false;
+        o.material.opacity = 1;
+        o.material.needsUpdate = true;
+      }
+    }
+  });
+}, undefined, (err)=>{
+  console.error(err);
+}); 
 
     msg.textContent = '✅ WebGL 정상: 회전 큐브가 보여야 합니다.';
 
@@ -64,3 +96,4 @@
   </script>
 </body>
 </html>
+
