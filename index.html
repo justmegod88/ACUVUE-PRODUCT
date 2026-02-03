@@ -89,13 +89,10 @@
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
 
-  <!-- ✅ (핵심) 처음부터 정면을 “목표값”으로 지정 -->
   <model-viewer
     id="mv"
     src="test.glb"
     camera-controls
-    camera-target="0m 0m 0m"
-    camera-orbit="0deg 90deg 2.6m"
     touch-action="pan-y"
     exposure="1.1"
     shadow-intensity="0"
@@ -129,12 +126,10 @@
     const BL_TEAL = [0.0, 0.72, 0.70, 1.0];
     let originalBaseColor = null;
 
-    // ✅ 정면 고정값
-    const FRONT_THETA_DEG = 0;
-    const FRONT_PHI_DEG   = 90;
-
-    // ✅ 순목 1회 재생 보장용(ios finished 미발생 대비)
-    let blinkGuardTimer = null;
+    // ✅ (1) “처음 정면” 고정값
+    // theta: 좌우 회전(0deg가 정면), phi: 위/아래 각도(90deg가 정면 수평)
+    const FRONT_THETA = 0;
+    const FRONT_PHI   = 90;
 
     function setMsg(t){ msg.textContent = t; }
 
@@ -161,23 +156,13 @@
       setBtnState();
     }
 
-    // ✅ (1) 렌즈/눈 모두 “처음 정면” 강제
+    // ✅ 정면 카메라로 강제 세팅
     function forceFrontView(){
       try{
-        // 사용자 회전 잔상 제거(지원되는 버전이면)
-        if (typeof mv.resetTurntableRotation === 'function') mv.resetTurntableRotation();
-
-        // target을 원점으로
-        mv.cameraTarget = '0m 0m 0m';
-
-        // radius는 현재값을 쓰되, 없으면 기본값
-        let r = 2.6;
-        try{
-          const orbit = mv.getCameraOrbit();
-          if (orbit && orbit.radius) r = orbit.radius;
-        }catch(e){}
-
-        mv.cameraOrbit = `${FRONT_THETA_DEG}deg ${FRONT_PHI_DEG}deg ${r}m`;
+        const orbit = mv.getCameraOrbit();
+        const r = orbit?.radius || 2.5;
+        // 정면(0deg, 90deg) + 기존 반경 유지
+        mv.cameraOrbit = `${FRONT_THETA}deg ${FRONT_PHI}deg ${r}m`;
       }catch(e){}
     }
 
@@ -192,44 +177,41 @@
       originalBaseColor = null;
       baseRadius = null;
 
-      // 순목 타이머 정리
-      if (blinkGuardTimer){ clearInterval(blinkGuardTimer); blinkGuardTimer = null; }
-
       setModeUI();
       setMsg(`로딩중…\n${file}`);
 
       mv.src = file + '?v=' + Date.now();
     }
 
-    // ✅ 순목이 끝나면 0초로 복귀 (가능할 때)
+    // ✅ (2) 순목: 끝나면 항상 0초로 복귀(다음 클릭 준비)
     mv.addEventListener('finished', ()=>{
       if(currentMode !== 'eye') return;
       try{
         mv.pause();
         mv.currentTime = 0;
       }catch(e){}
-      if (blinkGuardTimer){ clearInterval(blinkGuardTimer); blinkGuardTimer = null; }
     });
 
     mv.addEventListener('load', async ()=>{
-      // 줌 기준 반경 저장
+      // 초기 카메라 반경 저장
       try{
         const orbit = mv.getCameraOrbit();
         baseRadius = orbit.radius;
       }catch(e){ baseRadius = null; }
 
-      // ✅ 로드 직후 정면 강제(타이밍 이슈 대비 2번)
+      // ✅ 로드 후 무조건 “정면”으로 맞춤 (요청 1)
+      // 약간의 타이밍 이슈가 있어 2번 호출(바로 + 200ms 후) 해두면 안정적
       forceFrontView();
-      setTimeout(forceFrontView, 250);
+      setTimeout(forceFrontView, 200);
 
       if(currentMode === 'eye'){
-        // 자동 재생 방지 + 정지 상태로 시작
+        // 자동 깜박임 방지
         try{
           mv.loop = false;
           mv.pause();
           mv.currentTime = 0;
 
-          // 애니메이션 이름이 여러개면 첫번째 고정
+          // 혹시 기본 애니메이션이 여러개면 첫번째를 지정
           if (mv.availableAnimations && mv.availableAnimations.length){
             mv.animationName = mv.availableAnimations[0];
           }
@@ -239,7 +221,6 @@
         setMsg('✅ 로드 성공!\n드래그 회전 / 핀치 확대');
       }
 
-      // 렌즈 재질 원색 저장
       if(currentMode === 'lens'){
         try{
           const model = mv.model;
@@ -328,14 +309,12 @@
       }catch(e){}
     });
 
-    // ✅ (2) 순목 버튼 = “클릭할 때마다 1회만” + 자동 정지 + 다시 클릭하면 또 1회
+    // ✅ 순목(버튼 누를때마다 “무조건 1회”)
     btnBlink.addEventListener('click', ()=>{
       if(currentMode !== 'eye') return;
 
       try{
-        // 기존 가드 타이머 정리
-        if (blinkGuardTimer){ clearInterval(blinkGuardTimer); blinkGuardTimer = null; }
-
+        // 재생 중이어도 강제 리셋 후 재생
         mv.loop = false;
 
         // 애니메이션 지정(있다면)
@@ -343,30 +322,13 @@
           mv.animationName = mv.availableAnimations[0];
         }
 
-        // 무조건 처음부터
         mv.pause();
         mv.currentTime = 0;
 
-        // iOS에서 play 씹힘 방지
+        // iOS에서 바로 play가 씹히는 경우가 있어 한 프레임 뒤에 재생
         requestAnimationFrame(()=>{
           mv.play();
           setMsg('순목(1회) 재생');
-
-          // ✅ finished 이벤트가 안 오는 경우 대비: duration 기준 강제 종료
-          blinkGuardTimer = setInterval(()=>{
-            try{
-              const d = mv.duration;
-              if (!d || !isFinite(d)) return;
-
-              // 거의 끝까지 가면 강제 stop + reset
-              if (mv.currentTime >= d - 0.03){
-                mv.pause();
-                mv.currentTime = 0;
-                clearInterval(blinkGuardTimer);
-                blinkGuardTimer = null;
-              }
-            }catch(e){}
-          }, 50);
         });
       }catch(err){
         setMsg('❌ 순목 재생 실패\n(eye_animation.glb에 애니메이션이 없을 수 있어요)');
