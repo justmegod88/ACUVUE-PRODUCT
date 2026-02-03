@@ -2,88 +2,211 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>WebGL Cube Test</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>ACUVUE 3D Viewer (GLB)</title>
   <style>
-    html,body{margin:0;height:100%;background:#081625;overflow:hidden;}
-    #msg{position:fixed;left:12px;top:12px;right:12px;z-index:10;
-      color:#eaf2ff;background:rgba(0,0,0,.55);padding:10px 12px;border-radius:12px;
-      font-family:-apple-system,system-ui;font-size:13px;white-space:pre-wrap}
+    html,body{height:100%;margin:0;background:#081625;overflow:hidden;font-family:-apple-system,system-ui;}
     canvas{display:block;width:100vw;height:100vh;}
+
+    #topbar{
+      position:fixed;left:12px;right:12px;top:12px;z-index:20;
+      display:flex;gap:8px;align-items:center;justify-content:space-between;
+    }
+    #msg{
+      flex:1;
+      padding:10px 12px;border-radius:12px;
+      background:rgba(0,0,0,.55);
+      color:#eaf2ff;font-size:13px;line-height:1.35;white-space:pre-wrap;
+      border:1px solid rgba(255,255,255,.14);
+    }
+    #btns{
+      position:fixed;left:12px;right:12px;bottom:12px;z-index:20;
+      display:flex;gap:8px;flex-wrap:wrap;
+    }
+    button{
+      flex:1;min-width:120px;
+      padding:12px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      color:#eaf2ff;font-weight:800;font-size:13px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button.primary{ background:rgba(0,255,140,.12); border-color:rgba(0,255,140,.35); }
   </style>
 </head>
 <body>
-  <div id="msg">로딩중…</div>
+  <div id="topbar">
+    <div id="msg">준비중…</div>
+  </div>
+
+  <div id="btns">
+    <button id="btnTest" class="primary">test.glb 보기</button>
+    <button id="btnEye">eye_animation.glb 보기</button>
+    <button id="btnFrame">가운데 맞춤</button>
+  </div>
+
   <canvas id="c"></canvas>
 
+  <!-- iOS Safari 안정: non-module CDN -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+
   <script>
     const msg = document.getElementById('msg');
 
+    function setMsg(t){ msg.textContent = t; }
+
     if(!window.THREE){
-      msg.textContent = '❌ three.min.js 로딩 실패 (CDN/캐시 문제)';
+      setMsg('❌ THREE 로딩 실패 (CDN/캐시 문제)');
       throw new Error('THREE not loaded');
     }
 
-    const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'), antialias:true});
-    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    // Renderer
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     renderer.setSize(innerWidth, innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
 
+    // Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x081625);
 
-    const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 100);
-    camera.position.set(0,0,3);
+    // Lights (밝게)
+    scene.add(new THREE.AmbientLight(0xffffff, 1.25));
+    const d1 = new THREE.DirectionalLight(0xffffff, 1.7);
+    d1.position.set(5,5,5);
+    scene.add(d1);
+    const d2 = new THREE.DirectionalLight(0xffffff, 1.1);
+    d2.position.set(-5,3,-3);
+    scene.add(d2);
 
-    const light = new THREE.DirectionalLight(0xffffff, 1.2);
-    light.position.set(2,2,2);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    // Camera
+    const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.001, 5000);
+    camera.position.set(0, 0.2, 3.2);
 
-// ===== GLB 로딩 =====
-const loader = new THREE.GLTFLoader();
-loader.load('./test.glb', (gltf)=>{
-  const model = gltf.scene;
-  scene.add(model);
+    // Controls (모바일 드래그/핀치)
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
 
-  // 자동 프레이밍 (핵심)
-  const box = new THREE.Box3().setFromObject(model);
-  const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
+    // Loader
+    const loader = new THREE.GLTFLoader();
 
-  const maxDim = Math.max(size.x, size.y, size.z) || 1;
-  const fov = camera.fov * Math.PI / 180;
-  let camZ = Math.abs((maxDim / 2) / Math.tan(fov / 2)) * 2.2;
+    let currentRoot = null;      // 현재 모델
+    let lastFrameInfo = null;    // 마지막 프레이밍 정보
 
-  camera.near = maxDim / 1000;
-  camera.far  = maxDim * 1000;
-  camera.updateProjectionMatrix();
+    function disposeObject(obj){
+      obj.traverse((o)=>{
+        if(o.isMesh){
+          if(o.geometry) o.geometry.dispose();
+          if(o.material){
+            if(Array.isArray(o.material)){
+              o.material.forEach(m=>m.dispose && m.dispose());
+            } else {
+              o.material.dispose && o.material.dispose();
+            }
+          }
+        }
+      });
+    }
 
-  camera.position.set(center.x, center.y, center.z + camZ);
-  camera.lookAt(center);
+    function applySafariSafeMaterials(root){
+      let meshCount = 0;
+      root.traverse((o)=>{
+        if(o.isMesh){
+          meshCount++;
+          o.frustumCulled = false;
 
-  // 재질 강제 보정 (Safari 대응)
-  model.traverse(o=>{
-    if(o.isMesh){
-      o.frustumCulled = false;
-      if(o.material){
-        o.material.side = THREE.DoubleSide;
-        o.material.transparent = false;
-        o.material.opacity = 1;
-        o.material.needsUpdate = true;
+          // 재질 보정(안 보이는 케이스 방지)
+          const mats = Array.isArray(o.material) ? o.material : [o.material];
+          mats.forEach((m)=>{
+            if(!m) return;
+            m.side = THREE.DoubleSide;
+            m.transparent = false;
+            m.opacity = 1.0;
+            m.depthWrite = true;
+            m.needsUpdate = true;
+          });
+        }
+      });
+      return meshCount;
+    }
+
+    function frameObject(obj){
+      const box = new THREE.Box3().setFromObject(obj);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+
+      const maxDim = Math.max(size.x, size.y, size.z) || 1;
+
+      // 카메라 거리 계산
+      const fov = camera.fov * Math.PI/180;
+      let camZ = Math.abs((maxDim/2) / Math.tan(fov/2)) * 2.2;
+
+      camera.near = maxDim / 1000;
+      camera.far  = maxDim * 1000;
+      camera.updateProjectionMatrix();
+
+      // 카메라 위치 + 타겟
+      camera.position.set(center.x, center.y + maxDim*0.15, center.z + camZ);
+      controls.target.copy(center);
+      controls.update();
+
+      lastFrameInfo = {maxDim, center};
+      return lastFrameInfo;
+    }
+
+    async function loadGLB(filename){
+      try{
+        setMsg(`로딩중…\n${filename}`);
+
+        // 이전 모델 제거
+        if(currentRoot){
+          scene.remove(currentRoot);
+          try{ disposeObject(currentRoot); }catch(e){}
+          currentRoot = null;
+        }
+
+        // 캐시 회피(깃허브 pages가 가끔 캐시 심함)
+        const url = `${filename}?v=${Date.now()}`;
+
+        const gltf = await new Promise((resolve, reject)=>{
+          loader.load(url, resolve, undefined, reject);
+        });
+
+        currentRoot = gltf.scene;
+        scene.add(currentRoot);
+
+        const meshCount = applySafariSafeMaterials(currentRoot);
+        const info = frameObject(currentRoot);
+
+        setMsg(
+          `✅ 로드 성공: ${filename}\n` +
+          `Mesh: ${meshCount}\n` +
+          `크기(maxDim): ${info.maxDim.toFixed(4)}\n` +
+          `드래그 회전 / 핀치 확대`
+        );
+
+      }catch(err){
+        console.error(err);
+        setMsg(`❌ 로딩 실패: ${filename}\n${String(err)}`);
       }
     }
-  });
-}, undefined, (err)=>{
-  console.error(err);
-}); 
 
-    msg.textContent = '✅ WebGL 정상: 회전 큐브가 보여야 합니다.';
+    // UI 버튼
+    document.getElementById('btnTest').onclick = ()=>loadGLB('test.glb');
+    document.getElementById('btnEye').onclick  = ()=>loadGLB('eye_animation.glb');
+    document.getElementById('btnFrame').onclick = ()=>{
+      if(currentRoot) frameObject(currentRoot);
+      else setMsg('모델이 아직 없습니다.');
+    };
 
+    // Render loop
     function animate(){
       requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.013;
+      controls.update();
       renderer.render(scene, camera);
     }
     animate();
@@ -93,7 +216,9 @@ loader.load('./test.glb', (gltf)=>{
       camera.updateProjectionMatrix();
       renderer.setSize(innerWidth, innerHeight);
     });
+
+    // ✅ 시작: test.glb 자동 로드
+    loadGLB('test.glb');
   </script>
 </body>
 </html>
-
