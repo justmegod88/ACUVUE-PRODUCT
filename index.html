@@ -3,19 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>ACUVUE 3D Viewer (GLB)</title>
+  <title>ACUVUE 3D Viewer (Module)</title>
   <style>
     html,body{height:100%;margin:0;background:#081625;overflow:hidden;font-family:-apple-system,system-ui;}
     canvas{display:block;width:100vw;height:100vh;}
 
-    #topbar{
-      position:fixed;left:12px;right:12px;top:12px;z-index:20;
-      display:flex;gap:8px;align-items:center;justify-content:space-between;
-    }
     #msg{
-      flex:1;
+      position:fixed;left:12px;right:12px;top:12px;z-index:20;
       padding:10px 12px;border-radius:12px;
-      background:rgba(0,0,0,.55);
+      background:rgba(0,0,0,.60);
       color:#eaf2ff;font-size:13px;line-height:1.35;white-space:pre-wrap;
       border:1px solid rgba(255,255,255,.14);
     }
@@ -35,9 +31,7 @@
   </style>
 </head>
 <body>
-  <div id="topbar">
-    <div id="msg">준비중…</div>
-  </div>
+  <div id="msg">준비중…</div>
 
   <div id="btns">
     <button id="btnTest" class="primary">test.glb 보기</button>
@@ -47,20 +41,22 @@
 
   <canvas id="c"></canvas>
 
-  <!-- iOS Safari 안정: non-module CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script type="module">
+    const msgEl = document.getElementById('msg');
+    const setMsg = (t)=>{ msgEl.textContent = t; };
 
-  <script>
-    const msg = document.getElementById('msg');
+    // ✅ iPhone에서 “왜 안되는지” 바로 보이게
+    window.addEventListener('error', (e)=>{
+      setMsg('❌ JS 에러\n' + (e?.message || e));
+    });
+    window.addEventListener('unhandledrejection', (e)=>{
+      setMsg('❌ Promise 에러\n' + (e?.reason?.message || e?.reason || e));
+    });
 
-    function setMsg(t){ msg.textContent = t; }
-
-    if(!window.THREE){
-      setMsg('❌ THREE 로딩 실패 (CDN/캐시 문제)');
-      throw new Error('THREE not loaded');
-    }
+    // ✅ Module 방식(ios safari 안정)
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+    import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
     // Renderer
     const canvas = document.getElementById('c');
@@ -87,26 +83,20 @@
     camera.position.set(0, 0.2, 3.2);
 
     // Controls (모바일 드래그/핀치)
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
 
-    // Loader
-    const loader = new THREE.GLTFLoader();
-
-    let currentRoot = null;      // 현재 모델
-    let lastFrameInfo = null;    // 마지막 프레이밍 정보
+    const loader = new GLTFLoader();
+    let currentRoot = null;
 
     function disposeObject(obj){
       obj.traverse((o)=>{
         if(o.isMesh){
-          if(o.geometry) o.geometry.dispose();
+          o.geometry?.dispose?.();
           if(o.material){
-            if(Array.isArray(o.material)){
-              o.material.forEach(m=>m.dispose && m.dispose());
-            } else {
-              o.material.dispose && o.material.dispose();
-            }
+            if(Array.isArray(o.material)) o.material.forEach(m=>m?.dispose?.());
+            else o.material?.dispose?.();
           }
         }
       });
@@ -119,7 +109,6 @@
           meshCount++;
           o.frustumCulled = false;
 
-          // 재질 보정(안 보이는 케이스 방지)
           const mats = Array.isArray(o.material) ? o.material : [o.material];
           mats.forEach((m)=>{
             if(!m) return;
@@ -140,36 +129,31 @@
       const center = box.getCenter(new THREE.Vector3());
 
       const maxDim = Math.max(size.x, size.y, size.z) || 1;
-
-      // 카메라 거리 계산
       const fov = camera.fov * Math.PI/180;
-      let camZ = Math.abs((maxDim/2) / Math.tan(fov/2)) * 2.2;
+      const camZ = Math.abs((maxDim/2) / Math.tan(fov/2)) * 2.2;
 
       camera.near = maxDim / 1000;
       camera.far  = maxDim * 1000;
       camera.updateProjectionMatrix();
 
-      // 카메라 위치 + 타겟
       camera.position.set(center.x, center.y + maxDim*0.15, center.z + camZ);
       controls.target.copy(center);
       controls.update();
 
-      lastFrameInfo = {maxDim, center};
-      return lastFrameInfo;
+      return {maxDim, center};
     }
 
     async function loadGLB(filename){
       try{
         setMsg(`로딩중…\n${filename}`);
 
-        // 이전 모델 제거
         if(currentRoot){
           scene.remove(currentRoot);
           try{ disposeObject(currentRoot); }catch(e){}
           currentRoot = null;
         }
 
-        // 캐시 회피(깃허브 pages가 가끔 캐시 심함)
+        // 캐시 회피
         const url = `${filename}?v=${Date.now()}`;
 
         const gltf = await new Promise((resolve, reject)=>{
@@ -185,17 +169,16 @@
         setMsg(
           `✅ 로드 성공: ${filename}\n` +
           `Mesh: ${meshCount}\n` +
-          `크기(maxDim): ${info.maxDim.toFixed(4)}\n` +
+          `maxDim: ${info.maxDim.toFixed(4)}\n` +
           `드래그 회전 / 핀치 확대`
         );
-
       }catch(err){
         console.error(err);
-        setMsg(`❌ 로딩 실패: ${filename}\n${String(err)}`);
+        setMsg(`❌ 로딩 실패: ${filename}\n${err?.message || String(err)}`);
       }
     }
 
-    // UI 버튼
+    // 버튼 연결
     document.getElementById('btnTest').onclick = ()=>loadGLB('test.glb');
     document.getElementById('btnEye').onclick  = ()=>loadGLB('eye_animation.glb');
     document.getElementById('btnFrame').onclick = ()=>{
@@ -203,7 +186,7 @@
       else setMsg('모델이 아직 없습니다.');
     };
 
-    // Render loop
+    // render loop
     function animate(){
       requestAnimationFrame(animate);
       controls.update();
@@ -217,7 +200,7 @@
       renderer.setSize(innerWidth, innerHeight);
     });
 
-    // ✅ 시작: test.glb 자동 로드
+    // 시작: test.glb 로드
     loadGLB('test.glb');
   </script>
 </body>
