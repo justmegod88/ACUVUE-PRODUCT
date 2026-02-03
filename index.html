@@ -123,13 +123,18 @@
 
     let baseRadius = null;
 
-    const BL_TEAL = [0.0, 0.72, 0.70, 1.0];
+    // ✅ (1) BL 블루그린 틴트: "아주 연하게" (실물 렌즈 톤)
+    // 더 연하게/진하게는 아래 값만 조절하면 됨
+    const BL_TEAL = [0.88, 0.93, 0.96, 1.0];
+
     let originalBaseColor = null;
 
-    // ✅ (1) “처음 정면” 고정값
-    // theta: 좌우 회전(0deg가 정면), phi: 위/아래 각도(90deg가 정면 수평)
     const FRONT_THETA = 0;
     const FRONT_PHI   = 90;
+
+    // ✅ (2) 순목 1회 재생을 위해 duration 기억
+    let eyeAnimName = null;
+    let eyeAnimDuration = null;
 
     function setMsg(t){ msg.textContent = t; }
 
@@ -156,12 +161,10 @@
       setBtnState();
     }
 
-    // ✅ 정면 카메라로 강제 세팅
     function forceFrontView(){
       try{
         const orbit = mv.getCameraOrbit();
         const r = orbit?.radius || 2.5;
-        // 정면(0deg, 90deg) + 기존 반경 유지
         mv.cameraOrbit = `${FRONT_THETA}deg ${FRONT_PHI}deg ${r}m`;
       }catch(e){}
     }
@@ -177,13 +180,17 @@
       originalBaseColor = null;
       baseRadius = null;
 
+      // eye 관련 변수도 리셋
+      eyeAnimName = null;
+      eyeAnimDuration = null;
+
       setModeUI();
       setMsg(`로딩중…\n${file}`);
 
       mv.src = file + '?v=' + Date.now();
     }
 
-    // ✅ (2) 순목: 끝나면 항상 0초로 복귀(다음 클릭 준비)
+    // ✅ eye에서 "끝나면 항상 0초로 복귀" (다음 클릭 준비)
     mv.addEventListener('finished', ()=>{
       if(currentMode !== 'eye') return;
       try{
@@ -193,27 +200,31 @@
     });
 
     mv.addEventListener('load', async ()=>{
-      // 초기 카메라 반경 저장
       try{
         const orbit = mv.getCameraOrbit();
         baseRadius = orbit.radius;
       }catch(e){ baseRadius = null; }
 
-      // ✅ 로드 후 무조건 “정면”으로 맞춤 (요청 1)
-      // 약간의 타이밍 이슈가 있어 2번 호출(바로 + 200ms 후) 해두면 안정적
+      // 로드 후 정면 고정
       forceFrontView();
       setTimeout(forceFrontView, 200);
 
       if(currentMode === 'eye'){
-        // 자동 깜박임 방지
         try{
           mv.loop = false;
           mv.pause();
           mv.currentTime = 0;
 
-          // 혹시 기본 애니메이션이 여러개면 첫번째를 지정
+          // 애니메이션 이름/길이 저장 (가능하면)
           if (mv.availableAnimations && mv.availableAnimations.length){
-            mv.animationName = mv.availableAnimations[0];
+            eyeAnimName = mv.availableAnimations[0];
+            mv.animationName = eyeAnimName;
+
+            // duration은 model-viewer 버전에 따라 없을 수도 있어 try
+            try{
+              eyeAnimDuration = mv.duration; // seconds
+              if(!(eyeAnimDuration > 0)) eyeAnimDuration = null;
+            }catch(e){ eyeAnimDuration = null; }
           }
         }catch(e){}
         setMsg('✅ 로드 성공!\n순목 버튼을 눌러야 깜박입니다.');
@@ -259,7 +270,7 @@
         if(!originalBaseColor && pbr.baseColorFactor) originalBaseColor = [...pbr.baseColorFactor];
         pbr.setBaseColorFactor(blOn ? BL_TEAL : (originalBaseColor || [1,1,1,1]));
 
-        setMsg(blOn ? 'BL ON: 렌즈 색상을 블루그린 톤으로 표시' : 'BL OFF: 렌즈 색상을 원래대로 복원');
+        setMsg(blOn ? 'BL ON: 연한 블루그린 틴트' : 'BL OFF: 원래 색상');
       }catch(err){
         setMsg('❌ BL 적용 실패\n' + (err?.message || err));
       }
@@ -309,26 +320,36 @@
       }catch(e){}
     });
 
-    // ✅ 순목(버튼 누를때마다 “무조건 1회”)
+    // ✅ 순목 버튼: 누를 때마다 "딱 1회" + 즉시 멈춤 + 0초 복귀
     btnBlink.addEventListener('click', ()=>{
       if(currentMode !== 'eye') return;
 
       try{
-        // 재생 중이어도 강제 리셋 후 재생
         mv.loop = false;
 
-        // 애니메이션 지정(있다면)
-        if (mv.availableAnimations && mv.availableAnimations.length){
-          mv.animationName = mv.availableAnimations[0];
+        if (eyeAnimName){
+          mv.animationName = eyeAnimName;
         }
 
+        // 항상 리셋하고 시작
         mv.pause();
         mv.currentTime = 0;
 
-        // iOS에서 바로 play가 씹히는 경우가 있어 한 프레임 뒤에 재생
+        // iOS 안정: 한 프레임 뒤 재생
         requestAnimationFrame(()=>{
           mv.play();
           setMsg('순목(1회) 재생');
+
+          // ✅ duration을 알 수 있으면: duration 기준으로 강제 stop
+          // (finished 이벤트가 누락되는 기기/버전 대비)
+          if (eyeAnimDuration && eyeAnimDuration > 0){
+            setTimeout(()=>{
+              try{
+                mv.pause();
+                mv.currentTime = 0;
+              }catch(e){}
+            }, Math.max(0, eyeAnimDuration * 1000 + 60));
+          }
         });
       }catch(err){
         setMsg('❌ 순목 재생 실패\n(eye_animation.glb에 애니메이션이 없을 수 있어요)');
