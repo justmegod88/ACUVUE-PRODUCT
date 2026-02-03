@@ -12,19 +12,18 @@
       --bd:rgba(255,255,255,.10);
       --text:#eaf2ff;
       --muted:rgba(234,242,255,.72);
-      --pill:rgba(255,255,255,.10);
       --accent:#2fd1ff;
       --green:#20c65a;
       --green2:#12a34a;
       --danger:#ff3b30;
       --yellow:#ffd26a;
     }
-
-    html,body{height:100%; margin:0; font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial; color:var(--text); background:linear-gradient(180deg,var(--bg1),var(--bg2));}
+    html,body{height:100%; margin:0; font-family:-apple-system,system-ui,Segoe UI,Roboto,Arial; color:var(--text);
+      background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    }
     #app{position:fixed; inset:0; overflow:hidden;}
     canvas{position:absolute; inset:0; width:100%; height:100%; display:block;}
 
-    /* Top bar */
     .topbar{
       position:absolute; left:0; right:0; top:0;
       padding:14px 14px 10px;
@@ -34,8 +33,7 @@
       border-bottom:1px solid rgba(255,255,255,.06);
       z-index:5;
     }
-    .top-left{font-weight:800; font-size:14px; letter-spacing:.2px;}
-    .top-right{display:flex; align-items:center; gap:10px;}
+    .top-left{font-weight:800; font-size:14px;}
     .btn-close{
       border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.06);
@@ -46,7 +44,6 @@
       font-size:12px;
     }
 
-    /* Product pill (center-ish like your sample) */
     .product-pill{
       position:absolute; left:50%; transform:translateX(-50%);
       top:62px; z-index:6;
@@ -73,7 +70,18 @@
       vertical-align:middle;
     }
 
-    /* Right icon stack */
+    .status{
+      position:absolute;
+      left:14px; right:70px;
+      top:110px;
+      z-index:6;
+      font-size:12px;
+      color:rgba(234,242,255,.78);
+      text-shadow: 0 2px 8px rgba(0,0,0,.35);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .status b{color:var(--yellow);}
+
     .right-stack{
       position:absolute;
       right:14px;
@@ -101,7 +109,6 @@
       border-color:rgba(47,209,255,.45);
     }
 
-    /* Bottom action & tabs */
     .bottom{
       position:absolute; left:0; right:0; bottom:0;
       padding:12px 14px 16px;
@@ -141,7 +148,6 @@
       color:rgba(234,242,255,.72);
     }
 
-    /* Info sheet */
     .sheet{
       position:absolute;
       left:14px; right:14px;
@@ -157,9 +163,7 @@
     .sheet.show{display:block;}
     .sheet h3{margin:0 0 6px 0; font-size:14px;}
     .sheet p{margin:0; font-size:13px; color:var(--muted); line-height:1.35;}
-    .row{
-      display:flex; gap:8px; margin-top:10px;
-    }
+    .row{display:flex; gap:8px; margin-top:10px;}
     .smallbtn{
       flex:1;
       border-radius:12px;
@@ -176,7 +180,6 @@
       border-color:rgba(255,59,48,.45);
     }
 
-    /* Quiz modal */
     .modal{
       position:absolute; inset:0;
       background:rgba(0,0,0,.55);
@@ -220,19 +223,6 @@
       color:var(--text);
       font-weight:1000;
     }
-
-    /* Tiny status text */
-    .status{
-      position:absolute;
-      left:14px; right:70px;
-      top:110px;
-      z-index:6;
-      font-size:12px;
-      color:rgba(234,242,255,.78);
-      text-shadow: 0 2px 8px rgba(0,0,0,.35);
-      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    }
-    .status b{color:var(--yellow);}
   </style>
 </head>
 <body>
@@ -246,11 +236,8 @@
     </div>
   </div>
 
-  <div class="product-pill" id="productPill">
-    아큐브 오아시스 원데이 난시
-  </div>
-
-  <div class="status" id="statusText">드래그: 회전 · 핀치: 확대 · <b>Blink</b>: ASD 축 안정 연출</div>
+  <div class="product-pill" id="productPill">아큐브 오아시스 원데이 난시</div>
+  <div class="status" id="statusText">로딩중… (렌즈는 코드로 생성, 눈은 GLB 로딩)</div>
 
   <div class="right-stack">
     <div class="iconbtn" id="btnRotate" title="360">360</div>
@@ -274,8 +261,8 @@
       <div class="tab" id="tab2">MAX</div>
       <div class="tab" id="tabQuiz">Q</div>
     </div>
-    <button class="cta" id="ctaBtn">123마크</button>
-    <div class="sub" id="ctaSub">콘택트렌즈가 뒤집혀 있는지 확인이 가능해요 (테스트 문구)</div>
+    <button class="cta" id="ctaBtn">순목(눈깜박임)</button>
+    <div class="sub" id="ctaSub">버튼 클릭 시 눈이 깜박이며, 렌즈 축이 안정화되는 연출을 확인합니다.</div>
   </div>
 
   <div class="modal" id="modal">
@@ -299,14 +286,13 @@
   import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
   // ---------- DOM ----------
-  const canvas = document.getElementById('c');
   const productPill = document.getElementById('productPill');
-  const statusText = document.getElementById('statusText');
+  const statusText  = document.getElementById('statusText');
 
   const btnRotate = document.getElementById('btnRotate');
   const btnASD = document.getElementById('btnASD');
   const btnPVP = document.getElementById('btnPVP');
-  const btnBL = document.getElementById('btnBL');
+  const btnBL  = document.getElementById('btnBL');
 
   const tab1 = document.getElementById('tab1');
   const tab2 = document.getElementById('tab2');
@@ -314,9 +300,9 @@
 
   const sheet = document.getElementById('sheet');
   const sheetTitle = document.getElementById('sheetTitle');
-  const sheetBody = document.getElementById('sheetBody');
-  const sheetRow = document.getElementById('sheetRow');
-  const btnBlink = document.getElementById('btnBlink');
+  const sheetBody  = document.getElementById('sheetBody');
+  const sheetRow   = document.getElementById('sheetRow');
+  const btnBlink   = document.getElementById('btnBlink');
   const btnBeforeAfter = document.getElementById('btnBeforeAfter');
 
   const ctaBtn = document.getElementById('ctaBtn');
@@ -333,7 +319,8 @@
 
   document.getElementById('btnClose').addEventListener('click', ()=> alert('닫기(데모)'));
 
-  // ---------- Three.js base ----------
+  // ---------- Three.js ----------
+  const canvas = document.getElementById('c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -342,16 +329,18 @@
   scene.fog = new THREE.Fog(0x071322, 5, 18);
 
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-  camera.position.set(0, 0.4, 4.8);
+  camera.position.set(0, 0.2, 5.2);
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.enablePan = false;
-  controls.minDistance = 3.0;
-  controls.maxDistance = 7.0;
+  controls.minDistance = 2.6;
+  controls.maxDistance = 7.5;
   controls.rotateSpeed = 0.9;
+  controls.target.set(0, 0, 0);
+  controls.update();
 
-  // Lighting
+  // lights
   scene.add(new THREE.HemisphereLight(0xcfe7ff, 0x0a1b2f, 0.9));
   const key = new THREE.DirectionalLight(0xffffff, 1.0);
   key.position.set(3, 2, 3);
@@ -360,7 +349,7 @@
   rim.position.set(-3, 1, -2);
   scene.add(rim);
 
-  // ---------- Groups ----------
+  // root groups
   const root = new THREE.Group();
   scene.add(root);
 
@@ -370,43 +359,15 @@
   const lensGroup = new THREE.Group();
   root.add(lensGroup);
 
-  // ---------- Load eye GLB (blink animation) ----------
-  const loader = new GLTFLoader();
-  let mixer = null;
-  let blinkAction = null;
+  // ---------- ALWAYS-VISIBLE fallback helper (so you never see "blank") ----------
+  // tiny center dot
+  const dot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.03, 16, 16),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 })
+  );
+  root.add(dot);
 
-  loader.load('./eye_animation.glb', (gltf)=>{
-    const model = gltf.scene;
-    model.traverse(o=>{
-      if (o.isMesh){
-        o.castShadow = false;
-        o.receiveShadow = false;
-      }
-    });
-    // center / scale safely
-    const box = new THREE.Box3().setFromObject(model);
-    const size = box.getSize(new THREE.Vector3()).length();
-    const center = box.getCenter(new THREE.Vector3());
-    model.position.sub(center);
-    const s = 2.2 / (size || 1);
-    model.scale.setScalar(s);
-    eyeGroup.add(model);
-
-    // animation
-    if (gltf.animations && gltf.animations.length){
-      mixer = new THREE.AnimationMixer(model);
-      // 가장 첫번째 클립을 blink로 사용 (이름 몰라도 안전)
-      blinkAction = mixer.clipAction(gltf.animations[0]);
-      blinkAction.setLoop(THREE.LoopOnce, 1);
-      blinkAction.clampWhenFinished = true;
-    }
-  }, undefined, (e)=>{
-    console.error(e);
-    alert('eye_animation.glb 로딩 실패: 파일이 같은 폴더에 있는지 확인해줘');
-  });
-
-  // ---------- Generate TEMP lens (until vendor GLB arrives) ----------
-  // Lens disc
+  // ---------- TEMP Lens (generated) - MUST BE VISIBLE ----------
   const lensGeo = new THREE.CircleGeometry(1.05, 96);
   const lensMat = new THREE.MeshPhysicalMaterial({
     color: 0x86ddff,
@@ -417,29 +378,34 @@
     thickness: 0.12,
     ior: 1.33,
     clearcoat: 0.7,
-    clearcoatRoughness: 0.12
+    clearcoatRoughness: 0.12,
+    side: THREE.DoubleSide,    // ★ 핵심: 양면 렌더링
+    depthWrite: false          // ★ 투명 안정화
   });
   const lens = new THREE.Mesh(lensGeo, lensMat);
-  lens.position.set(0, 0, 1.35);
+  lens.position.set(0, 0, 0.6);     // ★ 너무 앞(1.35)로 두면 안 보일 수 있음
+  lens.renderOrder = 2;
   lensGroup.add(lens);
 
-  // Axis line (toric axis marker)
-  const axisMat = new THREE.LineBasicMaterial({ color: 0xffd26a, transparent:true, opacity:0.9 });
+  // axis line
+  const axisMat = new THREE.LineBasicMaterial({ color: 0xffd26a, transparent:true, opacity:0.95 });
   const axisGeo = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(-0.85, 0, 1.36),
-    new THREE.Vector3( 0.85, 0, 1.36),
+    new THREE.Vector3(-0.85, 0, 0.61),
+    new THREE.Vector3( 0.85, 0, 0.61),
   ]);
   const axisLine = new THREE.Line(axisGeo, axisMat);
+  axisLine.renderOrder = 3;
   lensGroup.add(axisLine);
 
   // 12 o'clock mark
   const markGeo = new THREE.BoxGeometry(0.08, 0.22, 0.02);
   const markMat = new THREE.MeshStandardMaterial({ color: 0xffd26a, roughness: 0.4 });
   const mark = new THREE.Mesh(markGeo, markMat);
-  mark.position.set(0, 0.92, 1.36);
+  mark.position.set(0, 0.92, 0.62);
+  mark.renderOrder = 4;
   lensGroup.add(mark);
 
-  // Blue-light rays (MAX only)
+  // blue-light rays (MAX only)
   const rays = new THREE.Group();
   rays.visible = false;
   scene.add(rays);
@@ -452,25 +418,61 @@
     ray.position.set(x, y, z);
     return ray;
   }
-  const rayA = makeRay(-2.2, 0.25, 1.2);
-  const rayB = makeRay(-2.2,-0.05, 1.2);
+  const rayA = makeRay(-2.2, 0.25, 0.6);
+  const rayB = makeRay(-2.2,-0.05, 0.6);
   rays.add(rayA, rayB);
 
-  // ---------- ASD rotation logic ----------
-  const MISALIGN = THREE.MathUtils.degToRad(18); // 착용 직후 축 어긋남(연출)
+  // ---------- Eye GLB load (blink animation) ----------
+  const loader = new GLTFLoader();
+  let mixer = null;
+  let blinkAction = null;
+
+  statusText.textContent = '렌즈 표시 OK · 눈(GLB) 로딩중…';
+
+  loader.load('./eye_animation.glb', (gltf)=>{
+    const model = gltf.scene;
+
+    // Normalize: center & scale to fit
+    const box = new THREE.Box3().setFromObject(model);
+    const size = box.getSize(new THREE.Vector3()).length();
+    const center = box.getCenter(new THREE.Vector3());
+
+    model.position.sub(center);
+    const s = 2.6 / (size || 1);
+    model.scale.setScalar(s);
+
+    // put eye slightly behind lens
+    model.position.z = 0.0;
+
+    eyeGroup.add(model);
+
+    if (gltf.animations && gltf.animations.length){
+      mixer = new THREE.AnimationMixer(model);
+      blinkAction = mixer.clipAction(gltf.animations[0]); // 첫 클립 사용
+      blinkAction.setLoop(THREE.LoopOnce, 1);
+      blinkAction.clampWhenFinished = true;
+    }
+
+    statusText.innerHTML = '드래그: 회전 · 핀치: 확대 · <b>Blink</b>: ASD 축 안정 연출';
+  }, undefined, (e)=>{
+    console.error(e);
+    // GLB 실패해도 렌즈는 보이게 남아있음
+    statusText.innerHTML = '<b style="color:#ff3b30">GLB 로딩 실패</b> : eye_animation.glb 경로/이름/업로드 확인';
+  });
+
+  // ---------- ASD logic ----------
+  const MISALIGN = THREE.MathUtils.degToRad(18);
   let axisAngle = MISALIGN;
   let axisTarget = MISALIGN;
   let afterMode = false;
 
-  function applyAxis(angle){
-    lensGroup.rotation.z = angle;
-  }
+  function applyAxis(angle){ lensGroup.rotation.z = angle; }
   applyAxis(axisAngle);
 
   function setBefore(){
     afterMode = false;
     axisTarget = MISALIGN;
-    statusText.innerHTML = '드래그: 회전 · 핀치: 확대 · <b>Blink</b>: ASD 축 안정 연출 (착용 직후)';
+    statusText.innerHTML = '드래그: 회전 · 핀치: 확대 · <b>Blink</b>: ASD 축 안정 (착용 직후)';
   }
   function setAfter(){
     afterMode = true;
@@ -478,10 +480,14 @@
     statusText.innerHTML = '드래그: 회전 · 핀치: 확대 · <b>축 안정화 완료</b>';
   }
 
-  // ---------- Modes / UI ----------
+  // ---------- UI Modes ----------
   let product = '1D'; // '1D' | 'MAX'
   let mode = 'ASD';   // 'ASD' | 'PVP' | 'BL'
-  let sheetOpen = false;
+  let autoSpin = false;
+
+  function openSheet(open=true){
+    sheet.classList.toggle('show', open);
+  }
 
   function setProduct(p){
     product = p;
@@ -490,7 +496,6 @@
 
     if (product==='1D'){
       productPill.textContent = '아큐브 오아시스 원데이 난시';
-      // BL 비활성 느낌
       btnBL.style.opacity = 0.35;
       btnBL.style.pointerEvents = 'none';
       if (mode==='BL') setMode('ASD');
@@ -499,7 +504,6 @@
       btnBL.style.opacity = 1;
       btnBL.style.pointerEvents = 'auto';
     }
-    // 렌즈 색감 살짝 차이(데모)
     lensMat.color.set(product==='MAX' ? 0x9ae6ff : 0x86ddff);
   }
 
@@ -509,51 +513,43 @@
     btnPVP.classList.toggle('on', mode==='PVP');
     btnBL.classList.toggle('on',  mode==='BL');
 
-    rays.visible = (mode==='BL' && product==='MAX');
-
-    // reset visuals
+    // reset
+    rays.visible = false;
     lensMat.opacity = 0.18;
     lensMat.clearcoat = 0.7;
-    axisMat.opacity = 0.9;
+    axisMat.opacity = 0.95;
+    sheetRow.style.display = 'flex';
+    ctaBtn.textContent = '순목(눈깜박임)';
 
     if (mode==='ASD'){
       sheetTitle.textContent = 'ASD 난시 디자인';
-      sheetBody.textContent = '순목(눈깜박임) 시 눈꺼풀과 렌즈의 상호작용으로 난시 축이 빠르게 제자리로 안정됩니다.';
-      sheetRow.style.display = 'flex';
-      ctaBtn.textContent = '순목(눈깜박임)';
-      ctaSub.textContent = '버튼 클릭 시 눈이 깜박이며(eye GLB), 렌즈 축이 안정화되는 연출을 확인합니다.';
+      sheetBody.textContent  = '순목(눈깜박임) 시 눈꺼풀과 렌즈의 상호작용으로 난시 축이 빠르게 제자리로 안정됩니다.';
+      ctaSub.textContent = '버튼 클릭 시 눈이 깜박이며, 렌즈 축이 안정화되는 연출을 확인합니다.';
     }
     if (mode==='PVP'){
       sheetTitle.textContent = 'PVP 습윤 인자';
-      sheetBody.textContent = 'PVP 습윤 인자가 렌즈 표면 젖음성을 유지하도록 돕고, 수분 유지에 기여합니다. (테스트: 표면 강조 연출)';
+      sheetBody.textContent  = 'PVP 습윤 인자가 렌즈 표면 젖음성을 유지하도록 돕고, 수분 유지에 기여합니다. (테스트: 표면 강조 연출)';
       sheetRow.style.display = 'none';
-      // “표면 확대” 느낌: 더 맑고 유광
       lensMat.opacity = 0.14;
       lensMat.clearcoat = 0.9;
       axisMat.opacity = 0.35;
       ctaBtn.textContent = 'PVP 보기';
-      ctaSub.textContent = '렌즈 표면(젖음성) 포인트를 간단히 확인합니다. (추후 내부 단면/레이어로 확장)';
+      ctaSub.textContent = '렌즈 표면(젖음성) 포인트를 간단히 확인합니다. (추후 내부 단면/레이어 확장)';
     }
     if (mode==='BL'){
       sheetTitle.textContent = '블루라이트 차단 (MAX)';
-      sheetBody.textContent = '블루라이트가 눈으로 들어오는 경로 중 일부가 렌즈에서 감소/필터링되는 연출을 확인합니다. (테스트: 광선 + 감쇠)';
+      sheetBody.textContent  = '블루라이트가 눈으로 들어오는 경로 중 일부가 렌즈에서 감소/필터링되는 연출을 확인합니다. (테스트: 광선 + 감쇠)';
       sheetRow.style.display = 'none';
       axisMat.opacity = 0.35;
+      rays.visible = (product==='MAX');
       ctaBtn.textContent = 'BL 보기';
-      ctaSub.textContent = 'MAX 난시에서만 제공되는 블루라이트 관련 연출(테스트)을 확인합니다.';
+      ctaSub.textContent = 'MAX 난시에서만 제공되는 블루라이트 관련 기능(테스트)을 확인합니다.';
     }
-
     openSheet(true);
   }
 
-  function openSheet(forceOpen){
-    sheetOpen = forceOpen ?? !sheetOpen;
-    sheet.classList.toggle('show', sheetOpen);
-  }
-
-  // Right icon actions
+  // right buttons
   btnRotate.addEventListener('click', ()=>{
-    // 360 자동 회전 토글
     autoSpin = !autoSpin;
     btnRotate.classList.toggle('on', autoSpin);
   });
@@ -561,29 +557,30 @@
   btnPVP.addEventListener('click', ()=> setMode('PVP'));
   btnBL.addEventListener('click', ()=> { if (product==='MAX') setMode('BL'); });
 
-  // product tabs
+  // bottom tabs
   tab1.addEventListener('click', ()=> setProduct('1D'));
   tab2.addEventListener('click', ()=> setProduct('MAX'));
 
-  // CTA: mode별 행동 (이미지 참고처럼 하단 큰 버튼이 핵심 트리거)
+  // CTA
   ctaBtn.addEventListener('click', ()=>{
     if (mode==='ASD') triggerBlinkASD();
     else openSheet(true);
   });
 
-  // Sheet buttons
+  // sheet buttons
   btnBlink.addEventListener('click', triggerBlinkASD);
-  btnBeforeAfter.addEventListener('click', ()=>{ afterMode ? setBefore() : setAfter(); });
+  btnBeforeAfter.addEventListener('click', ()=> { afterMode ? setBefore() : setAfter(); });
 
-  // ---------- Blink + ASD action ----------
+  // ---------- Blink + ASD ----------
   let isBlinking = false;
 
   async function triggerBlinkASD(){
     if (isBlinking) return;
     isBlinking = true;
+
     openSheet(true);
 
-    // play eye blink animation (if exists)
+    // play blink (if exists)
     if (blinkAction){
       try{
         blinkAction.reset();
@@ -591,8 +588,7 @@
       }catch(e){}
     }
 
-    // simulate 3 blinks stabilization
-    // (blink clip length unknown; we just run axis alignment quickly)
+    // align axis quickly
     axisTarget = 0;
     await sleep(520);
     setAfter();
@@ -602,7 +598,7 @@
 
   function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-  // ---------- Quiz (2 questions) ----------
+  // ---------- Quiz ----------
   const quiz = [
     {
       title: 'Q. ASD 디자인에서 ‘순목’이 하는 역할은?',
@@ -618,15 +614,9 @@
   let qi = 0;
   let locked = false;
 
-  function showQuiz(){
-    qi = 0;
-    locked = false;
-    renderQuiz();
-    modal.classList.add('show');
-  }
-  function closeQuiz(){
-    modal.classList.remove('show');
-  }
+  function showQuiz(){ qi = 0; locked = false; renderQuiz(); modal.classList.add('show'); }
+  function closeQuiz(){ modal.classList.remove('show'); }
+
   function renderQuiz(){
     const q = quiz[qi];
     qnum.textContent = `퀴즈 ${qi+1}/${quiz.length}`;
@@ -649,22 +639,12 @@
       if (i === idx && i !== q.answer) b.classList.add('wrong');
     });
   }
-  [opt0,opt1,opt2].forEach((b)=>{
-    b.addEventListener('click', ()=> markAnswer(parseInt(b.dataset.idx,10)));
-  });
+  [opt0,opt1,opt2].forEach((b)=> b.addEventListener('click', ()=> markAnswer(parseInt(b.dataset.idx,10))) );
   btnModalClose.addEventListener('click', closeQuiz);
   btnNext.addEventListener('click', ()=>{
-    if (!locked){
-      alert('답을 선택해줘!');
-      return;
-    }
-    if (qi === quiz.length-1){
-      closeQuiz();
-      alert('퀴즈 완료! (데모)');
-      return;
-    }
-    qi += 1;
-    renderQuiz();
+    if (!locked){ alert('답을 선택해줘!'); return; }
+    if (qi === quiz.length-1){ closeQuiz(); alert('퀴즈 완료! (데모)'); return; }
+    qi += 1; renderQuiz();
   });
   tabQuiz.addEventListener('click', showQuiz);
 
@@ -678,33 +658,31 @@
   }
   window.addEventListener('resize', resize);
 
-  // ---------- Animation loop ----------
+  // ---------- Loop ----------
   const clock = new THREE.Clock();
-  let autoSpin = false;
 
-  function tick(){
-    requestAnimationFrame(tick);
+  function animate(){
+    requestAnimationFrame(animate);
     const dt = Math.min(clock.getDelta(), 0.033);
 
     controls.update();
     if (mixer) mixer.update(dt);
 
-    // axis lerp (ASD stabilization)
+    // ASD alignment
     const speed = 2.4;
     axisAngle = THREE.MathUtils.lerp(axisAngle, axisTarget, 1 - Math.exp(-speed * dt));
     applyAxis(axisAngle);
 
-    // auto 360 spin (demo)
+    // 360 auto spin
     if (autoSpin){
       root.rotation.y += dt * 0.8;
     }
 
-    // BL rays pulse
+    // BL pulse
     if (rays.visible){
       const t = performance.now()*0.0012;
       rayA.material.opacity = 0.18 + 0.10*Math.sin(t);
       rayB.material.opacity = 0.18 + 0.10*Math.cos(t*1.1);
-      // "filter" 느낌: 렌즈 앞에서 약간 감쇠(데모)
       lensMat.opacity = 0.16;
     }
 
@@ -717,7 +695,7 @@
   setMode('ASD');
   setBefore();
   openSheet(true);
-  tick();
+  animate();
 </script>
 </body>
 </html>
