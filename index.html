@@ -25,28 +25,24 @@
       backdrop-filter: blur(8px);
       min-height:86px;
       box-sizing:border-box;
+
+      /* ✅ 클릭 가능하게 */
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      cursor:pointer;
+      transition: transform .08s ease, background .18s ease, border-color .18s ease;
     }
+    .missionCard:active{ transform: scale(.99); }
+
+    /* ✅ ON 상태 표시 */
+    .missionCard.on{
+      background:rgba(0,255,140,.12);
+      border-color:rgba(0,255,140,.35);
+    }
+
     .missionNo{font-weight:900;opacity:.85;font-size:14px;margin-bottom:6px;}
     .missionTitle{font-weight:900;font-size:16px;margin-bottom:6px;}
     .missionDesc{font-size:12.5px;line-height:1.35;opacity:.88;white-space:pre-line;}
-
-    /* 오른쪽 버튼 */
-    #rightBtns{
-      position:fixed; right:14px; top:190px; z-index:45;
-      display:flex; flex-direction:column; gap:10px;
-    }
-    .pill{
-      width:54px;height:54px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.08);
-      color:#eaf2ff;font-weight:900;font-size:12px;
-      display:flex;align-items:center;justify-content:center;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
-      backdrop-filter: blur(8px);
-    }
-    .pill.on{ background:rgba(0,255,140,.14); border-color:rgba(0,255,140,.35); }
-    .pill.disabled{ opacity:.35; pointer-events:none; }
 
     /* 하단 버튼 */
     #bottomBtns{
@@ -120,7 +116,7 @@
     #pvpBig{
       position:fixed;
       left:50%;
-      top:49%; /* ✅ 아주 살짝 위로 */
+      top:49%;
       transform:translate(-50%,-50%);
       width:min(72vw, 520px);
       height:min(72vw, 520px);
@@ -244,7 +240,7 @@
     #blockBadge.show{ display:block; }
     #blockBadge span{ color:rgba(0,255,140,.95); }
 
-    /* ✅ 두께 그래프(가로형) */
+    /* 두께 그래프(가로형) */
     #thicknessBar{
       position:fixed;
       left:12px;
@@ -364,28 +360,23 @@
 </head>
 
 <body>
+  <!-- ✅ 미션 카드가 기능 버튼 역할 -->
   <div id="missionBar">
-    <div class="missionCard">
+    <div id="missionASD" class="missionCard" role="button" tabindex="0" aria-label="ASD 기술 보기">
       <div class="missionNo">01</div>
       <div class="missionTitle">ASD 기술</div>
-      <div class="missionDesc">“렌즈 두께 MAP”을 눌러 확인</div>
+      <div class="missionDesc">카드를 눌러 확인</div>
     </div>
-    <div class="missionCard">
+    <div id="missionPVP" class="missionCard" role="button" tabindex="0" aria-label="PVP 보기">
       <div class="missionNo">02</div>
       <div class="missionTitle">눈물 안정화</div>
-      <div class="missionDesc">“PVP” 버튼을 눌러 확인</div>
+      <div class="missionDesc">카드를 눌러 확인</div>
     </div>
-    <div class="missionCard">
+    <div id="missionBlue" class="missionCard" role="button" tabindex="0" aria-label="옵티블루 보기">
       <div class="missionNo">03</div>
       <div class="missionTitle">옵티블루 기술</div>
-      <div class="missionDesc">“블루” 버튼을 눌러 확인</div>
+      <div class="missionDesc">카드를 눌러 확인</div>
     </div>
-  </div>
-
-  <div id="rightBtns">
-    <div id="btnASD"  class="pill">ASD</div>
-    <div id="btnPVP"  class="pill">PVP</div>
-    <div id="btnBlue" class="pill">블루</div>
   </div>
 
   <!-- 블루라이트 이펙트 -->
@@ -395,7 +386,7 @@
   </div>
   <div id="blockBadge">블루라이트 <span>55%</span> 차단 연출</div>
 
-  <!-- ✅ 두께 그래프 -->
+  <!-- 두께 그래프 -->
   <div id="thicknessBar" aria-hidden="true">
     <div id="thHeader">
       <div id="thTitle">두께</div>
@@ -429,7 +420,7 @@
     <img id="pvpThumb" src="PVP.gif" alt="PVP" onerror="this.onerror=null; this.src='PVP.jpeg';">
     <div id="pvpText">
       <div id="pvpTitle">PVP 습윤 인자</div>
-      <div id="hint">PVP 습윤인자 설명 및 그래프 추가.</div>
+      <div id="hint">렌즈 내 PVP 습윤인자가 표면 탈수율을 감소시켜 더 오랫동안 눈물막 유지하여 건조감 감소. 아큐브 오아시스 원데이 대비 20% 게선됟 수분</div>
     </div>
   </div>
 
@@ -469,9 +460,10 @@
   <script>
     const mv = document.getElementById('mv');
 
-    const btnASD  = document.getElementById('btnASD');
-    const btnPVP  = document.getElementById('btnPVP');
-    const btnBlue = document.getElementById('btnBlue');
+    // ✅ 상단 미션(=기능 버튼)
+    const missionASD  = document.getElementById('missionASD');
+    const missionPVP  = document.getElementById('missionPVP');
+    const missionBlue = document.getElementById('missionBlue');
 
     const modeLens = document.getElementById('modeLens');
     const modeHeat = document.getElementById('modeHeat');
@@ -493,18 +485,17 @@
     let blueOn = false;
     let pvpOn = false;
 
-    // ✅ "투명/히트맵" 전환 시에도 카메라(orbit+target) 연동
+    // 투명/히트맵 전환 시에도 카메라(orbit+target) 연동
     let lastOrbit = null;
     let lastTarget = null;
 
-    // ✅ 디폴트(처음 상태)로 확실히 복귀시키기 위한 값
+    // 디폴트(처음 상태)
     let defaultOrbit = null;
     let defaultTarget = null;
 
-    // ✅ 블루 ON 할 때, 요청한 각도(2번째 이미지 느낌)로 강제 세팅
-    // 필요하면 여기만 숫자 미세 조정하면 됨.
-    const BLUE_ORBIT_STR  = '20deg 88deg 2.75m';  // theta phi radius
-    const BLUE_TARGET_STR = '0m 0.010m 0m';       // (살짝 위/중앙)
+    // 블루 ON 할 때 강제 각도
+    const BLUE_ORBIT_STR  = '20deg 88deg 2.75m';
+    const BLUE_TARGET_STR = '0m 0.010m 0m';
     let orbitBeforeBlue = null;
     let targetBeforeBlue = null;
 
@@ -530,7 +521,6 @@
       try{ mv.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`; }catch(e){}
     }
 
-    // ✅ 문자열로도 세팅 가능하게 (블루용)
     function applyOrbitStr(s){
       try{ mv.cameraOrbit = s; }catch(e){}
     }
@@ -538,12 +528,10 @@
       try{ mv.cameraTarget = s; }catch(e){}
     }
 
-    // ✅ "백(↺) 버튼" = 디폴트 orbit+target로 100% 복귀
     function resetCameraToDefault(){
       if(!defaultOrbit || !defaultTarget) return;
       applyTarget(defaultTarget);
       applyOrbit(defaultOrbit);
-      // iOS/모바일에서 한 번 더 먹여야 확실히 고정되는 경우가 있어서 1회 재적용
       setTimeout(()=>{
         applyTarget(defaultTarget);
         applyOrbit(defaultOrbit);
@@ -565,7 +553,7 @@
       thicknessBar.setAttribute('aria-hidden', show ? 'false' : 'true');
     }
 
-    // ✅ PVP 확대 비율(여기 숫자만 바꾸면 “조금” 확대/축소 됨)
+    // ✅ PVP 확대 비율
     const PVP_ZOOM_FACTOR = 0.76;
 
     function zoomInForPVP(){
@@ -648,13 +636,18 @@
       }catch(e){}
     }
 
+    // ✅ 상단 카드 ON/OFF UI 동기화
+    function syncMissionUI(){
+      missionASD.classList.toggle('on', asdOverlay.classList.contains('show'));
+      missionPVP.classList.toggle('on', pvpOn);
+      missionBlue.classList.toggle('on', blueOn);
+    }
+
     function closeASD(){
       asdOverlay.classList.remove('show');
       asdOverlay.setAttribute('aria-hidden','true');
-      btnASD.classList.remove('on');
-
-      // (요청) ASD 닫을 때 디폴트로
       resetCameraToDefault();
+      syncMissionUI();
     }
 
     function setModeButtons(){
@@ -665,11 +658,9 @@
     function forceBlueOff(){
       if(!blueOn) return;
       blueOn = false;
-      btnBlue.classList.remove('on');
       showBlueFx(false);
       restoreOriginalColors();
 
-      // 블루 끌 때, 원래 보던 각도로 복귀(저장돼 있으면)
       if(orbitBeforeBlue && targetBeforeBlue){
         applyTarget(targetBeforeBlue);
         applyOrbit(orbitBeforeBlue);
@@ -680,43 +671,39 @@
       }
       orbitBeforeBlue = null;
       targetBeforeBlue = null;
+      syncMissionUI();
     }
 
     function forcePVPOff(){
       if(!pvpOn) return;
       pvpOn = false;
-      btnPVP.classList.remove('on');
       showPVP(false);
+      syncMissionUI();
     }
 
     function openASD(){
-      /* ✅✅ 수정: ASD 켜면 다른 기능 남지 않게 강제 OFF + 디폴트 */
+      // ASD 켜면 다른 기능 강제 OFF + 디폴트
       if(blueOn) forceBlueOff();
       if(pvpOn)  forcePVPOff();
       resetCameraToDefault();
 
       asdOverlay.classList.add('show');
       asdOverlay.setAttribute('aria-hidden','false');
-      btnASD.classList.add('on');
+      syncMissionUI();
     }
 
     function setModel(file, mode){
       return new Promise((resolve)=>{
-        // ✅ 전환 직전에 현재 orbit+target 저장 (두 모델 연동)
         lastOrbit = getOrbitSafe();
         lastTarget = getTargetSafe();
 
         currentMode = mode;
 
-        // 모드 전환하면 PVP 닫기
+        // 모드 전환하면 PVP/블루 닫기
         forcePVPOff();
-
-        // 블루 OFF
         forceBlueOff();
 
-        // 두께맵에서만 그래프 ON
         showThickness(mode === 'heat');
-
         setModeButtons();
 
         const onLoadOnce = ()=>{
@@ -730,11 +717,9 @@
     }
 
     mv.addEventListener('load', ()=>{
-      // ✅ 최초 1회: 디폴트 orbit/target 확정 저장
       if(!defaultOrbit) defaultOrbit = getOrbitSafe();
       if(!defaultTarget) defaultTarget = getTargetSafe();
 
-      // ✅ 모드 전환 시: 이전 orbit/target 그대로 복원
       if(lastTarget) applyTarget(lastTarget);
       if(lastOrbit)  applyOrbit(lastOrbit);
 
@@ -749,69 +734,63 @@
       }
 
       setModeButtons();
+      syncMissionUI();
     });
 
-    /* ASD */
-    btnASD.addEventListener('click', ()=>{
+    /* ✅ ASD (미션 01 카드 클릭) */
+    function toggleASD(){
       if(asdOverlay.classList.contains('show')) closeASD();
       else openASD();
-    });
+    }
+    missionASD.addEventListener('click', toggleASD);
+    missionASD.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') toggleASD(); });
+
     asdClose.addEventListener('click', closeASD);
     asdOverlay.addEventListener('click', (e)=>{ if(e.target === asdOverlay) closeASD(); });
 
-    /* ✅ PVP (블루와 상호배타) */
-    btnPVP.addEventListener('click', async ()=>{
-      // 두께맵에서 누르면 투명 렌즈로 원복 후 동작
+    /* ✅ PVP (미션 02 카드 클릭) */
+    async function togglePVP(){
       if(currentMode === 'heat'){
-        btnPVP.classList.add('on');
         await setModel('lens_clear.glb', 'lens');
       }
       if(currentMode !== 'lens') return;
 
-      // PVP 켜려는 순간 → 블루는 무조건 OFF
       if(!pvpOn){
         if(blueOn) forceBlueOff();
       }
 
       pvpOn = !pvpOn;
-      btnPVP.classList.toggle('on', pvpOn);
 
       if(pvpOn){
-        // ✅ (요청) PVP 켤 때 렌즈 위치 이상하면 디폴트로 돌리고 시작
         resetCameraToDefault();
         setTimeout(()=>{
           zoomInForPVP();
           showPVP(true);
+          syncMissionUI();
         }, 140);
       }else{
         showPVP(false);
-
-        /* ✅✅ 추가: PVP OFF 되면 렌즈 위치/크기를 디폴트로 복귀 */
         resetCameraToDefault();
+        syncMissionUI();
       }
-    });
+    }
+    missionPVP.addEventListener('click', togglePVP);
+    missionPVP.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') togglePVP(); });
 
-    /* ✅ 블루 (PVP와 상호배타) */
-    btnBlue.addEventListener('click', async ()=>{
-      /* ✅✅ 수정 핵심: 두께맵에서 블루 누르면 -> 투명렌즈로 돌아간 뒤 "블루 ON"까지 이어짐 */
+    /* ✅ 블루 (미션 03 카드 클릭) */
+    async function toggleBlue(){
       if(currentMode === 'heat'){
-        // lens로 전환
         await setModel('lens_clear.glb', 'lens');
-        // setModel 안에서 blueOff 처리되므로, 여기서 "블루 ON" 로직을 이어서 실행
       }
-
       if(currentMode !== 'lens') return;
 
-      // 블루 켜려는 순간 → PVP는 무조건 OFF
       if(!blueOn){
         if(pvpOn) forcePVPOff();
       }
 
       blueOn = !blueOn;
-      btnBlue.classList.toggle('on', blueOn);
 
       if(blueOn){
-        // ✅ (요청) 블루 ON 시 각도를 2번 이미지 느낌으로 강제 조정
         orbitBeforeBlue = getOrbitSafe();
         targetBeforeBlue = getTargetSafe();
 
@@ -825,10 +804,11 @@
         if(!allMaterialBackup) backupOriginalColors();
         applyTint();
         showBlueFx(true);
+        syncMissionUI();
       }else{
         showBlueFx(false);
         restoreOriginalColors();
-        // forceBlueOff에서 복귀까지 처리하긴 하는데, 여기서도 안전하게 호출
+
         if(orbitBeforeBlue && targetBeforeBlue){
           applyTarget(targetBeforeBlue);
           applyOrbit(orbitBeforeBlue);
@@ -840,12 +820,14 @@
         orbitBeforeBlue = null;
         targetBeforeBlue = null;
 
-        /* ✅✅ 추가: 블루 OFF 되면 렌즈 위치/크기를 디폴트로 복귀 */
         resetCameraToDefault();
+        syncMissionUI();
       }
-    });
+    }
+    missionBlue.addEventListener('click', toggleBlue);
+    missionBlue.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') toggleBlue(); });
 
-    /* ✅ 백(↺) 버튼: 무조건 맨 처음 디폴트 위치+크기로 */
+    /* 백(↺) 버튼 */
     btnReset.addEventListener('click', ()=>{
       resetCameraToDefault();
     });
