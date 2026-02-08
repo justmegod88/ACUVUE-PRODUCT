@@ -9,15 +9,30 @@
     html,body{height:100%;margin:0;background:#081625;overflow:hidden;font-family:-apple-system,system-ui;}
     model-viewer{width:100vw;height:100vh;background:transparent;display:block;}
 
-    #msg{
-      position:fixed;left:12px;right:12px;top:12px;z-index:30;
-      padding:10px 12px;border-radius:12px;
-      background:rgba(0,0,0,.60);color:#eaf2ff;font-size:13px;line-height:1.35;white-space:pre-wrap;
-      border:1px solid rgba(255,255,255,.14);
+    /* 상단 미션 카드 */
+    #missionBar{
+      position:fixed; left:12px; right:12px; top:12px; z-index:40;
+      display:flex; gap:10px; align-items:stretch;
+      pointer-events:auto;
     }
+    .missionCard{
+      flex:1;
+      padding:12px 12px;
+      border-radius:16px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      color:#eaf2ff;
+      backdrop-filter: blur(8px);
+      min-height:86px;
+      box-sizing:border-box;
+    }
+    .missionNo{font-weight:900;opacity:.85;font-size:14px;margin-bottom:6px;}
+    .missionTitle{font-weight:900;font-size:16px;margin-bottom:6px;}
+    .missionDesc{font-size:12.5px;line-height:1.35;opacity:.88;white-space:pre-line;}
 
+    /* 오른쪽 버튼 */
     #rightBtns{
-      position:fixed; right:14px; top:120px; z-index:30;
+      position:fixed; right:14px; top:190px; z-index:45;
       display:flex; flex-direction:column; gap:10px;
     }
     .pill{
@@ -28,13 +43,15 @@
       display:flex;align-items:center;justify-content:center;
       -webkit-tap-highlight-color: transparent;
       user-select:none;
+      backdrop-filter: blur(8px);
     }
     .pill.on{ background:rgba(0,255,140,.14); border-color:rgba(0,255,140,.35); }
-    .pill.disabled{ opacity:.35; }
+    .pill.disabled{ opacity:.35; pointer-events:none; }
 
+    /* 하단 버튼 */
     #bottomBtns{
-      position:fixed;left:12px;right:12px;bottom:12px;z-index:30;
-      display:flex;gap:8px;flex-wrap:wrap;
+      position:fixed;left:12px;right:12px;bottom:12px;z-index:50;
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;
     }
     .btn{
       flex:1;min-width:140px;
@@ -43,11 +60,100 @@
       background:rgba(255,255,255,.08);
       color:#eaf2ff;font-weight:900;font-size:13px;
       -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(8px);
     }
     .btn.primary{ background:rgba(0,255,140,.12); border-color:rgba(0,255,140,.35); }
 
+    /* 작은 원형 ↺ 버튼 */
+    #btnReset{
+      width:46px;height:46px;min-width:46px;flex:0 0 auto;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.08);
+      color:#eaf2ff;
+      font-weight:900;
+      font-size:16px;
+      display:flex;align-items:center;justify-content:center;
+      backdrop-filter: blur(8px);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ASD 오버레이 (blink.png) */
+    #asdOverlay{
+      position:fixed; inset:0; z-index:80;
+      display:none;
+      background:rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      align-items:center; justify-content:center;
+      padding:18px;
+      box-sizing:border-box;
+    }
+    #asdOverlay.show{ display:flex; }
+    #asdCard{
+      width:min(920px, 96vw);
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(10,18,30,.62);
+      overflow:hidden;
+      box-shadow:0 18px 60px rgba(0,0,0,.55);
+      position:relative;
+    }
+    #asdCard img{ width:100%; height:auto; display:block; background:rgba(255,255,255,.04); }
+    #asdClose{
+      position:absolute; right:10px; top:10px;
+      width:38px; height:38px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.10);
+      color:#eaf2ff;
+      font-weight:900;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #asdHint{
+      padding:10px 12px;
+      color:#eaf2ff;
+      font-size:12.5px;
+      opacity:.9;
+      border-top:1px solid rgba(255,255,255,.10);
+    }
+
+    /* PVP 큰 원형 */
+    #pvpBig{
+      position:fixed;
+      left:50%;
+      top:52%;
+      transform:translate(-50%,-50%);
+      width:min(72vw, 520px);
+      height:min(72vw, 520px);
+      border-radius:999px;
+      z-index:56;
+      display:none;
+      pointer-events:none;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(8px);
+      overflow:hidden;
+      box-shadow:0 18px 70px rgba(0,0,0,.35);
+    }
+    #pvpBig.show{ display:block; }
+    #pvpBig img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      border-radius:999px;
+      filter:saturate(1.05) contrast(1.02);
+    }
+    #pvpBig::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:999px;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.08);
+      pointer-events:none;
+    }
+
+    /* PVP 하단 설명 */
     #pvpOverlay{
-      position:fixed; left:12px; right:12px; bottom:92px; z-index:40;
+      position:fixed; left:12px; right:12px; bottom:92px; z-index:60;
       background:rgba(0,0,0,.62);
       border:1px solid rgba(255,255,255,.14);
       border-radius:14px;
@@ -55,6 +161,7 @@
       display:none;
       gap:10px;
       align-items:center;
+      backdrop-filter: blur(10px);
     }
     #pvpOverlay.show{ display:flex; }
     #pvpOverlay img{
@@ -65,24 +172,284 @@
     #pvpText{color:#eaf2ff;font-size:12.5px;line-height:1.35;}
     #pvpTitle{font-weight:900;margin-bottom:2px;}
     #hint{opacity:.85;}
+
+    /* 블루라이트(55%) */
+    #blueFx{
+      position:fixed; inset:0; z-index:58;
+      pointer-events:none;
+      display:none;
+    }
+    #blueFx.show{ display:block; }
+
+    .beam{
+      position:absolute;
+      top:46%;
+      height:10px;
+      filter: blur(1px);
+      opacity:.95;
+      transform:translateY(-50%) rotate(-10deg);
+      border-radius:999px;
+    }
+    .beam-pass{
+      left:-10%;
+      width:65%;
+      background:linear-gradient(90deg,
+        rgba(0,200,255,0) 0%,
+        rgba(0,200,255,.65) 25%,
+        rgba(0,200,255,1.0) 50%,
+        rgba(0,200,255,.65) 75%,
+        rgba(0,200,255,0) 100%
+      );
+      animation: passMove 1.05s ease-in-out infinite;
+    }
+    @keyframes passMove{
+      0%{ transform:translateY(-50%) rotate(-10deg) translateX(-4%); opacity:.70;}
+      50%{ transform:translateY(-50%) rotate(-10deg) translateX(4%);  opacity:1;}
+      100%{transform:translateY(-50%) rotate(-10deg) translateX(-4%); opacity:.70;}
+    }
+
+    .beam-bounce{
+      left:44%;
+      width:52%;
+      top:44%;
+      transform:translateY(-50%) rotate(170deg);
+      background:linear-gradient(90deg,
+        rgba(0,200,255,0) 0%,
+        rgba(0,200,255,.45) 25%,
+        rgba(0,200,255,.85) 55%,
+        rgba(0,200,255,.45) 80%,
+        rgba(0,200,255,0) 100%
+      );
+      animation: bounceMove 1.05s ease-in-out infinite;
+      opacity:.75;
+    }
+    @keyframes bounceMove{
+      0%{ transform:translateY(-50%) rotate(170deg) translateX(-3%); opacity:.55;}
+      50%{ transform:translateY(-50%) rotate(170deg) translateX(3%);  opacity:.85;}
+      100%{transform:translateY(-50%) rotate(170deg) translateX(-3%); opacity:.55;}
+    }
+
+    #blockBadge{
+      position:fixed; left:12px; right:12px; bottom:160px; z-index:70;
+      display:none;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.14);
+      color:#eaf2ff;
+      font-weight:900;
+      backdrop-filter: blur(10px);
+      text-align:center;
+    }
+    #blockBadge.show{ display:block; }
+    #blockBadge span{ color:rgba(0,255,140,.95); }
+
+    /* ✅ 두께 그래프(가로형) */
+    #thicknessBar{
+      position:fixed;
+      left:12px;
+      right:12px;
+      bottom:92px;
+      z-index:67;
+      display:none;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.38);
+      backdrop-filter: blur(10px);
+      padding:10px 12px 12px;
+      box-sizing:border-box;
+      box-shadow:0 18px 60px rgba(0,0,0,.35);
+    }
+    #thicknessBar.show{ display:block; }
+
+    #thHeader{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      margin-bottom:8px;
+    }
+    #thTitle{
+      color:#eaf2ff;
+      font-weight:900;
+      font-size:12.5px;
+      letter-spacing:.2px;
+      opacity:.95;
+    }
+    #thUnit{
+      color:rgba(234,242,255,.70);
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.1px;
+    }
+
+    #gradRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .tickLabel{
+      width:46px;
+      text-align:right;
+      color:rgba(234,242,255,.78);
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:.1px;
+      flex:0 0 auto;
+    }
+
+    #gradWrap{
+      position:relative;
+      flex:1 1 auto;
+      height:14px;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      box-shadow: inset 0 0 12px rgba(0,0,0,.35);
+    }
+
+    #grad{
+      position:absolute; inset:0;
+      background:linear-gradient(90deg,
+        rgba(140,  0,255,1) 0%,
+        rgba(  0, 90,255,1) 17%,
+        rgba(  0,200,255,1) 32%,
+        rgba(  0,255,150,1) 48%,
+        rgba(150,255,  0,1) 64%,
+        rgba(255,220,  0,1) 78%,
+        rgba(255,120,  0,1) 90%,
+        rgba(255, 50, 50,1) 100%
+      );
+      opacity:.92;
+      filter:saturate(1.05) contrast(1.05);
+    }
+
+    #gradShine{
+      position:absolute; inset:0;
+      background:linear-gradient(180deg,
+        rgba(255,255,255,.22) 0%,
+        rgba(255,255,255,0) 55%,
+        rgba(0,0,0,.18) 100%
+      );
+      mix-blend-mode: overlay;
+      opacity:.55;
+      pointer-events:none;
+    }
+
+    .mark{
+      position:absolute;
+      top:-6px;
+      width:1px;
+      height:26px;
+      background:rgba(255,255,255,.18);
+    }
+    .mark strong{
+      position:absolute;
+      top:18px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:10px;
+      color:rgba(234,242,255,.70);
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .m0{ left:0%; }
+    .m25{ left:25%; }
+    .m50{ left:50%; }
+    .m75{ left:75%; }
+    .m100{ left:100%; }
+
+    /* ✅ (요청 1) 워딩 삭제: #thHint는 유지해도 되지만 내용은 비움 */
+    #thHint{
+      margin-top:8px;
+      color:rgba(234,242,255,.70);
+      font-size:10.5px;
+      line-height:1.25;
+      display:none; /* 아예 숨김 */
+    }
   </style>
 </head>
 
 <body>
-  <div id="msg">준비중…</div>
-
-  <div id="rightBtns">
-    <div id="btnBL"  class="pill">BL</div>
-    <div id="btnPVP" class="pill">PVP</div>
-    <div id="btnBlink" class="pill">순목</div>
+  <div id="missionBar">
+    <div class="missionCard">
+      <div class="missionNo">01</div>
+      <div class="missionTitle">ASD 기술</div>
+      <div class="missionDesc">“렌즈 두께 MAP”을 눌러 확인</div>
+    </div>
+    <div class="missionCard">
+      <div class="missionNo">02</div>
+      <div class="missionTitle">눈물 안정화</div>
+      <div class="missionDesc">“PVP” 버튼을 눌러 확인</div>
+    </div>
+    <div class="missionCard">
+      <div class="missionNo">03</div>
+      <div class="missionTitle">옵티블루 기술</div>
+      <div class="missionDesc">“블루” 버튼을 눌러 확인</div>
+    </div>
   </div>
 
+  <div id="rightBtns">
+    <div id="btnASD"  class="pill">ASD</div>
+    <div id="btnPVP"  class="pill">PVP</div>
+    <div id="btnBlue" class="pill">블루</div>
+  </div>
+
+  <!-- 블루라이트 이펙트 -->
+  <div id="blueFx">
+    <div class="beam beam-pass"></div>
+    <div class="beam beam-bounce"></div>
+  </div>
+  <div id="blockBadge">블루라이트 <span>55%</span> 차단 연출</div>
+
+  <!-- ✅ 두께 그래프(가로형, CSS) -->
+  <div id="thicknessBar" aria-hidden="true">
+    <div id="thHeader">
+      <div id="thTitle">두께</div>
+      <div id="thUnit">mm</div>
+    </div>
+
+    <div id="gradRow">
+      <div class="tickLabel">얆음_0.0</div>
+      <div id="gradWrap">
+        <div id="grad"></div>
+        <div id="gradShine"></div>
+
+        <div class="mark m0"><strong>0.0</strong></div>
+        <div class="mark m25"><strong>0.1</strong></div>
+        <div class="mark m50"><strong>0.2</strong></div>
+        <div class="mark m75"><strong>0.3</strong></div>
+        <div class="mark m100"><strong>0.4</strong></div>
+      </div>
+      <div class="tickLabel" style="text-align:left;width:46px;">0.4_두껍</div>
+    </div>
+
+    <div id="thHint"></div>
+  </div>
+
+  <!-- PVP 큰 원형 -->
+  <div id="pvpBig">
+    <img id="pvpBigImg" src="PVP.gif" alt="PVP Big"
+         onerror="this.onerror=null; this.src='PVP.jpeg';">
+  </div>
+
+  <!-- PVP 하단 설명(유지) -->
   <div id="pvpOverlay">
-    <img id="pvpImg" src="pvp_inside.jpg" alt="PVP 내부 재질"
-      onerror="this.style.display='none'; document.getElementById('pvpText').innerHTML = '<div id=&quot;pvpTitle&quot;>PVP 습윤 인자</div><div id=&quot;hint&quot;>pvp_inside.jpg 파일을 같은 폴더에 넣으면 이미지가 표시돼요.</div>';">
+    <img id="pvpThumb" src="PVP.gif" alt="PVP"
+      onerror="this.onerror=null; this.src='PVP.jpeg';">
     <div id="pvpText">
       <div id="pvpTitle">PVP 습윤 인자</div>
-      <div id="hint">확대 시 렌즈 내부/표면의 습윤 유지 컨셉을 시각적으로 보여줍니다.</div>
+      <div id="hint">PVP 습윤인자 설명 및 그래프 추가.</div>
+    </div>
+  </div>
+
+  <!-- ASD 오버레이 -->
+  <div id="asdOverlay" aria-hidden="true">
+    <div id="asdCard">
+      <button id="asdClose" type="button" aria-label="닫기">✕</button>
+      <img id="asdImg" src="blink.png" alt="ASD (blink.png)"
+           onerror="this.style.display='none'; document.getElementById('asdHint').textContent='blink.png 파일을 같은 폴더에 넣어주세요.';">
+      <div id="asdHint">ASD 참고 이미지</div>
     </div>
   </div>
 
@@ -91,279 +458,314 @@
 
   <model-viewer
     id="mv"
-    src="test.glb"
+    src="lens_clear.glb"
     camera-controls
+    camera-orbit="0deg 102deg 2.6m"
+    camera-target="0m 0.015m 0m"
     touch-action="pan-y"
-    exposure="1.1"
+    exposure="1.35"
+    tone-mapping="aces"
+    environment-image="neutral"
     shadow-intensity="0"
     style="display:block;">
   </model-viewer>
 
   <div id="bottomBtns">
-    <button id="modeLens" class="btn primary">렌즈(test.glb)</button>
-    <button id="modeEye" class="btn">눈(eye_animation.glb)</button>
+    <button id="btnReset" title="처음 위치로">↺</button>
+    <button id="modeLens" class="btn primary">투명 렌즈 모드</button>
+    <button id="modeHeat" class="btn">렌즈 두께 MAP</button>
   </div>
 
   <script>
     const mv = document.getElementById('mv');
-    const msg = document.getElementById('msg');
 
-    const btnBL = document.getElementById('btnBL');
-    const btnPVP = document.getElementById('btnPVP');
-    const btnBlink = document.getElementById('btnBlink');
+    const btnASD  = document.getElementById('btnASD');
+    const btnPVP  = document.getElementById('btnPVP');
+    const btnBlue = document.getElementById('btnBlue');
 
     const modeLens = document.getElementById('modeLens');
-    const modeEye  = document.getElementById('modeEye');
+    const modeHeat = document.getElementById('modeHeat');
+
+    const btnReset = document.getElementById('btnReset');
+
+    const asdOverlay = document.getElementById('asdOverlay');
+    const asdClose   = document.getElementById('asdClose');
 
     const pvpOverlay = document.getElementById('pvpOverlay');
+    const pvpBig     = document.getElementById('pvpBig');
 
-    let currentMode = 'lens'; // 'lens' | 'eye'
-    let blOn = false;
+    const blueFx = document.getElementById('blueFx');
+    const blockBadge = document.getElementById('blockBadge');
+
+    // ✅ 두께 그래프
+    const thicknessBar = document.getElementById('thicknessBar');
+
+    let currentMode = 'lens'; // 'lens' | 'heat'
+    let blueOn = false;
     let pvpOn = false;
 
-    let baseRadius = null;
+    // 모드 전환 시 orbit 유지
+    let lastOrbit = null;
+    let defaultOrbit = null;
 
-    // ✅ (1) BL 블루그린 틴트: "아주 연하게" (실물 렌즈 톤)
-    // 더 연하게/진하게는 아래 값만 조절하면 됨
-    const BL_TEAL = [0.88, 0.95, 0.86, 0.96]
+    // 블루그린 틴트
+    const BLUEGREEN_TINT = [0.55, 1.08, 0.72, 0.45];
 
-    let originalBaseColor = null;
+    // 원본 색 백업(블루 OFF 시 복귀)
+    let allMaterialBackup = null;
 
-    const FRONT_THETA = 0;
-    const FRONT_PHI   = 90;
-
-    // ✅ (2) 순목 1회 재생을 위해 duration 기억
-    let eyeAnimName = null;
-    let eyeAnimDuration = null;
-
-    function setMsg(t){ msg.textContent = t; }
-
-    function setBtnState(){
-      if(currentMode === 'lens'){
-        btnBL.classList.remove('disabled');
-        btnPVP.classList.remove('disabled');
-        btnBlink.classList.add('disabled');
-      } else {
-        btnBL.classList.add('disabled');
-        btnPVP.classList.add('disabled');
-        btnBlink.classList.remove('disabled');
-      }
+    function getOrbitSafe(){
+      try{ return mv.getCameraOrbit(); }catch(e){ return null; }
+    }
+    function applyOrbit(orbit){
+      if(!orbit) return;
+      try{ mv.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`; }catch(e){}
     }
 
-    function setModeUI(){
-      if(currentMode === 'lens'){
-        modeLens.classList.add('primary');
-        modeEye.classList.remove('primary');
-      } else {
-        modeEye.classList.add('primary');
-        modeLens.classList.remove('primary');
-      }
-      setBtnState();
+    function showBlueFx(show){
+      blueFx.classList.toggle('show', show);
+      blockBadge.classList.toggle('show', show);
     }
 
-    function forceFrontView(){
-      try{
-        const orbit = mv.getCameraOrbit();
-        const r = orbit?.radius || 2.5;
-        mv.cameraOrbit = `${FRONT_THETA}deg ${FRONT_PHI}deg ${r}m`;
-      }catch(e){}
-    }
-
-    async function setModel(file, mode){
-      currentMode = mode;
-
-      blOn = false;
-      pvpOn = false;
-      btnBL.classList.remove('on');
-      btnPVP.classList.remove('on');
-      pvpOverlay.classList.remove('show');
-      originalBaseColor = null;
-      baseRadius = null;
-
-      // eye 관련 변수도 리셋
-      eyeAnimName = null;
-      eyeAnimDuration = null;
-
-      setModeUI();
-      setMsg(`로딩중…\n${file}`);
-
-      mv.src = file + '?v=' + Date.now();
-    }
-
-    // ✅ eye에서 "끝나면 항상 0초로 복귀" (다음 클릭 준비)
-    mv.addEventListener('finished', ()=>{
-      if(currentMode !== 'eye') return;
-      try{
-        mv.pause();
-        mv.currentTime = 0;
-      }catch(e){}
-    });
-
-    mv.addEventListener('load', async ()=>{
-      try{
-        const orbit = mv.getCameraOrbit();
-        baseRadius = orbit.radius;
-      }catch(e){ baseRadius = null; }
-
-      // 로드 후 정면 고정
-      forceFrontView();
-      setTimeout(forceFrontView, 200);
-
-      if(currentMode === 'eye'){
-        try{
-          mv.loop = false;
-          mv.pause();
-          mv.currentTime = 0;
-
-          // 애니메이션 이름/길이 저장 (가능하면)
-          if (mv.availableAnimations && mv.availableAnimations.length){
-            eyeAnimName = mv.availableAnimations[0];
-            mv.animationName = eyeAnimName;
-
-            // duration은 model-viewer 버전에 따라 없을 수도 있어 try
-            try{
-              eyeAnimDuration = mv.duration; // seconds
-              if(!(eyeAnimDuration > 0)) eyeAnimDuration = null;
-            }catch(e){ eyeAnimDuration = null; }
-          }
-        }catch(e){}
-        setMsg('✅ 로드 성공!\n순목 버튼을 눌러야 깜박입니다.');
-      } else {
-        setMsg('✅ 로드 성공!\n드래그 회전 / 핀치 확대');
-      }
-
-      if(currentMode === 'lens'){
-        try{
-          const model = mv.model;
-          if(model && model.materials && model.materials.length){
-            const mat = model.materials[0];
-            const pbr = mat.pbrMetallicRoughness;
-            if(pbr && pbr.baseColorFactor){
-              originalBaseColor = [...pbr.baseColorFactor];
-            }
-          }
-        }catch(e){}
-      }
-    });
-
-    mv.addEventListener('error', (e)=>{
-      setMsg('❌ 로딩 실패\n' + JSON.stringify(e.detail || {}, null, 2));
-    });
-
-    // BL
-    btnBL.addEventListener('click', ()=>{
-      if(currentMode !== 'lens') return;
-
-      blOn = !blOn;
-      btnBL.classList.toggle('on', blOn);
-
-      try{
-        const model = mv.model;
-        if(!model || !model.materials || !model.materials.length){
-          setMsg('⚠️ 재질을 찾지 못했어요(모델 materials 없음).');
-          return;
-        }
-        const mat = model.materials[0];
-        const pbr = mat.pbrMetallicRoughness;
-        if(!pbr) return;
-
-        if(!originalBaseColor && pbr.baseColorFactor) originalBaseColor = [...pbr.baseColorFactor];
-        pbr.setBaseColorFactor(blOn ? BL_TEAL : (originalBaseColor || [1,1,1,1]));
-
-        setMsg(blOn ? 'BL ON: 연한 블루그린 틴트' : 'BL OFF: 원래 색상');
-      }catch(err){
-        setMsg('❌ BL 적용 실패\n' + (err?.message || err));
-      }
-    });
-
-    // PVP
-    function showPVPOverlay(show){
+    function showPVP(show){
       pvpOverlay.classList.toggle('show', show);
+      pvpBig.classList.toggle('show', show);
+    }
+
+    function showThickness(show){
+      thicknessBar.classList.toggle('show', show);
+      thicknessBar.setAttribute('aria-hidden', show ? 'false' : 'true');
     }
 
     function zoomInForPVP(){
       try{
-        const orbit = mv.getCameraOrbit();
-        const targetRadius = orbit.radius * 0.62;
+        const orbit = getOrbitSafe();
+        if(!orbit) return;
+        const targetRadius = orbit.radius * 0.76;
         mv.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${targetRadius}m`;
       }catch(e){}
     }
 
-    btnPVP.addEventListener('click', ()=>{
+    // 렌즈 기본룩
+    function tuneClearLensMaterials(){
+      try{
+        const model = mv.model;
+        if(!model || !model.materials) return;
+
+        model.materials.forEach(mat=>{
+          const pbr = mat.pbrMetallicRoughness;
+          if(!pbr) return;
+
+          const base = pbr.baseColorFactor ? [...pbr.baseColorFactor] : [1,1,1,1];
+          base[3] = Math.max(base[3], 0.45);
+          pbr.setBaseColorFactor(base);
+
+          try{ pbr.setRoughnessFactor(0.28); }catch(e){}
+          try{ pbr.setMetallicFactor(0.0); }catch(e){}
+
+          if(mat.extensions && mat.extensions.KHR_materials_transmission){
+            mat.extensions.KHR_materials_transmission.transmissionFactor = 0.86;
+          }
+
+          try{
+            if(mat.emissiveFactor){ mat.emissiveFactor = [0.04, 0.06, 0.07]; }
+          }catch(e){}
+
+          try{ if(mat.setAlphaMode) mat.setAlphaMode('BLEND'); }catch(e){}
+        });
+      }catch(e){}
+    }
+
+    function backupOriginalColors(){
+      try{
+        const model = mv.model;
+        if(!model || !model.materials) return;
+        allMaterialBackup = model.materials.map(mat=>{
+          const pbr = mat.pbrMetallicRoughness;
+          const base = (pbr && pbr.baseColorFactor) ? [...pbr.baseColorFactor] : [1,1,1,1];
+          return base;
+        });
+      }catch(e){
+        allMaterialBackup = null;
+      }
+    }
+
+    function restoreOriginalColors(){
+      try{
+        const model = mv.model;
+        if(!model || !model.materials || !allMaterialBackup) return;
+        model.materials.forEach((mat, idx)=>{
+          const pbr = mat.pbrMetallicRoughness;
+          if(!pbr) return;
+          const base = allMaterialBackup[idx] ? [...allMaterialBackup[idx]] : [1,1,1,1];
+          base[3] = Math.max(base[3], 0.45);
+          pbr.setBaseColorFactor(base);
+        });
+      }catch(e){}
+    }
+
+    function applyTint(){
+      try{
+        const model = mv.model;
+        if(!model || !model.materials) return;
+        model.materials.forEach((mat, idx)=>{
+          const pbr = mat.pbrMetallicRoughness;
+          if(!pbr) return;
+          const cur = pbr.baseColorFactor ? [...pbr.baseColorFactor] : (allMaterialBackup?.[idx] ? [...allMaterialBackup[idx]] : [1,1,1,1]);
+          const a = Math.max(cur[3] ?? 0.45, 0.45);
+          pbr.setBaseColorFactor([BLUEGREEN_TINT[0], BLUEGREEN_TINT[1], BLUEGREEN_TINT[2], a]);
+        });
+      }catch(e){}
+    }
+
+    function closeASD(){
+      asdOverlay.classList.remove('show');
+      asdOverlay.setAttribute('aria-hidden','true');
+      btnASD.classList.remove('on');
+    }
+    function openASD(){
+      asdOverlay.classList.add('show');
+      asdOverlay.setAttribute('aria-hidden','false');
+      btnASD.classList.add('on');
+    }
+
+    function setModeButtons(){
+      modeLens.classList.toggle('primary', currentMode === 'lens');
+      modeHeat.classList.toggle('primary', currentMode === 'heat');
+    }
+
+    /* ✅ 공통 OFF 함수들 (요청 2: PVP/블루 동시 ON 금지) */
+    function forceBlueOff(){
+      blueOn = false;
+      btnBlue.classList.remove('on');
+      showBlueFx(false);
+      restoreOriginalColors(); // 투명 복귀
+    }
+    function forcePVPOff(){
+      pvpOn = false;
+      btnPVP.classList.remove('on');
+      showPVP(false);
+    }
+
+    function setModel(file, mode){
+      return new Promise((resolve)=>{
+        lastOrbit = getOrbitSafe();
+        currentMode = mode;
+
+        // 모드 전환하면 PVP는 닫기
+        forcePVPOff();
+
+        // 블루 OFF
+        forceBlueOff();
+
+        // 두께맵에서만 그래프 ON
+        showThickness(mode === 'heat');
+
+        setModeButtons();
+
+        const onLoadOnce = ()=>{
+          mv.removeEventListener('load', onLoadOnce);
+          resolve();
+        };
+        mv.addEventListener('load', onLoadOnce, { once:true });
+
+        mv.src = file + '?v=' + Date.now();
+      });
+    }
+
+    mv.addEventListener('load', ()=>{
+      if(!defaultOrbit) defaultOrbit = getOrbitSafe();
+
+      if(lastOrbit){
+        applyOrbit(lastOrbit);
+        setTimeout(()=>applyOrbit(lastOrbit), 120);
+      }
+
+      if(currentMode === 'lens'){
+        tuneClearLensMaterials();
+        backupOriginalColors();
+      }
+
+      setModeButtons();
+    });
+
+    /* ASD */
+    btnASD.addEventListener('click', ()=>{
+      if(asdOverlay.classList.contains('show')) closeASD();
+      else openASD();
+    });
+    asdClose.addEventListener('click', closeASD);
+    asdOverlay.addEventListener('click', (e)=>{ if(e.target === asdOverlay) closeASD(); });
+
+    /* ✅ PVP (블루와 상호배타) */
+    btnPVP.addEventListener('click', async ()=>{
+      // 두께맵에서 누르면 투명 렌즈로 원복 후 동작
+      if(currentMode === 'heat'){
+        btnPVP.classList.add('on');
+        await setModel('lens_clear.glb', 'lens');
+      }
       if(currentMode !== 'lens') return;
+
+      // PVP 켜려는 순간 → 블루는 무조건 OFF
+      if(!pvpOn){
+        if(blueOn) forceBlueOff();
+      }
 
       pvpOn = !pvpOn;
       btnPVP.classList.toggle('on', pvpOn);
 
       if(pvpOn){
         zoomInForPVP();
-        showPVPOverlay(true);
-        setMsg('PVP: 확대 + 내부 재질 오버레이 표시');
+        showPVP(true);
       }else{
-        showPVPOverlay(false);
-        setMsg('PVP: 오버레이 숨김');
+        showPVP(false);
       }
     });
 
-    mv.addEventListener('camera-change', ()=>{
+    /* ✅ 블루 (PVP와 상호배타) */
+    btnBlue.addEventListener('click', ()=>{
       if(currentMode !== 'lens') return;
-      try{
-        if(!baseRadius) return;
-        const orbit = mv.getCameraOrbit();
-        const nearEnough = orbit.radius < baseRadius * 0.68;
 
-        if(nearEnough){
-          showPVPOverlay(true);
-        } else if(!pvpOn){
-          showPVPOverlay(false);
-        }
-      }catch(e){}
-    });
+      // 블루 켜려는 순간 → PVP는 무조건 OFF
+      if(!blueOn){
+        if(pvpOn) forcePVPOff();
+      }
 
-    // ✅ 순목 버튼: 누를 때마다 "딱 1회" + 즉시 멈춤 + 0초 복귀
-    btnBlink.addEventListener('click', ()=>{
-      if(currentMode !== 'eye') return;
+      blueOn = !blueOn;
+      btnBlue.classList.toggle('on', blueOn);
 
-      try{
-        mv.loop = false;
-
-        if (eyeAnimName){
-          mv.animationName = eyeAnimName;
-        }
-
-        // 항상 리셋하고 시작
-        mv.pause();
-        mv.currentTime = 0;
-
-        // iOS 안정: 한 프레임 뒤 재생
-        requestAnimationFrame(()=>{
-          mv.play();
-          setMsg('순목(1회) 재생');
-
-          // ✅ duration을 알 수 있으면: duration 기준으로 강제 stop
-          // (finished 이벤트가 누락되는 기기/버전 대비)
-          if (eyeAnimDuration && eyeAnimDuration > 0){
-            setTimeout(()=>{
-              try{
-                mv.pause();
-                mv.currentTime = 0;
-              }catch(e){}
-            }, Math.max(0, eyeAnimDuration * 1000 + 60));
-          }
-        });
-      }catch(err){
-        setMsg('❌ 순목 재생 실패\n(eye_animation.glb에 애니메이션이 없을 수 있어요)');
+      if(blueOn){
+        if(!allMaterialBackup) backupOriginalColors();
+        applyTint();
+        showBlueFx(true);
+      }else{
+        showBlueFx(false);
+        restoreOriginalColors();
       }
     });
 
-    modeLens.addEventListener('click', ()=> setModel('test.glb', 'lens'));
-    modeEye.addEventListener('click',  ()=> setModel('eye_animation.glb', 'eye'));
+    /* ↺ */
+    btnReset.addEventListener('click', ()=>{
+      if(defaultOrbit){
+        applyOrbit(defaultOrbit);
+        setTimeout(()=>applyOrbit(defaultOrbit), 120);
+      }
+    });
 
-    setModeUI();
-    setModel('test.glb', 'lens');
+    /* 모드 */
+    modeLens.addEventListener('click', ()=> setModel('lens_clear.glb', 'lens'));
+    modeHeat.addEventListener('click', ()=> setModel('lens_heatmap.glb', 'heat'));
+
+    // 초기
+    setModel('lens_clear.glb', 'lens');
   </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
