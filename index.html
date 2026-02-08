@@ -120,7 +120,7 @@
     #pvpBig{
       position:fixed;
       left:50%;
-      top:52%;
+      top:49%; /* ✅ 아주 살짝 위로 */
       transform:translate(-50%,-50%);
       width:min(72vw, 520px);
       height:min(72vw, 520px);
@@ -359,14 +359,7 @@
     .m75{ left:75%; }
     .m100{ left:100%; }
 
-    /* ✅ (요청 1) 워딩 삭제: #thHint는 유지해도 되지만 내용은 비움 */
-    #thHint{
-      margin-top:8px;
-      color:rgba(234,242,255,.70);
-      font-size:10.5px;
-      line-height:1.25;
-      display:none; /* 아예 숨김 */
-    }
+    #thHint{ display:none; }
   </style>
 </head>
 
@@ -402,7 +395,7 @@
   </div>
   <div id="blockBadge">블루라이트 <span>55%</span> 차단 연출</div>
 
-  <!-- ✅ 두께 그래프(가로형, CSS) -->
+  <!-- ✅ 두께 그래프 -->
   <div id="thicknessBar" aria-hidden="true">
     <div id="thHeader">
       <div id="thTitle">두께</div>
@@ -423,20 +416,17 @@
       </div>
       <div class="tickLabel" style="text-align:left;width:46px;">0.4_두껍</div>
     </div>
-
     <div id="thHint"></div>
   </div>
 
   <!-- PVP 큰 원형 -->
   <div id="pvpBig">
-    <img id="pvpBigImg" src="PVP.gif" alt="PVP Big"
-         onerror="this.onerror=null; this.src='PVP.jpeg';">
+    <img id="pvpBigImg" src="PVP.gif" alt="PVP Big" onerror="this.onerror=null; this.src='PVP.jpeg';">
   </div>
 
-  <!-- PVP 하단 설명(유지) -->
+  <!-- PVP 하단 설명 -->
   <div id="pvpOverlay">
-    <img id="pvpThumb" src="PVP.gif" alt="PVP"
-      onerror="this.onerror=null; this.src='PVP.jpeg';">
+    <img id="pvpThumb" src="PVP.gif" alt="PVP" onerror="this.onerror=null; this.src='PVP.jpeg';">
     <div id="pvpText">
       <div id="pvpTitle">PVP 습윤 인자</div>
       <div id="hint">PVP 습윤인자 설명 및 그래프 추가.</div>
@@ -460,7 +450,8 @@
     id="mv"
     src="lens_clear.glb"
     camera-controls
-    camera-orbit="0deg 101deg 2.6m"
+    camera-orbit="0deg 100deg 2.6m"
+    camera-target="0m 0.015m 0m"
     touch-action="pan-y"
     exposure="1.35"
     tone-mapping="aces"
@@ -496,29 +487,67 @@
     const blueFx = document.getElementById('blueFx');
     const blockBadge = document.getElementById('blockBadge');
 
-    // ✅ 두께 그래프
     const thicknessBar = document.getElementById('thicknessBar');
 
     let currentMode = 'lens'; // 'lens' | 'heat'
     let blueOn = false;
     let pvpOn = false;
 
-    // 모드 전환 시 orbit 유지
+    // ✅ "투명/히트맵" 전환 시에도 카메라(orbit+target) 연동
     let lastOrbit = null;
+    let lastTarget = null;
+
+    // ✅ 디폴트(처음 상태)로 확실히 복귀시키기 위한 값
     let defaultOrbit = null;
+    let defaultTarget = null;
+
+    // ✅ 블루 ON 할 때, 요청한 각도(2번째 이미지 느낌)로 강제 세팅
+    // 필요하면 여기만 숫자 미세 조정하면 됨.
+    const BLUE_ORBIT_STR  = '20deg 88deg 2.75m';  // theta phi radius
+    const BLUE_TARGET_STR = '0m 0.010m 0m';       // (살짝 위/중앙)
+    let orbitBeforeBlue = null;
+    let targetBeforeBlue = null;
 
     // 블루그린 틴트
     const BLUEGREEN_TINT = [0.55, 1.08, 0.72, 0.45];
 
-    // 원본 색 백업(블루 OFF 시 복귀)
+    // 원본 색 백업
     let allMaterialBackup = null;
 
     function getOrbitSafe(){
       try{ return mv.getCameraOrbit(); }catch(e){ return null; }
     }
+    function getTargetSafe(){
+      try{ return mv.getCameraTarget(); }catch(e){ return null; }
+    }
+
     function applyOrbit(orbit){
       if(!orbit) return;
       try{ mv.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`; }catch(e){}
+    }
+    function applyTarget(target){
+      if(!target) return;
+      try{ mv.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`; }catch(e){}
+    }
+
+    // ✅ 문자열로도 세팅 가능하게 (블루용)
+    function applyOrbitStr(s){
+      try{ mv.cameraOrbit = s; }catch(e){}
+    }
+    function applyTargetStr(s){
+      try{ mv.cameraTarget = s; }catch(e){}
+    }
+
+    // ✅ "백(↺) 버튼" = 디폴트 orbit+target로 100% 복귀
+    function resetCameraToDefault(){
+      if(!defaultOrbit || !defaultTarget) return;
+      applyTarget(defaultTarget);
+      applyOrbit(defaultOrbit);
+      // iOS/모바일에서 한 번 더 먹여야 확실히 고정되는 경우가 있어서 1회 재적용
+      setTimeout(()=>{
+        applyTarget(defaultTarget);
+        applyOrbit(defaultOrbit);
+      }, 120);
     }
 
     function showBlueFx(show){
@@ -536,16 +565,18 @@
       thicknessBar.setAttribute('aria-hidden', show ? 'false' : 'true');
     }
 
+    // ✅ PVP 확대 비율(여기 숫자만 바꾸면 “조금” 확대/축소 됨)
+    const PVP_ZOOM_FACTOR = 0.76;
+
     function zoomInForPVP(){
       try{
         const orbit = getOrbitSafe();
         if(!orbit) return;
-        const targetRadius = orbit.radius * 0.76;
+        const targetRadius = orbit.radius * PVP_ZOOM_FACTOR;
         mv.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${targetRadius}m`;
       }catch(e){}
     }
 
-    // 렌즈 기본룩
     function tuneClearLensMaterials(){
       try{
         const model = mv.model;
@@ -623,6 +654,8 @@
       btnASD.classList.remove('on');
     }
     function openASD(){
+      // ✅ (요청) ASD 열릴 때 렌즈는 디폴트로
+      resetCameraToDefault();
       asdOverlay.classList.add('show');
       asdOverlay.setAttribute('aria-hidden','false');
       btnASD.classList.add('on');
@@ -633,14 +666,28 @@
       modeHeat.classList.toggle('primary', currentMode === 'heat');
     }
 
-    /* ✅ 공통 OFF 함수들 (요청 2: PVP/블루 동시 ON 금지) */
     function forceBlueOff(){
+      if(!blueOn) return;
       blueOn = false;
       btnBlue.classList.remove('on');
       showBlueFx(false);
-      restoreOriginalColors(); // 투명 복귀
+      restoreOriginalColors();
+
+      // 블루 끌 때, 원래 보던 각도로 복귀(저장돼 있으면)
+      if(orbitBeforeBlue && targetBeforeBlue){
+        applyTarget(targetBeforeBlue);
+        applyOrbit(orbitBeforeBlue);
+        setTimeout(()=>{
+          applyTarget(targetBeforeBlue);
+          applyOrbit(orbitBeforeBlue);
+        }, 120);
+      }
+      orbitBeforeBlue = null;
+      targetBeforeBlue = null;
     }
+
     function forcePVPOff(){
+      if(!pvpOn) return;
       pvpOn = false;
       btnPVP.classList.remove('on');
       showPVP(false);
@@ -648,10 +695,13 @@
 
     function setModel(file, mode){
       return new Promise((resolve)=>{
+        // ✅ 전환 직전에 현재 orbit+target 저장 (두 모델 연동)
         lastOrbit = getOrbitSafe();
+        lastTarget = getTargetSafe();
+
         currentMode = mode;
 
-        // 모드 전환하면 PVP는 닫기
+        // 모드 전환하면 PVP 닫기
         forcePVPOff();
 
         // 블루 OFF
@@ -673,12 +723,18 @@
     }
 
     mv.addEventListener('load', ()=>{
+      // ✅ 최초 1회: 디폴트 orbit/target 확정 저장
       if(!defaultOrbit) defaultOrbit = getOrbitSafe();
+      if(!defaultTarget) defaultTarget = getTargetSafe();
 
-      if(lastOrbit){
-        applyOrbit(lastOrbit);
-        setTimeout(()=>applyOrbit(lastOrbit), 120);
-      }
+      // ✅ 모드 전환 시: 이전 orbit/target 그대로 복원
+      if(lastTarget) applyTarget(lastTarget);
+      if(lastOrbit)  applyOrbit(lastOrbit);
+
+      setTimeout(()=>{
+        if(lastTarget) applyTarget(lastTarget);
+        if(lastOrbit)  applyOrbit(lastOrbit);
+      }, 120);
 
       if(currentMode === 'lens'){
         tuneClearLensMaterials();
@@ -714,8 +770,12 @@
       btnPVP.classList.toggle('on', pvpOn);
 
       if(pvpOn){
-        zoomInForPVP();
-        showPVP(true);
+        // ✅ (요청) PVP 켤 때 렌즈 위치 이상하면 디폴트로 돌리고 시작
+        resetCameraToDefault();
+        setTimeout(()=>{
+          zoomInForPVP();
+          showPVP(true);
+        }, 140);
       }else{
         showPVP(false);
       }
@@ -734,21 +794,40 @@
       btnBlue.classList.toggle('on', blueOn);
 
       if(blueOn){
+        // ✅ (요청) 블루 ON 시 각도를 2번 이미지 느낌으로 강제 조정
+        orbitBeforeBlue = getOrbitSafe();
+        targetBeforeBlue = getTargetSafe();
+
+        applyOrbitStr(BLUE_ORBIT_STR);
+        applyTargetStr(BLUE_TARGET_STR);
+        setTimeout(()=>{
+          applyOrbitStr(BLUE_ORBIT_STR);
+          applyTargetStr(BLUE_TARGET_STR);
+        }, 120);
+
         if(!allMaterialBackup) backupOriginalColors();
         applyTint();
         showBlueFx(true);
       }else{
         showBlueFx(false);
         restoreOriginalColors();
+        // forceBlueOff에서 복귀까지 처리하긴 하는데, 여기서도 안전하게 호출
+        if(orbitBeforeBlue && targetBeforeBlue){
+          applyTarget(targetBeforeBlue);
+          applyOrbit(orbitBeforeBlue);
+          setTimeout(()=>{
+            applyTarget(targetBeforeBlue);
+            applyOrbit(orbitBeforeBlue);
+          }, 120);
+        }
+        orbitBeforeBlue = null;
+        targetBeforeBlue = null;
       }
     });
 
-    /* ↺ */
+    /* ✅ 백(↺) 버튼: 무조건 맨 처음 디폴트 위치+크기로 */
     btnReset.addEventListener('click', ()=>{
-      if(defaultOrbit){
-        applyOrbit(defaultOrbit);
-        setTimeout(()=>applyOrbit(defaultOrbit), 120);
-      }
+      resetCameraToDefault();
     });
 
     /* 모드 */
@@ -760,16 +839,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
