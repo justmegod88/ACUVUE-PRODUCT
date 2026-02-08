@@ -778,6 +778,9 @@
         }, 140);
       }else{
         showPVP(false);
+
+        /* ✅✅ 추가: PVP OFF 되면 렌즈 위치/크기를 디폴트로 복귀 */
+        resetCameraToDefault();
       }
     });
 
@@ -822,6 +825,9 @@
         }
         orbitBeforeBlue = null;
         targetBeforeBlue = null;
+
+        /* ✅✅ 추가: 블루 OFF 되면 렌즈 위치/크기를 디폴트로 복귀 */
+        resetCameraToDefault();
       }
     });
 
