@@ -652,13 +652,9 @@
       asdOverlay.classList.remove('show');
       asdOverlay.setAttribute('aria-hidden','true');
       btnASD.classList.remove('on');
-    }
-    function openASD(){
-      // ✅ (요청) ASD 열릴 때 렌즈는 디폴트로
+
+      // (요청) ASD 닫을 때 디폴트로
       resetCameraToDefault();
-      asdOverlay.classList.add('show');
-      asdOverlay.setAttribute('aria-hidden','false');
-      btnASD.classList.add('on');
     }
 
     function setModeButtons(){
@@ -691,6 +687,17 @@
       pvpOn = false;
       btnPVP.classList.remove('on');
       showPVP(false);
+    }
+
+    function openASD(){
+      /* ✅✅ 수정: ASD 켜면 다른 기능 남지 않게 강제 OFF + 디폴트 */
+      if(blueOn) forceBlueOff();
+      if(pvpOn)  forcePVPOff();
+      resetCameraToDefault();
+
+      asdOverlay.classList.add('show');
+      asdOverlay.setAttribute('aria-hidden','false');
+      btnASD.classList.add('on');
     }
 
     function setModel(file, mode){
@@ -785,7 +792,14 @@
     });
 
     /* ✅ 블루 (PVP와 상호배타) */
-    btnBlue.addEventListener('click', ()=>{
+    btnBlue.addEventListener('click', async ()=>{
+      /* ✅✅ 수정 핵심: 두께맵에서 블루 누르면 -> 투명렌즈로 돌아간 뒤 "블루 ON"까지 이어짐 */
+      if(currentMode === 'heat'){
+        // lens로 전환
+        await setModel('lens_clear.glb', 'lens');
+        // setModel 안에서 blueOff 처리되므로, 여기서 "블루 ON" 로직을 이어서 실행
+      }
+
       if(currentMode !== 'lens') return;
 
       // 블루 켜려는 순간 → PVP는 무조건 OFF
