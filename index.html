@@ -121,7 +121,6 @@
       overflow:hidden;
       aspect-ratio: 16/9;
       min-height: 320px;
-
     }
 
     /* ASD eye model-viewer (정면 고정) */
@@ -142,7 +141,7 @@
       width:70%;
       transform:translate(-50%,-50%) rotate(20deg);
       transform-origin:50% 50%;
-      opacity:.55;               /* ✅ 약간 투명 */
+      opacity:.78;               /* ✅ (수정) 더 불투명하게 */
       mix-blend-mode: screen;    /* ✅ 뒤 홍채 보이게 */
       filter:saturate(1.08) contrast(1.06);
       pointer-events:none;
@@ -222,6 +221,31 @@
       z-index:5;
     }
     #asdBlinkBtn:active{ transform:scale(.95); }
+
+    /* ✅ (추가) 회전 버튼 */
+    #asdRotateBtn{
+      position:absolute;
+      right:76px;
+      bottom:14px;
+      width:54px;
+      height:54px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.26);
+      background:rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+      color:#0b1b2e;
+      font-weight:900;
+      font-size:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      cursor:pointer;
+      box-shadow:0 10px 28px rgba(0,0,0,.20);
+      z-index:5;
+    }
+    #asdRotateBtn:active{ transform:scale(.95); }
 
     /* (표시) 현재 각도 */
     #asdAngleBadge{
@@ -581,6 +605,7 @@
         <div id="asdBlinkLid" aria-hidden="true"></div>
 
         <div id="asdAngleBadge">20°</div>
+        <button id="asdRotateBtn" type="button" aria-label="회전">회전</button>
         <button id="asdBlinkBtn" type="button" aria-label="눈 깜박">깜박</button>
       </div>
 
@@ -639,6 +664,7 @@
     const asdEyeMV = document.getElementById('asdEyeMV');
     const asdLensImg = document.getElementById('asdLensImg');
     const asdBlinkBtn = document.getElementById('asdBlinkBtn');
+    const asdRotateBtn = document.getElementById('asdRotateBtn');
     const asdBlinkLid = document.getElementById('asdBlinkLid');
     const asdAngleBadge = document.getElementById('asdAngleBadge');
     const asdLensRim = document.getElementById('asdLensRim');
@@ -668,14 +694,18 @@
     let allMaterialBackup = null;
 
     /* ✅✅ ASD 로직 (요청사항 반영)
-       - 시작: +20deg (우측 20도)
-       - 4번 클릭: 20→15→10→5→0 (원위치)
-       - 그 이후 클릭: 왼쪽으로 살짝 미끄러졌다가 원위치 반복(각도 0 유지)
-       - 두께맵 모드에서 ASD 클릭 시 lens2.png 사용
+       1) 0도 이후 깜박 클릭: 좌우 미끌림 ❌
+          👉 현재 회전 방향으로 +3° 더 갔다가 → 0°로 복귀
+       2) 회전 버튼 추가: 10°/15°/20° 랜덤 + 좌/우 랜덤 (총 6가지)
+       3) ASD 렌즈 이미지 더 불투명하게 (CSS opacity 상향)
     */
     let asdAngle = 20;
     const ASD_STEP = 5;
     const ASD_START = 20;
+
+    // ✅ 현재 회전 "방향" 기억 (0 이후 관성 연출에 사용)
+    // -1: 각도 감소 방향(20→...→0), +1: 각도 증가 방향(-20→...→0)
+    let asdLastDir = -1;
 
     function pickASDLensSrc(){
       // ✅ 두께맵 상태면 lens2.png (요청)
@@ -686,24 +716,21 @@
       if(!asdLensImg) return;
       const src = pickASDLensSrc();
       asdLensImg.src = src + '?v=' + Date.now();
-      // rim 위치/크기 동기화(고정값이라 별도 계산 없음)
     }
 
     function renderASDLensTransform(extraX=0){
       if(!asdLensImg) return;
-      // lens: 홍채보다 크게 + 눈꺼풀에 살짝 들어간 느낌 (CSS top/width로 기본 세팅)
       asdLensImg.style.transform = `translate(calc(-50% + ${extraX}px), -50%) rotate(${asdAngle}deg)`;
       if(asdAngleBadge) asdAngleBadge.textContent = `${asdAngle}°`;
       if(asdLensRim){
-        // rim은 회전 없이 그대로
-        // (요청) 임의 변경 싫어해서, 여기서 rim 변형은 하지 않음
+        // rim은 그대로 유지
       }
     }
 
     function resetASDState(){
       asdAngle = ASD_START;
+      asdLastDir = -1; // 기본은 20→0 방향
       renderASDLensTransform(0);
-      // 버튼은 계속 클릭 가능 (요청: 0 이후도 작동해야함)
     }
 
     function playBlinkLid(){
@@ -723,34 +750,42 @@
       });
     }
 
-    function slipLeftAndBack(){
-      // ✅ 각도 0 유지 + 왼쪽으로 살짝 미끄러졌다가 원위치
+    // ✅ 0도 이후: 관성처럼 "회전 방향"으로 3도 더 갔다가 0 복귀
+    function overshootAndReturn(){
+      const overshootDeg = asdLastDir * 3; // 방향 유지해서 ±3
+      if(!asdLensImg) return;
+
+      asdLensImg.style.transition = 'transform 120ms ease';
+      asdAngle = overshootDeg;
       renderASDLensTransform(0);
-      // 미끄러짐 애니메이션은 transform을 잠깐 바꿔서 구현
-      renderASDLensTransform(0);
-      // 왼쪽으로
-      requestAnimationFrame(()=>{
-        if(!asdLensImg) return;
-        asdLensImg.style.transition = 'transform 120ms ease';
-        renderASDLensTransform(-10);
+
+      setTimeout(()=>{
+        asdLensImg.style.transition = 'transform 180ms ease';
+        asdAngle = 0;
+        renderASDLensTransform(0);
+
         setTimeout(()=>{
-          if(!asdLensImg) return;
-          asdLensImg.style.transition = 'transform 160ms ease';
-          renderASDLensTransform(0);
-          setTimeout(()=>{
-            if(!asdLensImg) return;
-            asdLensImg.style.transition = '';
-          }, 170);
-        }, 120);
-      });
+          if(asdLensImg) asdLensImg.style.transition = '';
+        }, 190);
+      }, 120);
     }
 
     function handleASDBlink(){
       playBlinkLid();
 
       if(asdAngle > 0){
+        asdLastDir = -1; // 20→0 방향
         asdAngle = Math.max(0, asdAngle - ASD_STEP);
-        // 각도 이동은 부드럽게
+        if(asdLensImg){
+          asdLensImg.style.transition = 'transform 160ms ease';
+          renderASDLensTransform(0);
+          setTimeout(()=>{ if(asdLensImg) asdLensImg.style.transition = ''; }, 170);
+        }else{
+          renderASDLensTransform(0);
+        }
+      }else if(asdAngle < 0){
+        asdLastDir = +1; // -20→0 방향
+        asdAngle = Math.min(0, asdAngle + ASD_STEP);
         if(asdLensImg){
           asdLensImg.style.transition = 'transform 160ms ease';
           renderASDLensTransform(0);
@@ -759,8 +794,8 @@
           renderASDLensTransform(0);
         }
       }else{
-        // 0 이후는 미끄러짐 반복
-        slipLeftAndBack();
+        // ✅ 0도 이후
+        overshootAndReturn();
       }
     }
 
@@ -768,6 +803,31 @@
       asdBlinkBtn.addEventListener('click', (e)=>{
         e.stopPropagation();
         handleASDBlink();
+      });
+    }
+
+    // ✅ 회전 버튼: 10/15/20 랜덤 + 좌/우 랜덤
+    function handleASDRotateRandom(){
+      const mags = [10,15,20];
+      const mag = mags[Math.floor(Math.random() * mags.length)];
+      const dir = (Math.random() < 0.5) ? -1 : 1; // 좌/우 랜덤
+      asdLastDir = dir; // 이후 0도 관성 방향도 이 방향을 따르도록
+
+      asdAngle = dir * mag;
+
+      if(asdLensImg){
+        asdLensImg.style.transition = 'transform 180ms ease';
+        renderASDLensTransform(0);
+        setTimeout(()=>{ if(asdLensImg) asdLensImg.style.transition = ''; }, 190);
+      }else{
+        renderASDLensTransform(0);
+      }
+    }
+
+    if(asdRotateBtn){
+      asdRotateBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        handleASDRotateRandom();
       });
     }
 
@@ -1117,6 +1177,4 @@
   </script>
 </body>
 </html>
-
-
 
