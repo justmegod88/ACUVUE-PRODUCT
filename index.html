@@ -1096,9 +1096,9 @@
       asdLensImg.style.transform =
         `translate(calc(-50% + ${extraX}px + var(--irisX, 0px)), calc(-50% + var(--irisY, 0px))) rotate(${asdAngle}deg)`;
       if(asdAngleBadge){
-        if(asdAngle > 0) asdAngleBadge.textContent = `좌측으로 ${asdAngle}° 회전 발생`;
-        else if(asdAngle < 0) asdAngleBadge.textContent = `우측으로 ${Math.abs(asdAngle)}° 회전 발생`;
-        else asdAngleBadge.textContent = `축 안정화`;
+        if(asdAngle > 0) asdAngleBadge.textContent = `좌측으로 ${asdAngle}° 회전`;
+        else if(asdAngle < 0) asdAngleBadge.textContent = `우측으로 ${Math.abs(asdAngle)}° 회전`;
+        else asdAngleBadge.textContent = `축 안정`;
  }
 }
     function resetASDState(){
@@ -1659,5 +1659,6 @@
   </script>
 </body>
 </html>
+
 
 
