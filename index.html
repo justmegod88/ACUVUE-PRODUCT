@@ -253,7 +253,15 @@
       box-shadow:0 18px 60px rgba(0,0,0,.55);
       position:relative;
     }
-    #asdCard img{ width:100%; height:auto; display:block; background:rgba(255,255,255,.04); }
+
+    /* ✅✅ (수정) asdCard 내 img 기본 100% 규칙이 렌즈/눈 배경까지 덮어써서 사이즈가 안 줄었음 → 제외 */
+    #asdCard img:not(#asdLensImg):not(#asdEyeMV){
+      width:100%;
+      height:auto;
+      display:block;
+      background:rgba(255,255,255,.04);
+    }
+
     #asdClose{
       position:absolute; right:10px; top:10px;
       width:38px; height:38px; border-radius:999px;
@@ -296,9 +304,11 @@
       overflow:hidden;
       aspect-ratio: 1/1;
       min-height: 360px;
+      --irisX: 13px;
+      --irisY: 20px;
     }
 
-    /* ✅✅ ASD 배경(눈) : a.gif */
+    /* ✅✅ ASD 배경(눈) : a.png (자동 깜박임 방지) */
     #asdEyeMV{
       position:absolute; inset:0;
       width:100%; height:100%;
@@ -306,7 +316,7 @@
       background:transparent;
       pointer-events:none;
       object-fit:cover;
-      transform: scale(1.28);
+      transform: scale(1.55);
       transform-origin:center;
       filter: contrast(1.02) saturate(1.02);
     }
@@ -316,11 +326,11 @@
       position:absolute;
       left:50%;
       top:52%;
-      width:62%;
+      width:83%;
       transform:translate(-50%,-50%) rotate(20deg);
       transform-origin:50% 50%;
-      opacity:.80;
-      mix-blend-mode: screen;
+      opacity:.88;
+      mix-blend-mode: normal;
       filter:saturate(1.08) contrast(1.06);
       pointer-events:none;
       will-change: transform, opacity;
@@ -329,8 +339,8 @@
       position:absolute;
       left:50%;
       top:52%;
-      width:62%;
-      height:62%;
+      width:83%;
+      height:80%;
       transform:translate(-50%,-50%);
       border-radius:999px;
       pointer-events:none;
@@ -781,7 +791,8 @@
     <div id="asdCard">
       <button id="asdClose" type="button" aria-label="닫기">✕</button>
       <div id="asdScene">
-        <img id="asdEyeMV" src="a.gif" alt="Eye background" onerror="this.onerror=null; this.src='a.png';">
+        <!-- ✅ (수정) 자동깜박 방지: a.png를 기본 배경으로 -->
+        <img id="asdEyeMV" src="a.png" alt="Eye background" onerror="this.onerror=null; this.src='a.gif';">
         <div id="asdLensRim" aria-hidden="true"></div>
         <img id="asdLensImg" src="lens.png" alt="Lens overlay"
              onerror="this.style.display='none'; document.getElementById('asdHint').textContent='lens.png / lens2.png 파일을 같은 폴더에 넣어주세요.';">
@@ -1081,9 +1092,15 @@
     }
     function renderASDLensTransform(extraX=0){
       if(!asdLensImg) return;
-      asdLensImg.style.transform = `translate(calc(-50% + ${extraX}px), -50%) rotate(${asdAngle}deg)`;
-      if(asdAngleBadge) asdAngleBadge.textContent = `${asdAngle}°`;
-    }
+      // ✅ CSS 변수(--irisX/--irisY)를 translate에 포함
+      asdLensImg.style.transform =
+        `translate(calc(-50% + ${extraX}px + var(--irisX, 0px)), calc(-50% + var(--irisY, 0px))) rotate(${asdAngle}deg)`;
+      if(asdAngleBadge){
+        if(asdAngle > 0) asdAngleBadge.textContent = `좌측으로 ${asdAngle}° 회전 발생`;
+        else if(asdAngle < 0) asdAngleBadge.textContent = `우측으로 ${Math.abs(asdAngle)}° 회전 발생`;
+        else asdAngleBadge.textContent = `축 안정화`;
+ }
+}
     function resetASDState(){
       asdAngle = ASD_START;
       asdLastDir = -1;
@@ -1398,8 +1415,9 @@
       resetASDState();
       setASDHintDefault();
 
+      /* ✅ (유지/수정) 자동 깜박임 방지: a.png로 항상 고정 */
       if(asdEyeMV){
-        asdEyeMV.src = 'a.gif' + '?v=' + Date.now();
+        asdEyeMV.src = 'a.png' + '?v=' + Date.now();
       }
 
       asdOverlay.classList.add('show');
@@ -1641,7 +1659,3 @@
   </script>
 </body>
 </html>
-"""
-out_path = Path("/mnt/data/acuvue_viewer_asd_a_gif.html")
-out_path.write_text(html, encoding="utf-8")
-str(out_path)
