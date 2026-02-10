@@ -26,18 +26,31 @@
       min-height:86px;
       box-sizing:border-box;
 
-      /* ✅ 클릭 가능하게 */
       -webkit-tap-highlight-color: transparent;
       user-select:none;
       cursor:pointer;
       transition: transform .08s ease, background .18s ease, border-color .18s ease;
+      position:relative;
     }
     .missionCard:active{ transform: scale(.99); }
 
-    /* ✅ ON 상태 표시 */
     .missionCard.on{
       background:rgba(0,255,140,.12);
       border-color:rgba(0,255,140,.35);
+    }
+
+    .missionCard.done::after{
+      content:"완료";
+      position:absolute;
+      right:10px; top:10px;
+      font-size:11px;
+      font-weight:900;
+      padding:4px 8px;
+      border-radius:999px;
+      background:rgba(0,255,140,.16);
+      border:1px solid rgba(0,255,140,.35);
+      color:rgba(234,242,255,.98);
+      backdrop-filter: blur(6px);
     }
 
     .missionNo{font-weight:900;opacity:.85;font-size:14px;margin-bottom:6px;}
@@ -74,7 +87,138 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* ASD 오버레이 (blink.png) */
+    /* =========================
+       ✅ 블루라이트: 상태 pill + 광선(투과/꺾임) + 설명/미션
+       ========================= */
+
+    /* ✅ on/off 토글 pill (오른쪽 아래, 텍스트박스 안겹치게 살짝 위로) */
+    #bluePill{
+      position:fixed;
+      right:14px;
+      bottom:210px;
+      z-index:72;
+      display:none;
+      padding:11px 16px;
+      border-radius:999px;
+      background:rgba(0,0,0,.70);
+      border:1px solid rgba(255,255,255,.16);
+      color:#eaf2ff;
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:.2px;
+      backdrop-filter: blur(10px);
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      cursor:pointer;
+      box-shadow:0 18px 60px rgba(0,0,0,.35);
+      white-space:nowrap;
+    }
+    #bluePill:active{ transform:scale(.98); }
+    #bluePill span{ opacity:.95; }
+
+    /* ✅ 광선(렌즈 표면에서 투과/꺾임) 레이어 */
+    #blueRayLayer{
+      position:fixed;
+      inset:0;
+      z-index:57;
+      pointer-events:none;
+      display:none;
+    }
+    #blueRaySvg{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    /* ✅ OFF일 때: 렌즈 뒤쪽 약한 그라데이션(실제 빛 번짐 느낌) */
+    #blueBackGlow{
+      position:fixed;
+      inset:0;
+      z-index:56;
+      pointer-events:none;
+      display:none;
+      background:
+        radial-gradient(35% 22% at 66% 52%,
+          rgba(0,200,255,.18) 0%,
+          rgba(0,200,255,.10) 22%,
+          rgba(0,200,255,.06) 38%,
+          rgba(0,200,255,0) 62%);
+      filter: blur(1px);
+      opacity:.95;
+    }
+
+    /* ✅ 하단 설명/미션 패널 */
+    #blueInfo{
+      position:fixed;
+      left:12px;
+      right:12px;
+      bottom:92px;
+      z-index:71;
+      display:none;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(0,0,0,.55);
+      backdrop-filter: blur(12px);
+      box-shadow:0 18px 60px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+    #blueInfoTop{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      color:#eaf2ff;
+      font-weight:900;
+      font-size:13px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    #blueInfoTop b{ font-weight:900; }
+    #blueInfoTop b .pct{ color:rgba(0,255,140,.95); }
+
+    #blueInfoBody{
+      padding:10px 12px;
+      color:rgba(234,242,255,.88);
+      font-size:12.5px;
+      line-height:1.35;
+    }
+
+    #blueInfoMission{
+      padding:9px 12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      color:rgba(234,242,255,.92);
+      font-size:12.5px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    #blueInfoMission .left{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      flex:1 1 auto;
+    }
+    #blueInfoMission .confirm{
+      color:#eaf2ff;
+      font-weight:900;
+      opacity:.95;
+      cursor:pointer;
+      user-select:none;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.10);
+      backdrop-filter: blur(8px);
+      -webkit-tap-highlight-color: transparent;
+      flex:0 0 auto;
+      white-space:nowrap;
+      display:none;
+    }
+    #blueInfoMission .confirm:active{ transform:scale(.98); }
+
+    /* ========================= */
+
+    /* ASD 오버레이 */
     #asdOverlay{
       position:fixed; inset:0; z-index:80;
       display:none;
@@ -111,9 +255,25 @@
       font-size:12.5px;
       opacity:.9;
       border-top:1px solid rgba(255,255,255,.10);
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
     }
+    #asdHint button{
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.10);
+      color:#eaf2ff;
+      font-weight:900;
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:12px;
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(8px);
+      cursor:pointer;
+      flex:0 0 auto;
+      white-space:nowrap;
+    }
+    #asdHint button:active{ transform:scale(.98); }
 
-    /* ✅✅ ASD: eye_animation.glb + lens overlay */
     #asdScene{
       position:relative;
       width:100%;
@@ -122,18 +282,14 @@
       aspect-ratio: 16/9;
       min-height: 320px;
     }
-
-    /* ASD eye model-viewer (정면 고정) */
     #asdEyeMV{
       position:absolute; inset:0;
       width:100%; height:100%;
       display:block;
       background:transparent;
-      /* 회전/줌 불필요 → 터치 막기 */
       pointer-events:none;
+      transform: translateY(18px);
     }
-
-    /* 렌즈 오버레이 (홍채보다 크게, 눈꺼풀 안쪽에 들어간 느낌) */
     #asdLensImg{
       position:absolute;
       left:50%;
@@ -141,14 +297,12 @@
       width:70%;
       transform:translate(-50%,-50%) rotate(20deg);
       transform-origin:50% 50%;
-      opacity:.78;               /* ✅ (수정) 더 불투명하게 */
-      mix-blend-mode: screen;    /* ✅ 뒤 홍채 보이게 */
+      opacity:.78;
+      mix-blend-mode: screen;
       filter:saturate(1.08) contrast(1.06);
       pointer-events:none;
       will-change: transform;
     }
-
-    /* 렌즈 가장자리 하이라이트 */
     #asdLensRim{
       position:absolute;
       left:50%;
@@ -165,12 +319,9 @@
       opacity:.55;
       mix-blend-mode: screen;
     }
-
-    /* 눈꺼풀 안쪽으로 들어간 느낌(가장자리 마스킹) */
     #asdMaskShade{
       position:absolute; inset:0;
       pointer-events:none;
-      /* 위/아래 눈꺼풀 그림자 */
       background:
         radial-gradient(110% 70% at 50% 18%,
           rgba(0,0,0,.50) 0%,
@@ -183,8 +334,6 @@
       mix-blend-mode: multiply;
       opacity:.9;
     }
-
-    /* 깜박임(눈꺼풀) 레이어 */
     #asdBlinkLid{
       position:absolute;
       inset:0;
@@ -196,8 +345,6 @@
       will-change:transform,opacity;
       z-index:4;
     }
-
-    /* 깜박임 버튼 (우측 하단, 원형, 반투명) */
     #asdBlinkBtn{
       position:absolute;
       right:14px;
@@ -221,8 +368,6 @@
       z-index:5;
     }
     #asdBlinkBtn:active{ transform:scale(.95); }
-
-    /* ✅ (추가) 회전 버튼 */
     #asdRotateBtn{
       position:absolute;
       right:76px;
@@ -246,8 +391,6 @@
       z-index:5;
     }
     #asdRotateBtn:active{ transform:scale(.95); }
-
-    /* (표시) 현재 각도 */
     #asdAngleBadge{
       position:absolute;
       left:14px;
@@ -320,77 +463,6 @@
     #pvpText{color:#eaf2ff;font-size:12.5px;line-height:1.35;}
     #pvpTitle{font-weight:900;margin-bottom:2px;}
     #hint{opacity:.85;}
-
-    /* 블루라이트(55%) */
-    #blueFx{
-      position:fixed; inset:0; z-index:58;
-      pointer-events:none;
-      display:none;
-    }
-    #blueFx.show{ display:block; }
-
-    .beam{
-      position:absolute;
-      top:46%;
-      height:10px;
-      filter: blur(1px);
-      opacity:.95;
-      transform:translateY(-50%) rotate(-10deg);
-      border-radius:999px;
-    }
-    .beam-pass{
-      left:-10%;
-      width:65%;
-      background:linear-gradient(90deg,
-        rgba(0,200,255,0) 0%,
-        rgba(0,200,255,.65) 25%,
-        rgba(0,200,255,1.0) 50%,
-        rgba(0,200,255,.65) 75%,
-        rgba(0,200,255,0) 100%
-      );
-      animation: passMove 1.05s ease-in-out infinite;
-    }
-    @keyframes passMove{
-      0%{ transform:translateY(-50%) rotate(-10deg) translateX(-4%); opacity:.70;}
-      50%{ transform:translateY(-50%) rotate(-10deg) translateX(4%);  opacity:1;}
-      100%{transform:translateY(-50%) rotate(-10deg) translateX(-4%); opacity:.70;}
-    }
-
-    .beam-bounce{
-      left:44%;
-      width:52%;
-      top:44%;
-      transform:translateY(-50%) rotate(170deg);
-      background:linear-gradient(90deg,
-        rgba(0,200,255,0) 0%,
-        rgba(0,200,255,.45) 25%,
-        rgba(0,200,255,.85) 55%,
-        rgba(0,200,255,.45) 80%,
-        rgba(0,200,255,0) 100%
-      );
-      animation: bounceMove 1.05s ease-in-out infinite;
-      opacity:.75;
-    }
-    @keyframes bounceMove{
-      0%{ transform:translateY(-50%) rotate(170deg) translateX(-3%); opacity:.55;}
-      50%{ transform:translateY(-50%) rotate(170deg) translateX(3%);  opacity:.85;}
-      100%{transform:translateY(-50%) rotate(170deg) translateX(-3%); opacity:.55;}
-    }
-
-    #blockBadge{
-      position:fixed; left:12px; right:12px; bottom:160px; z-index:70;
-      display:none;
-      padding:10px 12px;
-      border-radius:14px;
-      background:rgba(0,0,0,.55);
-      border:1px solid rgba(255,255,255,.14);
-      color:#eaf2ff;
-      font-weight:900;
-      backdrop-filter: blur(10px);
-      text-align:center;
-    }
-    #blockBadge.show{ display:block; }
-    #blockBadge span{ color:rgba(0,255,140,.95); }
 
     /* 두께 그래프(가로형) */
     #thicknessBar{
@@ -512,7 +584,7 @@
 </head>
 
 <body>
-  <!-- ✅ 미션 카드가 기능 버튼 역할 -->
+  <!-- ✅ 미션 카드 -->
   <div id="missionBar">
     <div id="missionASD" class="missionCard" role="button" tabindex="0" aria-label="ASD 기술 보기">
       <div class="missionNo">01</div>
@@ -531,12 +603,81 @@
     </div>
   </div>
 
-  <!-- 블루라이트 이펙트 -->
-  <div id="blueFx">
-    <div class="beam beam-pass"></div>
-    <div class="beam beam-bounce"></div>
+  <!-- ✅ OFF일 때 렌즈 뒤쪽 그라데이션 번짐 -->
+  <div id="blueBackGlow" aria-hidden="true"></div>
+
+  <!-- ✅ 광선 레이어 -->
+  <div id="blueRayLayer" aria-hidden="true">
+    <svg id="blueRaySvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="beamInGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="rgba(0,200,255,0)"></stop>
+          <stop offset="0.35" stop-color="rgba(0,200,255,.55)"></stop>
+          <stop offset="0.6" stop-color="rgba(0,200,255,1)"></stop>
+          <stop offset="1" stop-color="rgba(0,200,255,.25)"></stop>
+        </linearGradient>
+        <linearGradient id="beamPassGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="rgba(0,200,255,0)"></stop>
+          <stop offset="0.25" stop-color="rgba(0,200,255,.45)"></stop>
+          <stop offset="0.5" stop-color="rgba(0,200,255,.85)"></stop>
+          <stop offset="0.75" stop-color="rgba(0,200,255,.45)"></stop>
+          <stop offset="1" stop-color="rgba(0,200,255,0)"></stop>
+        </linearGradient>
+        <linearGradient id="beamOutGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="rgba(0,200,255,.25)"></stop>
+          <stop offset="0.35" stop-color="rgba(0,200,255,1)"></stop>
+          <stop offset="0.75" stop-color="rgba(0,200,255,.55)"></stop>
+          <stop offset="1" stop-color="rgba(0,200,255,0)"></stop>
+        </linearGradient>
+        <filter id="beamGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="0.9" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- (사용 안 함: 유지) -->
+      <line id="beamPass" x1="0" y1="50" x2="100" y2="50"
+            stroke="url(#beamPassGrad)" stroke-width="1.25" stroke-linecap="round"
+            filter="url(#beamGlow)" opacity="0.0"></line>
+
+      <!-- ✅ OFF/ON 공통: 입사광 -->
+      <line id="beamIn" x1="0" y1="50" x2="50" y2="50"
+            stroke="url(#beamInGrad)" stroke-width="1.35" stroke-linecap="round"
+            filter="url(#beamGlow)" opacity="0.0"></line>
+
+      <!-- ✅ OFF: 직진 출사 / ON: 꺾임 출사 (JS에서 좌표 바꿈) -->
+      <line id="beamOut" x1="50" y1="50" x2="100" y2="50"
+            stroke="url(#beamOutGrad)" stroke-width="1.15" stroke-linecap="round"
+            filter="url(#beamGlow)" opacity="0.0"></line>
+
+      <!-- 표면 접점 (ON에서만 강조) -->
+      <circle id="beamHit" cx="50" cy="50" r="1.1" fill="rgba(255,255,255,.55)" filter="url(#beamGlow)" opacity="0.0"></circle>
+    </svg>
   </div>
-  <div id="blockBadge">블루라이트 <span>55%</span> 차단 연출</div>
+
+  <!-- ✅ 블루라이트 on/off 토글 pill -->
+  <div id="bluePill" role="button" tabindex="0" aria-label="블루라이트 on/off">
+    <span>블루라이트 on</span>
+  </div>
+
+  <!-- ✅ 블루라이트 설명/미션 -->
+  <div id="blueInfo" aria-hidden="true">
+    <div id="blueInfoTop">
+      <b>블루라이트 <span class="pct">55%</span> 차단</b>
+    </div>
+    <div id="blueInfoBody">
+      아큐브® 오아시스 MAX는 자외선은 물론,
+      블루라이트를 55% 차단하여 디지털에 노출된 눈을 보호합니다.
+      블루라이트 차단 효과를 위한 "블루그린 틴트"를 확인해주세요.  
+    </div>
+    <div id="blueInfoMission">
+      <div class="left" id="blueMissionText">미션: '블루라이트 on' 버튼을 눌러 차이를 비교해 보세요</div>
+      <div class="confirm" id="blueMissionConfirm">확인</div>
+    </div>
+  </div>
 
   <!-- 두께 그래프 -->
   <div id="thicknessBar" aria-hidden="true">
@@ -544,13 +685,11 @@
       <div id="thTitle">두께</div>
       <div id="thUnit">mm</div>
     </div>
-
     <div id="gradRow">
-      <div class="tickLabel">얆음_0.0</div>
+      <div class="tickLabel">얇음_0.0</div>
       <div id="gradWrap">
         <div id="grad"></div>
         <div id="gradShine"></div>
-
         <div class="mark m0"><strong>0.0</strong></div>
         <div class="mark m25"><strong>0.1</strong></div>
         <div class="mark m50"><strong>0.2</strong></div>
@@ -567,13 +706,12 @@
     <img id="pvpBigImg" src="PVP.gif" alt="PVP Big" onerror="this.onerror=null; this.src='PVP.jpeg';">
   </div>
 
-
   <!-- PVP 하단 설명 -->
   <div id="pvpOverlay">
     <img id="pvpThumb" src="PVP.png" alt="PVP" onerror="this.onerror=null; this.src='PVP.jpeg';">
     <div id="pvpText">
       <div id="pvpTitle">PVP 습윤 인자</div>
-      <div id="hint">렌즈 내 PVP 습윤인자가 수분을 끌어당겨 더 오랫동안 눈물막 유지하여 건조감 감소.</div>
+      <div id="hint">렌즈 내 PVP 습윤인자가 수분을 더 오랫동안 눈물막 유지하여 건조감을 감소 시킵니다.</div>
     </div>
   </div>
 
@@ -581,8 +719,6 @@
   <div id="asdOverlay" aria-hidden="true">
     <div id="asdCard">
       <button id="asdClose" type="button" aria-label="닫기">✕</button>
-
-      <!-- ✅ ASD 구현: eye_animation.glb + lens overlay -->
       <div id="asdScene">
         <model-viewer
           id="asdEyeMV"
@@ -596,20 +732,16 @@
           interaction-prompt="none"
           style="display:block;">
         </model-viewer>
-
         <div id="asdLensRim" aria-hidden="true"></div>
         <img id="asdLensImg" src="lens.png" alt="Lens overlay"
              onerror="this.style.display='none'; document.getElementById('asdHint').textContent='lens.png / lens2.png 파일을 같은 폴더에 넣어주세요.';">
         <div id="asdMaskShade" aria-hidden="true"></div>
-
         <div id="asdBlinkLid" aria-hidden="true"></div>
-
         <div id="asdAngleBadge">20°</div>
-        <button id="asdRotateBtn" type="button" aria-label="회전">회전</button>
-        <button id="asdBlinkBtn" type="button" aria-label="눈 깜박">깜박</button>
+        <button id="asdRotateBtn" type="button" aria-label="회전">축이탈</button>
+        <button id="asdBlinkBtn" type="button" aria-label="눈 깜박">깜박임</button>
       </div>
-
-      <div id="asdHint">ASD 참고 이미지</div>
+      <div id="asdHint">미션. ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜주세요</div>
     </div>
   </div>
 
@@ -639,7 +771,6 @@
   <script>
     const mv = document.getElementById('mv');
 
-    // ✅ 상단 미션(=기능 버튼)
     const missionASD  = document.getElementById('missionASD');
     const missionPVP  = document.getElementById('missionPVP');
     const missionBlue = document.getElementById('missionBlue');
@@ -655,10 +786,20 @@
     const pvpOverlay = document.getElementById('pvpOverlay');
     const pvpBig     = document.getElementById('pvpBig');
 
-    const blueFx = document.getElementById('blueFx');
-    const blockBadge = document.getElementById('blockBadge');
-
     const thicknessBar = document.getElementById('thicknessBar');
+
+    /* ✅ 블루라이트 UI */
+    const bluePill = document.getElementById('bluePill');
+    const blueRayLayer = document.getElementById('blueRayLayer');
+    const blueBackGlow = document.getElementById('blueBackGlow');
+    const blueInfo = document.getElementById('blueInfo');
+    const blueMissionText = document.getElementById('blueMissionText');
+    const blueMissionConfirm = document.getElementById('blueMissionConfirm');
+
+    const beamPass = document.getElementById('beamPass');
+    const beamIn = document.getElementById('beamIn');
+    const beamOut = document.getElementById('beamOut');
+    const beamHit = document.getElementById('beamHit');
 
     /* ✅ ASD 요소 */
     const asdEyeMV = document.getElementById('asdEyeMV');
@@ -668,12 +809,16 @@
     const asdBlinkLid = document.getElementById('asdBlinkLid');
     const asdAngleBadge = document.getElementById('asdAngleBadge');
     const asdLensRim = document.getElementById('asdLensRim');
+    const asdHint = document.getElementById('asdHint');
 
     let currentMode = 'lens'; // 'lens' | 'heat'
     let blueOn = false;
     let pvpOn = false;
 
-    // 투명/히트맵 전환 시에도 카메라(orbit+target) 연동
+    // ✅ 블루라이트 패널(기능 진입) 오픈 상태
+    let bluePanelOpen = false;
+
+    // 투명/히트맵 전환 시에도 카메라 연동
     let lastOrbit = null;
     let lastTarget = null;
 
@@ -681,58 +826,195 @@
     let defaultOrbit = null;
     let defaultTarget = null;
 
-    // 블루 ON 할 때 강제 각도
+    // ✅ 블루 패널 오픈 시 "전용 사선 뷰" (요청 1)
+    const BLUE_PANEL_ORBIT_STR  = '-25deg 92deg 2.75m';
+    // ✅ (요청 5) 렌즈가 아래로 내려오는 문제 → target Y 더 낮춤(화면에서 위로 올라감)
+    const BLUE_PANEL_TARGET_STR = '0m -0.010m 0m';
+
+    // 블루 ON 할 때 강제 각도(유지하되 target Y는 동일하게 올림 반영)
     const BLUE_ORBIT_STR  = '20deg 88deg 2.75m';
-    const BLUE_TARGET_STR = '0m 0.010m 0m';
+    const BLUE_TARGET_STR = '0m -0.010m 0m';
+
     let orbitBeforeBlue = null;
     let targetBeforeBlue = null;
 
-    // 블루그린 틴트
+    // 블루그린 톤 (ON 시)
     const BLUEGREEN_TINT = [0.55, 1.08, 0.72, 0.45];
 
     // 원본 색 백업
     let allMaterialBackup = null;
 
-    /* ✅✅ ASD 로직 (요청사항 반영)
-       1) 0도 이후 깜박 클릭: 좌우 미끌림 ❌
-          👉 현재 회전 방향으로 +3° 더 갔다가 → 0°로 복귀
-       2) 회전 버튼 추가: 10°/15°/20° 랜덤 + 좌/우 랜덤 (총 6가지)
-       3) ASD 렌즈 이미지 더 불투명하게 (CSS opacity 상향)
-    */
+    // ✅ 블루 ON 1회 누르면 미션성공 + 확인
+    const blueMission = {
+      successShown: false,
+      confirmed: false
+    };
+
+    function setBlueUI(){
+      const visible = (bluePanelOpen && currentMode === 'lens');
+
+      bluePill.style.display = visible ? 'block' : 'none';
+      blueInfo.style.display = visible ? 'block' : 'none';
+      blueInfo.setAttribute('aria-hidden', visible ? 'false' : 'true');
+
+      blueRayLayer.style.display = visible ? 'block' : 'none';
+
+      // OFF일 때 렌즈 뒤쪽 번짐 그라데이션
+      blueBackGlow.style.display = (visible && !blueOn) ? 'block' : 'none';
+
+      // ✅ (요청 2) 버튼 라벨 = "현재 상태"가 아니라 "누르면 될 동작"
+      bluePill.querySelector('span').textContent = blueOn ? '블루라이트 off' : '블루라이트 on';
+
+      // 미션 문구
+      if(blueMission.successShown && !blueMission.confirmed){
+        blueMissionText.textContent = '미션 성공: 확인 버튼을 눌러주세요';
+        blueMissionConfirm.style.display = 'block';
+      }else{
+        blueMissionText.textContent = '미션: "블루라이트 on" 버튼을 눌러 차이를 비교해 보세요';
+        blueMissionConfirm.style.display = 'none';
+      }
+
+      syncBeamVisibility();
+      if(visible) updateBeams();
+    }
+
+    function syncBeamVisibility(){
+      const visible = (bluePanelOpen && currentMode === 'lens');
+      if(!visible){
+        beamPass.style.opacity = '0.0';
+        beamIn.style.opacity = '0.0';
+        beamOut.style.opacity = '0.0';
+        beamHit.style.opacity = '0.0';
+        return;
+      }
+
+      // ✅ (요청 4) OFF도 입사+출사(직진) 보이게
+      if(!blueOn){
+        beamPass.style.opacity = '0.0';
+        beamIn.style.opacity  = '0.88';
+        beamOut.style.opacity = '0.82';
+        beamHit.style.opacity = '0.0';
+        return;
+      }
+
+      // ✅ ON: 입사 + 꺾임 + 접점
+      beamPass.style.opacity = '0.0';
+      beamIn.style.opacity  = '0.92';
+      beamOut.style.opacity = '0.78';
+      beamHit.style.opacity = '0.90';
+    }
+
+    // ✅ 광선 위치 업데이트
+    function updateBeams(){
+      const visible = (bluePanelOpen && currentMode === 'lens');
+      if(!visible) return;
+
+      const rect = mv.getBoundingClientRect();
+
+      // ✅ (요청 3) 접점은 렌즈 "정중앙"
+      const hitX = rect.left + rect.width  * 0.50;
+      const hitY = rect.top  + rect.height * 0.50;
+
+      const toVw = (x)=> (x / window.innerWidth) * 100;
+      const toVh = (y)=> (y / window.innerHeight) * 100;
+
+      const hx = toVw(hitX), hy = toVh(hitY);
+
+      // OFF 직진: 입사(좌→중앙), 출사(중앙→우)
+      if(!blueOn){
+        const inX1 = rect.left - rect.width * 0.25;
+        const inY1 = hitY; // 중앙 정렬
+        beamIn.setAttribute('x1', toVw(inX1));
+        beamIn.setAttribute('y1', toVh(inY1));
+        beamIn.setAttribute('x2', hx);
+        beamIn.setAttribute('y2', hy);
+
+        const outX2 = rect.left + rect.width * 1.25;
+        const outY2 = hitY;
+        beamOut.setAttribute('x1', hx);
+        beamOut.setAttribute('y1', hy);
+        beamOut.setAttribute('x2', toVw(outX2));
+        beamOut.setAttribute('y2', toVh(outY2));
+
+        beamHit.setAttribute('cx', hx);
+        beamHit.setAttribute('cy', hy);
+        return;
+      }
+
+      // ON: 입사(좌→중앙), 꺾임(중앙에서 135도 느낌으로 좌상 방향)
+      const inX1 = rect.left - rect.width * 0.25;
+      const inY1 = hitY;
+      beamIn.setAttribute('x1', toVw(inX1));
+      beamIn.setAttribute('y1', toVh(inY1));
+      beamIn.setAttribute('x2', hx);
+      beamIn.setAttribute('y2', hy);
+
+      const outX2 = hitX - rect.width * 0.55; // 좌측
+      const outY2 = hitY - rect.height * 0.30; // 위쪽
+      beamOut.setAttribute('x1', hx);
+      beamOut.setAttribute('y1', hy);
+      beamOut.setAttribute('x2', toVw(outX2));
+      beamOut.setAttribute('y2', toVh(outY2));
+
+      beamHit.setAttribute('cx', hx);
+      beamHit.setAttribute('cy', hy);
+    }
+
+    mv.addEventListener('camera-change', ()=>{
+      if(bluePanelOpen && currentMode === 'lens') updateBeams();
+    });
+    window.addEventListener('resize', ()=>{
+      if(bluePanelOpen && currentMode === 'lens') updateBeams();
+    });
+
+    /* ✅✅ ASD 로직 (원본 유지) */
     let asdAngle = 20;
     const ASD_STEP = 5;
     const ASD_START = 20;
-
-    // ✅ 현재 회전 "방향" 기억 (0 이후 관성 연출에 사용)
-    // -1: 각도 감소 방향(20→...→0), +1: 각도 증가 방향(-20→...→0)
     let asdLastDir = -1;
+    let asdDone = false;
 
+    function setASDHintDefault(){
+      if(!asdHint) return;
+      asdHint.innerHTML = '미션. ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜주세요';
+    }
+    function setASDHintSuccess(){
+      if(!asdHint) return;
+      asdHint.innerHTML = `
+        <span>미션성공 : 축이 안정화되었습니다. 확인 버튼을 눌러주세요</span>
+        <button id="asdConfirmBtn" type="button" aria-label="확인">확인</button>
+      `;
+      const btn = document.getElementById('asdConfirmBtn');
+      if(btn){
+        btn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          closeASD();
+          markASDDone(true);
+        });
+      }
+    }
+    function markASDDone(done){
+      asdDone = !!done;
+      missionASD.classList.toggle('done', asdDone);
+    }
     function pickASDLensSrc(){
-      // ✅ 두께맵 상태면 lens2.png (요청)
       return (currentMode === 'heat') ? 'lens2.png' : 'lens.png';
     }
-
     function setASDLensSrc(){
       if(!asdLensImg) return;
       const src = pickASDLensSrc();
       asdLensImg.src = src + '?v=' + Date.now();
     }
-
     function renderASDLensTransform(extraX=0){
       if(!asdLensImg) return;
       asdLensImg.style.transform = `translate(calc(-50% + ${extraX}px), -50%) rotate(${asdAngle}deg)`;
       if(asdAngleBadge) asdAngleBadge.textContent = `${asdAngle}°`;
-      if(asdLensRim){
-        // rim은 그대로 유지
-      }
     }
-
     function resetASDState(){
       asdAngle = ASD_START;
-      asdLastDir = -1; // 기본은 20→0 방향
+      asdLastDir = -1;
       renderASDLensTransform(0);
     }
-
     function playBlinkLid(){
       if(!asdBlinkLid) return;
       asdBlinkLid.style.transition = 'none';
@@ -749,32 +1031,25 @@
         }, 120);
       });
     }
-
-    // ✅ 0도 이후: 관성처럼 "회전 방향"으로 3도 더 갔다가 0 복귀
     function overshootAndReturn(){
-      const overshootDeg = asdLastDir * 3; // 방향 유지해서 ±3
+      const overshootDeg = asdLastDir * 3;
       if(!asdLensImg) return;
-
       asdLensImg.style.transition = 'transform 120ms ease';
       asdAngle = overshootDeg;
       renderASDLensTransform(0);
-
       setTimeout(()=>{
         asdLensImg.style.transition = 'transform 180ms ease';
         asdAngle = 0;
         renderASDLensTransform(0);
-
         setTimeout(()=>{
           if(asdLensImg) asdLensImg.style.transition = '';
         }, 190);
       }, 120);
     }
-
     function handleASDBlink(){
       playBlinkLid();
-
       if(asdAngle > 0){
-        asdLastDir = -1; // 20→0 방향
+        asdLastDir = -1;
         asdAngle = Math.max(0, asdAngle - ASD_STEP);
         if(asdLensImg){
           asdLensImg.style.transition = 'transform 160ms ease';
@@ -783,8 +1058,11 @@
         }else{
           renderASDLensTransform(0);
         }
+        if(asdAngle === 0 && !asdDone){
+          setASDHintSuccess();
+        }
       }else if(asdAngle < 0){
-        asdLastDir = +1; // -20→0 방향
+        asdLastDir = +1;
         asdAngle = Math.min(0, asdAngle + ASD_STEP);
         if(asdLensImg){
           asdLensImg.style.transition = 'transform 160ms ease';
@@ -793,28 +1071,27 @@
         }else{
           renderASDLensTransform(0);
         }
+        if(asdAngle === 0 && !asdDone){
+          setASDHintSuccess();
+        }
       }else{
-        // ✅ 0도 이후
         overshootAndReturn();
       }
     }
-
     if(asdBlinkBtn){
       asdBlinkBtn.addEventListener('click', (e)=>{
         e.stopPropagation();
         handleASDBlink();
       });
     }
-
-    // ✅ 회전 버튼: 10/15/20 랜덤 + 좌/우 랜덤
     function handleASDRotateRandom(){
+      markASDDone(false);
+      setASDHintDefault();
       const mags = [10,15,20];
       const mag = mags[Math.floor(Math.random() * mags.length)];
-      const dir = (Math.random() < 0.5) ? -1 : 1; // 좌/우 랜덤
-      asdLastDir = dir; // 이후 0도 관성 방향도 이 방향을 따르도록
-
+      const dir = (Math.random() < 0.5) ? -1 : 1;
+      asdLastDir = dir;
       asdAngle = dir * mag;
-
       if(asdLensImg){
         asdLensImg.style.transition = 'transform 180ms ease';
         renderASDLensTransform(0);
@@ -823,7 +1100,6 @@
         renderASDLensTransform(0);
       }
     }
-
     if(asdRotateBtn){
       asdRotateBtn.addEventListener('click', (e)=>{
         e.stopPropagation();
@@ -831,13 +1107,8 @@
       });
     }
 
-    function getOrbitSafe(){
-      try{ return mv.getCameraOrbit(); }catch(e){ return null; }
-    }
-    function getTargetSafe(){
-      try{ return mv.getCameraTarget(); }catch(e){ return null; }
-    }
-
+    function getOrbitSafe(){ try{ return mv.getCameraOrbit(); }catch(e){ return null; } }
+    function getTargetSafe(){ try{ return mv.getCameraTarget(); }catch(e){ return null; } }
     function applyOrbit(orbit){
       if(!orbit) return;
       try{ mv.cameraOrbit = `${orbit.theta}rad ${orbit.phi}rad ${orbit.radius}m`; }catch(e){}
@@ -846,13 +1117,8 @@
       if(!target) return;
       try{ mv.cameraTarget = `${target.x}m ${target.y}m ${target.z}m`; }catch(e){}
     }
-
-    function applyOrbitStr(s){
-      try{ mv.cameraOrbit = s; }catch(e){}
-    }
-    function applyTargetStr(s){
-      try{ mv.cameraTarget = s; }catch(e){}
-    }
+    function applyOrbitStr(s){ try{ mv.cameraOrbit = s; }catch(e){} }
+    function applyTargetStr(s){ try{ mv.cameraTarget = s; }catch(e){} }
 
     function resetCameraToDefault(){
       if(!defaultOrbit || !defaultTarget) return;
@@ -864,24 +1130,16 @@
       }, 120);
     }
 
-    function showBlueFx(show){
-      blueFx.classList.toggle('show', show);
-      blockBadge.classList.toggle('show', show);
-    }
-
     function showPVP(show){
       pvpOverlay.classList.toggle('show', show);
       pvpBig.classList.toggle('show', show);
     }
-
     function showThickness(show){
       thicknessBar.classList.toggle('show', show);
       thicknessBar.setAttribute('aria-hidden', show ? 'false' : 'true');
     }
 
-    // ✅ PVP 확대 비율
     const PVP_ZOOM_FACTOR = 0.76;
-
     function zoomInForPVP(){
       try{
         const orbit = getOrbitSafe();
@@ -895,26 +1153,20 @@
       try{
         const model = mv.model;
         if(!model || !model.materials) return;
-
         model.materials.forEach(mat=>{
           const pbr = mat.pbrMetallicRoughness;
           if(!pbr) return;
-
           const base = pbr.baseColorFactor ? [...pbr.baseColorFactor] : [1,1,1,1];
           base[3] = Math.max(base[3], 0.45);
           pbr.setBaseColorFactor(base);
-
           try{ pbr.setRoughnessFactor(0.28); }catch(e){}
           try{ pbr.setMetallicFactor(0.0); }catch(e){}
-
           if(mat.extensions && mat.extensions.KHR_materials_transmission){
             mat.extensions.KHR_materials_transmission.transmissionFactor = 0.86;
           }
-
           try{
             if(mat.emissiveFactor){ mat.emissiveFactor = [0.04, 0.06, 0.07]; }
           }catch(e){}
-
           try{ if(mat.setAlphaMode) mat.setAlphaMode('BLEND'); }catch(e){}
         });
       }catch(e){}
@@ -933,7 +1185,6 @@
         allMaterialBackup = null;
       }
     }
-
     function restoreOriginalColors(){
       try{
         const model = mv.model;
@@ -947,7 +1198,6 @@
         });
       }catch(e){}
     }
-
     function applyTint(){
       try{
         const model = mv.model;
@@ -962,11 +1212,13 @@
       }catch(e){}
     }
 
-    // ✅ 상단 카드 ON/OFF UI 동기화
     function syncMissionUI(){
       missionASD.classList.toggle('on', asdOverlay.classList.contains('show'));
       missionPVP.classList.toggle('on', pvpOn);
-      missionBlue.classList.toggle('on', blueOn);
+      missionBlue.classList.toggle('on', bluePanelOpen);
+
+      missionASD.classList.toggle('done', asdDone);
+      missionBlue.classList.toggle('done', blueMission.confirmed);
     }
 
     function closeASD(){
@@ -982,21 +1234,19 @@
     }
 
     function forceBlueOff(){
-      if(!blueOn) return;
       blueOn = false;
-      showBlueFx(false);
       restoreOriginalColors();
-
-      if(orbitBeforeBlue && targetBeforeBlue){
-        applyTarget(targetBeforeBlue);
-        applyOrbit(orbitBeforeBlue);
-        setTimeout(()=>{
-          applyTarget(targetBeforeBlue);
-          applyOrbit(orbitBeforeBlue);
-        }, 120);
-      }
       orbitBeforeBlue = null;
       targetBeforeBlue = null;
+      setBlueUI();
+      syncMissionUI();
+    }
+
+    function closeBluePanel(){
+      bluePanelOpen = false;
+      forceBlueOff();          // 완전 복귀
+      resetCameraToDefault();  // 블루 전용 뷰도 종료
+      setBlueUI();
       syncMissionUI();
     }
 
@@ -1008,17 +1258,14 @@
     }
 
     function openASD(){
-      // ASD 켜면 다른 기능 강제 OFF + 디폴트
-      if(blueOn) forceBlueOff();
-      if(pvpOn)  forcePVPOff();
+      if(bluePanelOpen) closeBluePanel();
+      if(pvpOn) forcePVPOff();
       resetCameraToDefault();
 
-      // ✅ ASD: 현재 모드에 따라 렌즈 이미지 선택(lens.png / lens2.png)
       setASDLensSrc();
-      // ✅ ASD: 각도 초기화(20도) + 정면 고정 상태로 시작
       resetASDState();
+      setASDHintDefault();
 
-      // eye glb 재로딩(필요 시)
       if(asdEyeMV){
         asdEyeMV.src = 'eye_animation.glb' + '?v=' + Date.now();
       }
@@ -1035,9 +1282,8 @@
 
         currentMode = mode;
 
-        // 모드 전환하면 PVP/블루 닫기
         forcePVPOff();
-        forceBlueOff();
+        if(bluePanelOpen) closeBluePanel();
 
         showThickness(mode === 'heat');
         setModeButtons();
@@ -1070,6 +1316,7 @@
       }
 
       setModeButtons();
+      setBlueUI();
       syncMissionUI();
     });
 
@@ -1091,9 +1338,8 @@
       }
       if(currentMode !== 'lens') return;
 
-      if(!pvpOn){
-        if(blueOn) forceBlueOff();
-      }
+      if(!pvpOn && bluePanelOpen) closeBluePanel();
+      if(asdOverlay.classList.contains('show')) closeASD();
 
       pvpOn = !pvpOn;
 
@@ -1113,16 +1359,44 @@
     missionPVP.addEventListener('click', togglePVP);
     missionPVP.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') togglePVP(); });
 
-    /* ✅ 블루 (미션 03 카드 클릭) */
-    async function toggleBlue(){
+    /* ✅ 블루 카드: 패널 오픈/클로즈 + 전용 사선 뷰로 즉시 이동 (요청 1) */
+    async function toggleBluePanel(){
       if(currentMode === 'heat'){
         await setModel('lens_clear.glb', 'lens');
       }
       if(currentMode !== 'lens') return;
 
-      if(!blueOn){
-        if(pvpOn) forcePVPOff();
+      forcePVPOff();
+      if(asdOverlay.classList.contains('show')) closeASD();
+
+      bluePanelOpen = !bluePanelOpen;
+
+      if(!bluePanelOpen){
+        closeBluePanel();
+        return;
       }
+
+      // 패널 오픈 시: 기본은 OFF + 전용 사선 뷰
+      forceBlueOff();
+      bluePanelOpen = true;
+
+      applyOrbitStr(BLUE_PANEL_ORBIT_STR);
+      applyTargetStr(BLUE_PANEL_TARGET_STR);
+      setTimeout(()=>{
+        applyOrbitStr(BLUE_PANEL_ORBIT_STR);
+        applyTargetStr(BLUE_PANEL_TARGET_STR);
+        updateBeams();
+      }, 120);
+
+      setBlueUI();
+      syncMissionUI();
+    }
+    missionBlue.addEventListener('click', toggleBluePanel);
+    missionBlue.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') toggleBluePanel(); });
+
+    /* ✅ pill: 실제 on/off 토글 */
+    function toggleBlueOnOff(){
+      if(!bluePanelOpen) return;
 
       blueOn = !blueOn;
 
@@ -1135,33 +1409,43 @@
         setTimeout(()=>{
           applyOrbitStr(BLUE_ORBIT_STR);
           applyTargetStr(BLUE_TARGET_STR);
+          updateBeams();
         }, 120);
 
         if(!allMaterialBackup) backupOriginalColors();
         applyTint();
-        showBlueFx(true);
-        syncMissionUI();
+
+        if(!blueMission.successShown && !blueMission.confirmed){
+          blueMission.successShown = true;
+        }
       }else{
-        showBlueFx(false);
+        // OFF 완전 복귀(투명)
         restoreOriginalColors();
 
-        if(orbitBeforeBlue && targetBeforeBlue){
-          applyTarget(targetBeforeBlue);
-          applyOrbit(orbitBeforeBlue);
-          setTimeout(()=>{
-            applyTarget(targetBeforeBlue);
-            applyOrbit(orbitBeforeBlue);
-          }, 120);
-        }
-        orbitBeforeBlue = null;
-        targetBeforeBlue = null;
-
-        resetCameraToDefault();
-        syncMissionUI();
+        // OFF로 돌아갈 때도 "블루 전용 사선 뷰" 유지
+        applyOrbitStr(BLUE_PANEL_ORBIT_STR);
+        applyTargetStr(BLUE_PANEL_TARGET_STR);
+        setTimeout(()=>{
+          applyOrbitStr(BLUE_PANEL_ORBIT_STR);
+          applyTargetStr(BLUE_PANEL_TARGET_STR);
+          updateBeams();
+        }, 120);
       }
+
+      setBlueUI();
+      syncMissionUI();
     }
-    missionBlue.addEventListener('click', toggleBlue);
-    missionBlue.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') toggleBlue(); });
+
+    bluePill.addEventListener('click', (e)=>{ e.stopPropagation(); toggleBlueOnOff(); });
+    bluePill.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggleBlueOnOff(); } });
+
+    blueMissionConfirm.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      blueMission.confirmed = true;
+      blueMission.successShown = false;
+      setBlueUI();
+      syncMissionUI();
+    });
 
     /* 백(↺) 버튼 */
     btnReset.addEventListener('click', ()=>{
@@ -1177,4 +1461,6 @@
   </script>
 </body>
 </html>
+
+
 
