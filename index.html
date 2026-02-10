@@ -294,36 +294,43 @@
       width:100%;
       background:rgba(255,255,255,.04);
       overflow:hidden;
-      aspect-ratio: 16/9;
-      min-height: 320px;
+      aspect-ratio: 1/1;
+      min-height: 360px;
     }
+
+    /* ✅✅ ASD 배경(눈) : a.gif */
     #asdEyeMV{
       position:absolute; inset:0;
       width:100%; height:100%;
       display:block;
       background:transparent;
       pointer-events:none;
-      transform: translateY(18px);
+      object-fit:cover;
+      transform: scale(1.28);
+      transform-origin:center;
+      filter: contrast(1.02) saturate(1.02);
     }
+
+    /* ✅ 렌즈(홍채 위치) */
     #asdLensImg{
       position:absolute;
       left:50%;
-      top:53%;
-      width:70%;
+      top:52%;
+      width:62%;
       transform:translate(-50%,-50%) rotate(20deg);
       transform-origin:50% 50%;
-      opacity:.78;
+      opacity:.80;
       mix-blend-mode: screen;
       filter:saturate(1.08) contrast(1.06);
       pointer-events:none;
-      will-change: transform;
+      will-change: transform, opacity;
     }
     #asdLensRim{
       position:absolute;
       left:50%;
-      top:53%;
-      width:70%;
-      height:70%;
+      top:52%;
+      width:62%;
+      height:62%;
       transform:translate(-50%,-50%);
       border-radius:999px;
       pointer-events:none;
@@ -339,27 +346,61 @@
       pointer-events:none;
       background:
         radial-gradient(110% 70% at 50% 18%,
-          rgba(0,0,0,.50) 0%,
-          rgba(0,0,0,.28) 30%,
+          rgba(0,0,0,.45) 0%,
+          rgba(0,0,0,.22) 32%,
           rgba(0,0,0,0) 58%),
         radial-gradient(110% 70% at 50% 90%,
-          rgba(0,0,0,.46) 0%,
-          rgba(0,0,0,.22) 32%,
+          rgba(0,0,0,.42) 0%,
+          rgba(0,0,0,.18) 34%,
           rgba(0,0,0,0) 60%);
       mix-blend-mode: multiply;
-      opacity:.9;
+      opacity:.85;
     }
+
+    /* ✅✅ 실제 눈 깜박임(상/하 눈꺼풀) */
     #asdBlinkLid{
       position:absolute;
       inset:0;
-      background:rgba(0,0,0,.62);
-      transform:scaleY(0);
-      transform-origin:center;
-      opacity:0;
       pointer-events:none;
-      will-change:transform,opacity;
       z-index:4;
     }
+    #asdLidTop, #asdLidBot{
+      position:absolute;
+      left:0; right:0;
+      height:55%;
+      background:
+        radial-gradient(120% 90% at 50% 85%,
+          rgba(165,120,95,.98) 0%,
+          rgba(120,80,62,.98) 46%,
+          rgba(40,25,22,.98) 92%);
+      filter: blur(.2px);
+      opacity:0;
+      transform: translateY(-110%);
+      will-change: transform, opacity;
+    }
+    #asdLidBot{
+      top:auto; bottom:0;
+      background:
+        radial-gradient(120% 90% at 50% 15%,
+          rgba(165,120,95,.98) 0%,
+          rgba(120,80,62,.98) 46%,
+          rgba(40,25,22,.98) 92%);
+      transform: translateY(110%);
+    }
+    #asdLidTop::after, #asdLidBot::after{
+      content:"";
+      position:absolute;
+      left:-10%; right:-10%;
+      height:28px;
+      background: radial-gradient(120% 100% at 50% 50%,
+        rgba(0,0,0,.35) 0%,
+        rgba(0,0,0,.18) 35%,
+        rgba(0,0,0,0) 70%);
+      opacity:.55;
+    }
+    #asdLidTop::after{ bottom:-12px; }
+    #asdLidBot::after{ top:-12px; transform: scaleY(-1); }
+
     #asdBlinkBtn{
       position:absolute;
       right:14px;
@@ -645,16 +686,16 @@
     <svg id="blueRaySvg" viewBox="0 0 100 100" preserveAspectRatio="none">
       <defs>
         <linearGradient id="beamInGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="rgba(0,200,255,0)"></stop>
-          <stop offset="0.35" stop-color="rgba(0,200,255,.55)"></stop>
-          <stop offset="0.6" stop-color="rgba(0,200,255,1)"></stop>
-          <stop offset="1" stop-color="rgba(0,200,255,.25)"></stop>
+          <stop offset="0"    stop-color="rgb(0,200,255)" stop-opacity="0"></stop>
+          <stop offset="0.35" stop-color="rgb(0,200,255)" stop-opacity="0.55"></stop>
+          <stop offset="0.6"  stop-color="rgb(0,200,255)" stop-opacity="1"></stop>
+          <stop offset="1"    stop-color="rgb(0,200,255)" stop-opacity="0.25"></stop>
         </linearGradient>
         <linearGradient id="beamOutGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="rgba(0,200,255,.25)"></stop>
-          <stop offset="0.35" stop-color="rgba(0,200,255,1)"></stop>
-          <stop offset="0.75" stop-color="rgba(0,200,255,.55)"></stop>
-          <stop offset="1" stop-color="rgba(0,200,255,0)"></stop>
+          <stop offset="0"    stop-color="rgb(0,200,255)" stop-opacity="0.25"></stop>
+          <stop offset="0.35" stop-color="rgb(0,200,255)" stop-opacity="1"></stop>
+          <stop offset="0.75" stop-color="rgb(0,200,255)" stop-opacity="0.55"></stop>
+          <stop offset="1"    stop-color="rgb(0,200,255)" stop-opacity="0"></stop>
         </linearGradient>
         <filter id="beamGlow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="0.9" result="blur"/>
@@ -663,41 +704,30 @@
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
-
-        <!-- ✅ 꺾임 화살표 -->
         <marker id="beamArrow" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(0,200,255,.95)"></path>
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="rgb(0,200,255)" fill-opacity="0.95"></path>
         </marker>
       </defs>
 
-      <!-- ✅ 입사광 (OFF/ON 공통) -->
       <line id="beamIn" x1="0" y1="50" x2="50" y2="50"
             stroke="url(#beamInGrad)" stroke-width="1.15" stroke-linecap="round"
             filter="url(#beamGlow)" opacity="0.0"></line>
-
-      <!-- ✅ 직진 출사광 (OFF는 100%, ON은 절반 느낌으로 opacity 조절) -->
       <line id="beamOut" x1="50" y1="50" x2="100" y2="50"
             stroke="url(#beamOutGrad)" stroke-width="1.15" stroke-linecap="round"
             filter="url(#beamGlow)" opacity="0.0"></line>
-
-      <!-- ✅ ON일 때: 꺾임(절반 정도) -->
       <line id="beamBend" x1="50" y1="50" x2="25" y2="70"
             stroke="url(#beamOutGrad)" stroke-width="1.15" stroke-linecap="round"
             marker-end="url(#beamArrow)"
             filter="url(#beamGlow)" opacity="0.0"></line>
-
-      <!-- 접점(ON에서만 강조) -->
-      <circle id="beamHit" cx="50" cy="50" r="1.1" fill="rgba(255,255,255,.55)" filter="url(#beamGlow)" opacity="0.0"></circle>
+      <circle id="beamHit" cx="50" cy="50" r="1.1" fill="rgb(255,255,255)" fill-opacity="0.55" filter="url(#beamGlow)" opacity="0.0"></circle>
     </svg>
   </div>
 
-  <!-- ✅ 블루라이트 on/off 토글 pill (선택형) -->
   <div id="bluePill" aria-label="블루라이트 차단 선택">
     <div id="blueSegOn" class="blueSegBtn">블루라이트 차단 ON</div>
     <div id="blueSegOff" class="blueSegBtn">OFF</div>
   </div>
 
-  <!-- ✅ 블루라이트 설명/미션 -->
   <div id="blueInfo" aria-hidden="true">
     <div id="blueInfoTop">
       <b>블루라이트 <span class="pct">55%</span> 차단</b>
@@ -713,7 +743,6 @@
     </div>
   </div>
 
-  <!-- 두께 그래프 -->
   <div id="thicknessBar" aria-hidden="true">
     <div id="thHeader">
       <div id="thTitle">두께</div>
@@ -735,12 +764,10 @@
     <div id="thHint"></div>
   </div>
 
-  <!-- PVP 큰 원형 -->
   <div id="pvpBig">
     <img id="pvpBigImg" src="PVP.gif" alt="PVP Big" onerror="this.onerror=null; this.src='PVP.jpeg';">
   </div>
 
-  <!-- PVP 하단 설명 -->
   <div id="pvpOverlay">
     <img id="pvpThumb" src="PVP.png" alt="PVP" onerror="this.onerror=null; this.src='PVP.jpeg';">
     <div id="pvpText">
@@ -750,28 +777,21 @@
     <div id="pvpConfirm" role="button" tabindex="0" aria-label="확인">확인</div>
   </div>
 
-  <!-- ASD 오버레이 -->
   <div id="asdOverlay" aria-hidden="true">
     <div id="asdCard">
       <button id="asdClose" type="button" aria-label="닫기">✕</button>
       <div id="asdScene">
-        <model-viewer
-          id="asdEyeMV"
-          src="eye_animation.glb"
-          camera-orbit="0deg 90deg 0.78m"
-          camera-target="0m 0.02m 0m"
-          exposure="1.25"
-          tone-mapping="aces"
-          environment-image="neutral"
-          shadow-intensity="0"
-          interaction-prompt="none"
-          style="display:block;">
-        </model-viewer>
+        <img id="asdEyeMV" src="a.gif" alt="Eye background" onerror="this.onerror=null; this.src='a.png';">
         <div id="asdLensRim" aria-hidden="true"></div>
         <img id="asdLensImg" src="lens.png" alt="Lens overlay"
              onerror="this.style.display='none'; document.getElementById('asdHint').textContent='lens.png / lens2.png 파일을 같은 폴더에 넣어주세요.';">
         <div id="asdMaskShade" aria-hidden="true"></div>
-        <div id="asdBlinkLid" aria-hidden="true"></div>
+
+        <div id="asdBlinkLid" aria-hidden="true">
+          <div id="asdLidTop"></div>
+          <div id="asdLidBot"></div>
+        </div>
+
         <div id="asdAngleBadge">20°</div>
         <button id="asdRotateBtn" type="button" aria-label="회전">축이탈</button>
         <button id="asdBlinkBtn" type="button" aria-label="눈 깜박">깜박임</button>
@@ -824,7 +844,6 @@
 
     const thicknessBar = document.getElementById('thicknessBar');
 
-    /* ✅ 블루라이트 UI */
     const bluePill = document.getElementById('bluePill');
     const blueSegOn  = document.getElementById('blueSegOn');
     const blueSegOff = document.getElementById('blueSegOff');
@@ -839,66 +858,50 @@
     const beamBend = document.getElementById('beamBend');
     const beamHit = document.getElementById('beamHit');
 
-    /* ✅ ASD 요소 */
     const asdEyeMV = document.getElementById('asdEyeMV');
     const asdLensImg = document.getElementById('asdLensImg');
     const asdBlinkBtn = document.getElementById('asdBlinkBtn');
     const asdRotateBtn = document.getElementById('asdRotateBtn');
-    const asdBlinkLid = document.getElementById('asdBlinkLid');
     const asdAngleBadge = document.getElementById('asdAngleBadge');
     const asdLensRim = document.getElementById('asdLensRim');
     const asdHint = document.getElementById('asdHint');
 
-    let currentMode = 'lens'; // 'lens' | 'heat'
+    const asdLidTop = document.getElementById('asdLidTop');
+    const asdLidBot = document.getElementById('asdLidBot');
+
+    let currentMode = 'lens';
     let blueOn = false;
     let pvpOn = false;
-
-    // ✅ PVP 미션 완료 여부
     let pvpDone = false;
-
-    // ✅ 블루라이트 패널 오픈 상태
     let bluePanelOpen = false;
 
-    // 투명/히트맵 전환 시에도 카메라 연동 (유지)
     let lastOrbit = null;
     let lastTarget = null;
 
-    // 디폴트(처음 상태) (유지)
     let defaultOrbit = null;
     let defaultTarget = null;
-    let defaultFov = null; // ✅ 최초 fieldOfView 저장 (진짜 줌 리셋용)
+    let defaultFov = null;
 
-    // ✅ 블루 패널 오픈 시 전용 사선 뷰
     const BLUE_PANEL_ORBIT_STR  = '25deg 92deg 2.75m';
     const BLUE_PANEL_TARGET_STR = '0m -0.010m 0m';
 
-    // (유지) 기존 정의는 두되, ON/OFF에서 카메라를 바꾸지 않게 함
     const BLUE_ORBIT_STR  = '-20deg 88deg 2.75m';
     const BLUE_TARGET_STR = '0m -0.010m 0m';
 
-    // ✅ (정리) 1번/2번 디폴트 뷰
-    // 1) 투명 렌즈 모드 디폴트 (위치, 크기)
     const CLEAR_DEFAULT_ORBIT_STR  = '0deg 100deg 2.6m';
     const CLEAR_DEFAULT_TARGET_STR = '0m 0.015m 0m';
 
-    // 2) 렌즈 두께 MAP 디폴트 (위치, 크기)
-    // 필요하면 여기 숫자만 바꾸면 됨.
     const HEAT_DEFAULT_ORBIT_STR  = '0deg 100deg 2.6m';
     const HEAT_DEFAULT_TARGET_STR = '0m 0.015m 0m';
 
-    // ✅ load 후 "강제로" 디폴트 카메라를 세팅해야 하는 경우를 위한 플래그
-    let pendingCameraPreset = null; // {orbitStr, targetStr} | null
+    let pendingCameraPreset = null;
 
     let orbitBeforeBlue = null;
     let targetBeforeBlue = null;
 
-    // 블루그린 톤 (ON 시)
     const BLUEGREEN_TINT = [0.55, 1.08, 0.72, 0.45];
-
-    // 원본 색 백업
     let allMaterialBackup = null;
 
-    // ✅ 미션: ON만 1번 눌러도 성공 + 확인 노출
     const blueMission = {
       successShown: false,
       confirmed: false,
@@ -906,16 +909,12 @@
       sawOff: false
     };
 
-    // ✅ 광선 애니메이션(빠르게) - iOS 호환: attribute로 dash 처리
     let beamAnimTimer = null;
     function animateBeamLine(el){
       if(!el) return;
-
       el.setAttribute('stroke-dasharray', '140');
       el.setAttribute('stroke-dashoffset', '140');
-
       void el.getBoundingClientRect();
-
       el.style.transition = 'stroke-dashoffset 260ms linear';
       el.setAttribute('stroke-dashoffset', '0');
     }
@@ -928,10 +927,13 @@
 
     function playBeamAnimation(){
       if(beamAnimTimer) clearTimeout(beamAnimTimer);
+      const oIn  = getOpacity(beamIn);
+      const oOut = getOpacity(beamOut);
+      const oB   = getOpacity(beamBend);
 
-      if(getOpacity(beamIn)  > 0) animateBeamLine(beamIn);
-      if(getOpacity(beamOut) > 0) animateBeamLine(beamOut);
-      if(getOpacity(beamBend)> 0) animateBeamLine(beamBend);
+      if(oIn  > 0) animateBeamLine(beamIn);
+      setTimeout(()=>{ if(oOut > 0) animateBeamLine(beamOut); }, 90);
+      setTimeout(()=>{ if(oB   > 0) animateBeamLine(beamBend); }, 120);
 
       beamAnimTimer = setTimeout(()=>{
         [beamIn, beamOut, beamBend].forEach(el=>{
@@ -941,7 +943,7 @@
           el.removeAttribute('stroke-dashoffset');
         });
         beamAnimTimer = null;
-      }, 320);
+      }, 420);
     }
 
     function setBlueUI(){
@@ -954,11 +956,9 @@
       blueRayLayer.style.display = visible ? 'block' : 'none';
       blueBackGlow.style.display = (visible && !blueOn) ? 'block' : 'none';
 
-      // ✅ 세그먼트 선택 상태 표시
       blueSegOn.classList.toggle('on', blueOn === true);
       blueSegOff.classList.toggle('on', blueOn === false);
 
-      // ✅ 미션: ON만 눌러도 성공 + 확인 노출
       if(blueMission.successShown && !blueMission.confirmed){
         blueMissionText.textContent = '미션 성공: 확인 버튼을 눌러주세요';
         blueMissionConfirm.style.display = 'block';
@@ -984,58 +984,47 @@
         return;
       }
 
-      // OFF: 입사 + 직진 출사 노출
       if(!blueOn){
-        beamIn.setAttribute('opacity','0.92');
-        beamOut.setAttribute('opacity','0.92');
+        beamIn.setAttribute('opacity','0.95');
+        beamOut.setAttribute('opacity','0.95');
         beamBend.setAttribute('opacity','0');
         beamHit.setAttribute('opacity','0');
         return;
       }
 
-      // ON: 입사 + 직진(절반) + 반사(짧게) + 접점 강조
-      beamIn.setAttribute('opacity','0.92');
-      beamOut.setAttribute('opacity','0.55');
+      beamIn.setAttribute('opacity','0.95');
+      beamOut.setAttribute('opacity','0.50');
       beamBend.setAttribute('opacity','0.55');
       beamHit.setAttribute('opacity','0.90');
     }
 
-    // ✅ 광선 위치 업데이트
     function updateBeams(){
       const visible = (bluePanelOpen && currentMode === 'lens');
       if(!visible) return;
 
       const rect = mv.getBoundingClientRect();
 
-      // ✅ 중심 보정 + ON일 때 Y축 더 위로
-      const baseHitX = rect.left + rect.width * 0.50;
-      let   baseHitY = rect.top  + rect.height * 0.54;   // 기본(살짝 아래)
-      if(blueOn) baseHitY -= rect.height * 0.06;         // ON: 더 위로
-
-      const hitX = baseHitX;
-      const hitY = baseHitY;
+      const hitX = rect.left + rect.width * 0.50;
+      const hitY = rect.top  + rect.height * 0.52;
 
       const toVw = (x)=> (x / window.innerWidth) * 100;
       const toVh = (y)=> (y / window.innerHeight) * 100;
 
       const hx = toVw(hitX), hy = toVh(hitY);
 
-      // 입사광: 왼쪽 → 중심 (수평)
-      const inX1 = rect.left - rect.width * 0.25;
+      const inX1 = rect.left - rect.width * 0.60;
       beamIn.setAttribute('x1', toVw(inX1));
       beamIn.setAttribute('y1', hy);
       beamIn.setAttribute('x2', hx);
       beamIn.setAttribute('y2', hy);
 
-      // 직진 출사광: 중심 → 오른쪽 (수평)
-      const outX2 = rect.left + rect.width * 1.25;
+      const outX2 = rect.left + rect.width * 1.60;
       beamOut.setAttribute('x1', hx);
       beamOut.setAttribute('y1', hy);
       beamOut.setAttribute('x2', toVw(outX2));
       beamOut.setAttribute('y2', hy);
 
-      // ON일 때 반사광: 짧게 + 위로
-      const bendX2 = hitX - rect.width * 0.20;
+      const bendX2 = hitX - rect.width * 0.32;
       const bendY2 = hitY - rect.height * 0.18;
       beamBend.setAttribute('x1', hx);
       beamBend.setAttribute('y1', hy);
@@ -1053,7 +1042,6 @@
       if(bluePanelOpen && currentMode === 'lens') updateBeams();
     });
 
-    /* ✅✅ ASD 로직 (원본 유지) */
     let asdAngle = 20;
     const ASD_STEP = 5;
     const ASD_START = 20;
@@ -1101,22 +1089,60 @@
       asdLastDir = -1;
       renderASDLensTransform(0);
     }
+
+    let asdBlinkBusy = false;
     function playBlinkLid(){
-      if(!asdBlinkLid) return;
-      asdBlinkLid.style.transition = 'none';
-      asdBlinkLid.style.transform = 'scaleY(0)';
-      asdBlinkLid.style.opacity = '0';
+      if(asdBlinkBusy) return;
+      asdBlinkBusy = true;
+
+      const hideLens = ()=>{
+        if(asdLensImg) asdLensImg.style.opacity = '0';
+        if(asdLensRim) asdLensRim.style.opacity = '0';
+      };
+      const showLens = ()=>{
+        if(asdLensImg) asdLensImg.style.opacity = '';
+        if(asdLensRim) asdLensRim.style.opacity = '';
+      };
+
+      if(!asdLidTop || !asdLidBot) {
+        hideLens();
+        setTimeout(()=>{ showLens(); asdBlinkBusy = false; }, 220);
+        return;
+      }
+
+      asdLidTop.style.transition = 'none';
+      asdLidBot.style.transition = 'none';
+      asdLidTop.style.opacity = '0';
+      asdLidBot.style.opacity = '0';
+      asdLidTop.style.transform = 'translateY(-110%)';
+      asdLidBot.style.transform = 'translateY(110%)';
+
       requestAnimationFrame(()=>{
-        asdBlinkLid.style.transition = 'transform 120ms ease, opacity 120ms ease';
-        asdBlinkLid.style.transform = 'scaleY(1)';
-        asdBlinkLid.style.opacity = '0.88';
+        asdLidTop.style.transition = 'transform 120ms ease, opacity 120ms ease';
+        asdLidBot.style.transition = 'transform 120ms ease, opacity 120ms ease';
+        asdLidTop.style.opacity = '1';
+        asdLidBot.style.opacity = '1';
+        asdLidTop.style.transform = 'translateY(0%)';
+        asdLidBot.style.transform = 'translateY(0%)';
+
+        setTimeout(hideLens, 55);
+
         setTimeout(()=>{
-          asdBlinkLid.style.transition = 'transform 150ms ease, opacity 150ms ease';
-          asdBlinkLid.style.transform = 'scaleY(0)';
-          asdBlinkLid.style.opacity = '0';
-        }, 120);
+          asdLidTop.style.transition = 'transform 150ms ease, opacity 150ms ease';
+          asdLidBot.style.transition = 'transform 150ms ease, opacity 150ms ease';
+          asdLidTop.style.transform = 'translateY(-110%)';
+          asdLidBot.style.transform = 'translateY(110%)';
+          asdLidTop.style.opacity = '0';
+          asdLidBot.style.opacity = '0';
+        }, 140);
+
+        setTimeout(()=>{
+          showLens();
+          asdBlinkBusy = false;
+        }, 240);
       });
     }
+
     function overshootAndReturn(){
       const overshootDeg = asdLastDir * 3;
       if(!asdLensImg) return;
@@ -1206,7 +1232,6 @@
     function applyOrbitStr(s){ try{ mv.cameraOrbit = s; }catch(e){} }
     function applyTargetStr(s){ try{ mv.cameraTarget = s; }catch(e){} }
 
-    // ✅ (정리) 모드별 "진짜 최초 디폴트" 복귀 함수 (iOS pinch 줌 잔상까지 제거)
     function resetCameraToModeDefault(mode){
       const orbitStr  = (mode === 'heat') ? HEAT_DEFAULT_ORBIT_STR  : CLEAR_DEFAULT_ORBIT_STR;
       const targetStr = (mode === 'heat') ? HEAT_DEFAULT_TARGET_STR : CLEAR_DEFAULT_TARGET_STR;
@@ -1215,17 +1240,14 @@
         applyTargetStr(targetStr);
         applyOrbitStr(orbitStr);
 
-        // ✅ pinch 줌 잔상(FOV)까지 리셋
         try{
           if(defaultFov) mv.fieldOfView = defaultFov;
-          else mv.fieldOfView = '45deg'; // fallback
+          else mv.fieldOfView = '45deg';
         }catch(e){}
 
-        // ✅ 내부 goal 즉시 반영 (지원되는 버전에서만)
         try{ mv.jumpCameraToGoal?.(); }catch(e){}
       };
 
-      // ✅ iOS에서 controls 내부 상태(관성/줌)까지 날리기 위해 토글
       try{ mv.removeAttribute('camera-controls'); }catch(e){}
 
       applyAll();
@@ -1241,7 +1263,6 @@
     function showPVP(show){
       pvpOverlay.classList.toggle('show', show);
       pvpBig.classList.toggle('show', show);
-      // ✅ PVP 확인 버튼: PVP 열릴 때만 노출(완료여부와 무관)
       pvpConfirm.style.display = show ? 'block' : 'none';
     }
     function showThickness(show){
@@ -1335,7 +1356,6 @@
     function closeASD(){
       asdOverlay.classList.remove('show');
       asdOverlay.setAttribute('aria-hidden','true');
-      // ✅ E. ASD 팝업 X -> 1번 디폴트
       resetCameraToModeDefault('lens');
       syncMissionUI();
     }
@@ -1357,7 +1377,6 @@
     function closeBluePanel(){
       bluePanelOpen = false;
       forceBlueOff();
-      // (C는 백버튼에서 처리)
       setBlueUI();
       syncMissionUI();
     }
@@ -1373,7 +1392,6 @@
       if(bluePanelOpen) closeBluePanel();
       if(pvpOn) forcePVPOff();
 
-      // ✅ ASD 열 때도 1번 디폴트에서 시작
       resetCameraToModeDefault('lens');
 
       setASDLensSrc();
@@ -1381,7 +1399,7 @@
       setASDHintDefault();
 
       if(asdEyeMV){
-        asdEyeMV.src = 'eye_animation.glb' + '?v=' + Date.now();
+        asdEyeMV.src = 'a.gif' + '?v=' + Date.now();
       }
 
       asdOverlay.classList.add('show');
@@ -1393,10 +1411,8 @@
       const { resetCamera = false } = options;
 
       return new Promise((resolve)=>{
-        // ✅ 모드 전환 시 "디폴트로 강제" 해야 하는 경우만 preset 지정
         pendingCameraPreset = null;
 
-        // (유지) 기존 상태 저장 로직은 resetCamera=false일 때만
         if(!resetCamera){
           lastOrbit = getOrbitSafe();
           lastTarget = getTargetSafe();
@@ -1404,7 +1420,6 @@
           lastOrbit = null;
           lastTarget = null;
 
-          // ✅ 1/2번 디폴트로 세팅 예약
           if(mode === 'heat'){
             pendingCameraPreset = { orbitStr: HEAT_DEFAULT_ORBIT_STR, targetStr: HEAT_DEFAULT_TARGET_STR };
           }else{
@@ -1437,7 +1452,6 @@
         try{ defaultFov = mv.fieldOfView; }catch(e){ defaultFov = null; }
       }
 
-      // ✅ (정리) 1/2번 디폴트로 강제하는 경우 우선 적용
       if(pendingCameraPreset){
         applyTargetStr(pendingCameraPreset.targetStr);
         applyOrbitStr(pendingCameraPreset.orbitStr);
@@ -1447,13 +1461,9 @@
           applyOrbitStr(pendingCameraPreset.orbitStr);
         }, 120);
 
-        // ✅ 로드 직후에도 "하드 리셋" 한 번 더 (iOS 안정화)
         resetCameraToModeDefault(currentMode);
-
-        // 적용 후 해제
         pendingCameraPreset = null;
       }else{
-        // (유지) 기존 동작: 모드 전환 시 카메라 유지
         if(lastTarget) applyTarget(lastTarget);
         if(lastOrbit)  applyOrbit(lastOrbit);
 
@@ -1473,7 +1483,6 @@
       syncMissionUI();
     });
 
-    /* ✅ ASD (미션 01 카드 클릭) */
     function toggleASD(){
       if(asdOverlay.classList.contains('show')) closeASD();
       else openASD();
@@ -1484,10 +1493,8 @@
     asdClose.addEventListener('click', closeASD);
     asdOverlay.addEventListener('click', (e)=>{ if(e.target === asdOverlay) closeASD(); });
 
-    /* ✅ PVP (미션 02 카드 클릭) */
     async function togglePVP(){
       if(currentMode === 'heat'){
-        // ✅ F. 2번 카드 누르면 무조건 "1번 디폴트"로 돌아가서 미션 수행
         await setModel('lens_clear.glb', 'lens', { resetCamera:true });
       }
       if(currentMode !== 'lens') return;
@@ -1498,7 +1505,6 @@
       pvpOn = !pvpOn;
 
       if(pvpOn){
-        // ✅ F. PVP 시작은 무조건 1번 디폴트에서 시작
         resetCameraToModeDefault('lens');
         setTimeout(()=>{
           zoomInForPVP();
@@ -1507,7 +1513,6 @@
         }, 140);
       }else{
         showPVP(false);
-        // ✅ PVP 닫을 때도 1번으로 복귀(일관성)
         resetCameraToModeDefault('lens');
         syncMissionUI();
       }
@@ -1515,22 +1520,18 @@
     missionPVP.addEventListener('click', togglePVP);
     missionPVP.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') togglePVP(); });
 
-    /* ✅ PVP 확인 버튼: 디폴트 복귀 + 미션 완료 */
     function confirmPVP(){
       pvpDone = true;
       pvpOn = false;
       showPVP(false);
-      // ✅ D. 확인 누르면 1번 디폴트
       resetCameraToModeDefault('lens');
       syncMissionUI();
     }
     pvpConfirm.addEventListener('click', (e)=>{ e.stopPropagation(); confirmPVP(); });
     pvpConfirm.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); confirmPVP(); } });
 
-    /* ✅ 블루 카드: 패널 오픈/클로즈 + 전용 사선 뷰로 즉시 이동 */
     async function toggleBluePanel(){
       if(currentMode === 'heat'){
-        // ✅ F. 3번 카드 누르면 무조건 "1번 디폴트"로 돌아가서 미션 수행
         await setModel('lens_clear.glb', 'lens', { resetCamera:true });
       }
       if(currentMode !== 'lens') return;
@@ -1542,16 +1543,13 @@
 
       if(!bluePanelOpen){
         closeBluePanel();
-        // ✅ (닫을 때는 렌즈 디폴트로)
         resetCameraToModeDefault('lens');
         return;
       }
 
-      // 패널 오픈 시: 기본 OFF + 전용 사선 뷰
       forceBlueOff();
       bluePanelOpen = true;
 
-      // ✅ 새 세션 초기화 (확인 전이면 성공 상태만 초기화)
       if(!blueMission.confirmed){
         blueMission.successShown = false;
       }
@@ -1571,13 +1569,11 @@
     missionBlue.addEventListener('click', toggleBluePanel);
     missionBlue.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') toggleBluePanel(); });
 
-    /* ✅ 블루 상태 설정(카메라 ON/OFF 동일 유지) */
     function setBlueState(nextOn){
       if(!bluePanelOpen) return;
 
       const newState = !!nextOn;
 
-      // 같은 상태 재클릭이면 애니메이션만
       if(blueOn === newState){
         setBlueUI();
         updateBeams();
@@ -1587,12 +1583,10 @@
 
       blueOn = newState;
 
-      // ✅ (요청) ON만 눌러도 미션 성공 처리
       if(!blueMission.confirmed && blueOn){
         blueMission.successShown = true;
       }
 
-      // (유지) 기존 변수들
       if(blueOn) blueMission.sawOn = true;
       else blueMission.sawOff = true;
 
@@ -1603,7 +1597,6 @@
         restoreOriginalColors();
       }
 
-      // ✅ ON/OFF 모두 같은 뷰 유지 (OFF 기준)
       applyOrbitStr(BLUE_PANEL_ORBIT_STR);
       applyTargetStr(BLUE_PANEL_TARGET_STR);
       setTimeout(()=>{
@@ -1628,32 +1621,27 @@
       syncMissionUI();
     });
 
-    /* ✅✅✅ (수정) 백(↺) 버튼: 무조건 "처음 상태(디폴트)"로 초기화 */
     btnReset.addEventListener('click', async ()=>{
-      // 1) 미션 전부 OFF
       if(asdOverlay.classList.contains('show')) closeASD();
       if(pvpOn){ pvpOn = false; showPVP(false); }
       if(bluePanelOpen){ bluePanelOpen = false; forceBlueOff(); }
 
-      // 2) 패널류 숨김/표시 (현재 모드 기준)
       showThickness(currentMode === 'heat');
       bluePanelOpen = false;
       setBlueUI();
 
-      // ✅ 핵심: 무조건 현재 모드의 디폴트로 리셋
       resetCameraToModeDefault(currentMode);
-
-      // 5) 미션 카드 UI 동기화
       syncMissionUI();
     });
 
-    /* ✅✅✅ (수정) 모드: 투명 ↔ 두께맵 카메라 연동 유지 */
     modeLens.addEventListener('click', ()=> setModel('lens_clear.glb', 'lens', { resetCamera:false }));
     modeHeat.addEventListener('click', ()=> setModel('lens_heatmap.glb', 'heat', { resetCamera:false }));
 
-    // 초기 (처음 접속만 디폴트 강제)
     setModel('lens_clear.glb', 'lens', { resetCamera:true });
   </script>
 </body>
 </html>
-
+"""
+out_path = Path("/mnt/data/acuvue_viewer_asd_a_gif.html")
+out_path.write_text(html, encoding="utf-8")
+str(out_path)
