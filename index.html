@@ -859,11 +859,11 @@
     // ✅ 블루라이트 패널 오픈 상태
     let bluePanelOpen = false;
 
-    // 투명/히트맵 전환 시에도 카메라 연동 (유지)
+    // 투명/히트맵 전환 시에도 카메라 연동
     let lastOrbit = null;
     let lastTarget = null;
 
-    // 디폴트(처음 상태) (유지)
+    // 디폴트(처음 상태)
     let defaultOrbit = null;
     let defaultTarget = null;
 
@@ -875,19 +875,6 @@
     const BLUE_ORBIT_STR  = '-20deg 88deg 2.75m';
     const BLUE_TARGET_STR = '0m -0.010m 0m';
 
-    // ✅ (정리) 1번/2번 디폴트 뷰
-    // 1) 투명 렌즈 모드 디폴트 (위치, 크기)
-    const CLEAR_DEFAULT_ORBIT_STR  = '0deg 100deg 2.6m';
-    const CLEAR_DEFAULT_TARGET_STR = '0m 0.015m 0m';
-
-    // 2) 렌즈 두께 MAP 디폴트 (위치, 크기)
-    // 필요하면 여기 숫자만 바꾸면 됨.
-    const HEAT_DEFAULT_ORBIT_STR  = '0deg 100deg 2.6m';
-    const HEAT_DEFAULT_TARGET_STR = '0m 0.015m 0m';
-
-    // ✅ load 후 "강제로" 디폴트 카메라를 세팅해야 하는 경우를 위한 플래그
-    let pendingCameraPreset = null; // {orbitStr, targetStr} | null
-
     let orbitBeforeBlue = null;
     let targetBeforeBlue = null;
 
@@ -897,7 +884,7 @@
     // 원본 색 백업
     let allMaterialBackup = null;
 
-    // ✅ 미션: ON만 1번 눌러도 성공 + 확인 노출
+    // ✅ 미션: ON/OFF 각각 1번씩 해야 "확인" 노출
     const blueMission = {
       successShown: false,
       confirmed: false,
@@ -918,19 +905,12 @@
       el.style.transition = 'stroke-dashoffset 260ms linear';
       el.setAttribute('stroke-dashoffset', '0');
     }
-
-    function getOpacity(el){
-      const a = el.getAttribute('opacity');
-      const s = (el.style && el.style.opacity) ? el.style.opacity : null;
-      return parseFloat((s != null && s !== '') ? s : (a != null ? a : '0')) || 0;
-    }
-
     function playBeamAnimation(){
       if(beamAnimTimer) clearTimeout(beamAnimTimer);
 
-      if(getOpacity(beamIn)  > 0) animateBeamLine(beamIn);
-      if(getOpacity(beamOut) > 0) animateBeamLine(beamOut);
-      if(getOpacity(beamBend)> 0) animateBeamLine(beamBend);
+      if(parseFloat(beamIn.style.opacity || '0') > 0) animateBeamLine(beamIn);
+      if(parseFloat(beamOut.style.opacity || '0') > 0) animateBeamLine(beamOut);
+      if(parseFloat(beamBend.style.opacity || '0') > 0) animateBeamLine(beamBend);
 
       beamAnimTimer = setTimeout(()=>{
         [beamIn, beamOut, beamBend].forEach(el=>{
@@ -957,7 +937,7 @@
       blueSegOn.classList.toggle('on', blueOn === true);
       blueSegOff.classList.toggle('on', blueOn === false);
 
-      // ✅ 미션: ON만 눌러도 성공 + 확인 노출
+      // ✅ 미션: ON/OFF 각각 1번씩 수행해야 성공 + 확인 노출
       if(blueMission.successShown && !blueMission.confirmed){
         blueMissionText.textContent = '미션 성공: 확인 버튼을 눌러주세요';
         blueMissionConfirm.style.display = 'block';
@@ -976,66 +956,63 @@
     function syncBeamVisibility(){
       const visible = (bluePanelOpen && currentMode === 'lens');
       if(!visible){
-        beamIn.setAttribute('opacity','0');
-        beamOut.setAttribute('opacity','0');
-        beamBend.setAttribute('opacity','0');
-        beamHit.setAttribute('opacity','0');
+        beamIn.style.opacity = '0.0';
+        beamOut.style.opacity = '0.0';
+        beamBend.style.opacity = '0.0';
+        beamHit.style.opacity = '0.0';
         return;
       }
 
-      // OFF: 입사 + 직진 출사 노출
+      // OFF: 입사 + 직진 출사 (굵기 동일)
       if(!blueOn){
-        beamIn.setAttribute('opacity','0.92');
-        beamOut.setAttribute('opacity','0.92');
-        beamBend.setAttribute('opacity','0');
-        beamHit.setAttribute('opacity','0');
+        beamIn.style.opacity  = '0.92';
+        beamOut.style.opacity = '0.92';
+        beamBend.style.opacity = '0.0';
+        beamHit.style.opacity = '0.0';
         return;
       }
 
-      // ON: 입사 + 직진(절반) + 반사(짧게) + 접점 강조
-      beamIn.setAttribute('opacity','0.92');
-      beamOut.setAttribute('opacity','0.55');
-      beamBend.setAttribute('opacity','0.55');
-      beamHit.setAttribute('opacity','0.90');
+      // ON: 입사 + 직진(절반 느낌) + 꺾임(절반 느낌, 화살표)
+      beamIn.style.opacity  = '0.92';
+      beamOut.style.opacity = '0.55';
+      beamBend.style.opacity = '0.55';
+      beamHit.style.opacity = '0.90';
     }
 
-    // ✅ 광선 위치 업데이트
+    // ✅ 광선 위치 업데이트 (렌즈 광학적 중심=원의 중심 기준)
     function updateBeams(){
       const visible = (bluePanelOpen && currentMode === 'lens');
       if(!visible) return;
 
       const rect = mv.getBoundingClientRect();
 
-      // ✅ 중심 보정 + ON일 때 Y축 더 위로
-      const baseHitX = rect.left + rect.width * 0.50;
-      let   baseHitY = rect.top  + rect.height * 0.54;   // 기본(살짝 아래)
-      if(blueOn) baseHitY -= rect.height * 0.06;         // ON: 더 위로
-
-      const hitX = baseHitX;
-      const hitY = baseHitY;
+      const hitX = rect.left + rect.width  * 0.50;
+      const hitY = rect.top  + rect.height * 0.50;
 
       const toVw = (x)=> (x / window.innerWidth) * 100;
       const toVh = (y)=> (y / window.innerHeight) * 100;
 
       const hx = toVw(hitX), hy = toVh(hitY);
 
-      // 입사광: 왼쪽 → 중심 (수평)
+      // 입사광: 왼쪽 → 중심 (90도 수평)
       const inX1 = rect.left - rect.width * 0.25;
+      const inY1 = hitY;
       beamIn.setAttribute('x1', toVw(inX1));
-      beamIn.setAttribute('y1', hy);
+      beamIn.setAttribute('y1', toVh(inY1));
       beamIn.setAttribute('x2', hx);
       beamIn.setAttribute('y2', hy);
 
-      // 직진 출사광: 중심 → 오른쪽 (수평)
+      // 직진 출사광: 중심 → 오른쪽 (같은 선상)
       const outX2 = rect.left + rect.width * 1.25;
+      const outY2 = hitY;
       beamOut.setAttribute('x1', hx);
       beamOut.setAttribute('y1', hy);
       beamOut.setAttribute('x2', toVw(outX2));
-      beamOut.setAttribute('y2', hy);
+      beamOut.setAttribute('y2', toVh(outY2));
 
-      // ON일 때 반사광: 짧게 + 위로
-      const bendX2 = hitX - rect.width * 0.20;
-      const bendY2 = hitY - rect.height * 0.18;
+      // ON일 때 꺾임: "렌즈와 입사광 사이" 느낌(좌하 방향), 화살표 유지
+      const bendX2 = hitX - rect.width * 0.28;
+      const bendY2 = hitY + rect.height * 0.22;
       beamBend.setAttribute('x1', hx);
       beamBend.setAttribute('y1', hy);
       beamBend.setAttribute('x2', toVw(bendX2));
@@ -1205,23 +1182,14 @@
     function applyOrbitStr(s){ try{ mv.cameraOrbit = s; }catch(e){} }
     function applyTargetStr(s){ try{ mv.cameraTarget = s; }catch(e){} }
 
-    // ✅ (정리) 모드별 디폴트 복귀 함수
-    function resetCameraToModeDefault(mode){
-      const orbitStr  = (mode === 'heat') ? HEAT_DEFAULT_ORBIT_STR  : CLEAR_DEFAULT_ORBIT_STR;
-      const targetStr = (mode === 'heat') ? HEAT_DEFAULT_TARGET_STR : CLEAR_DEFAULT_TARGET_STR;
-
-      applyTargetStr(targetStr);
-      applyOrbitStr(orbitStr);
-
+    function resetCameraToDefault(){
+      if(!defaultOrbit || !defaultTarget) return;
+      applyTarget(defaultTarget);
+      applyOrbit(defaultOrbit);
       setTimeout(()=>{
-        applyTargetStr(targetStr);
-        applyOrbitStr(orbitStr);
+        applyTarget(defaultTarget);
+        applyOrbit(defaultOrbit);
       }, 120);
-
-      setTimeout(()=>{
-        applyTargetStr(targetStr);
-        applyOrbitStr(orbitStr);
-      }, 260);
     }
 
     function showPVP(show){
@@ -1321,8 +1289,7 @@
     function closeASD(){
       asdOverlay.classList.remove('show');
       asdOverlay.setAttribute('aria-hidden','true');
-      // ✅ E. ASD 팝업 X -> 1번 디폴트
-      resetCameraToModeDefault('lens');
+      resetCameraToDefault();
       syncMissionUI();
     }
 
@@ -1343,7 +1310,7 @@
     function closeBluePanel(){
       bluePanelOpen = false;
       forceBlueOff();
-      // (C는 백버튼에서 처리)
+      resetCameraToDefault();
       setBlueUI();
       syncMissionUI();
     }
@@ -1358,9 +1325,7 @@
     function openASD(){
       if(bluePanelOpen) closeBluePanel();
       if(pvpOn) forcePVPOff();
-
-      // ✅ ASD 열 때도 1번 디폴트에서 시작
-      resetCameraToModeDefault('lens');
+      resetCameraToDefault();
 
       setASDLensSrc();
       resetASDState();
@@ -1375,28 +1340,10 @@
       syncMissionUI();
     }
 
-    function setModel(file, mode, options = {}){
-      const { resetCamera = false } = options;
-
+    function setModel(file, mode){
       return new Promise((resolve)=>{
-        // ✅ 모드 전환 시 "디폴트로 강제" 해야 하는 경우만 preset 지정
-        pendingCameraPreset = null;
-
-        // (유지) 기존 상태 저장 로직은 resetCamera=false일 때만
-        if(!resetCamera){
-          lastOrbit = getOrbitSafe();
-          lastTarget = getTargetSafe();
-        }else{
-          lastOrbit = null;
-          lastTarget = null;
-
-          // ✅ 1/2번 디폴트로 세팅 예약
-          if(mode === 'heat'){
-            pendingCameraPreset = { orbitStr: HEAT_DEFAULT_ORBIT_STR, targetStr: HEAT_DEFAULT_TARGET_STR };
-          }else{
-            pendingCameraPreset = { orbitStr: CLEAR_DEFAULT_ORBIT_STR, targetStr: CLEAR_DEFAULT_TARGET_STR };
-          }
-        }
+        lastOrbit = getOrbitSafe();
+        lastTarget = getTargetSafe();
 
         currentMode = mode;
 
@@ -1420,28 +1367,13 @@
       if(!defaultOrbit) defaultOrbit = getOrbitSafe();
       if(!defaultTarget) defaultTarget = getTargetSafe();
 
-      // ✅ (정리) 1/2번 디폴트로 강제하는 경우 우선 적용
-      if(pendingCameraPreset){
-        applyTargetStr(pendingCameraPreset.targetStr);
-        applyOrbitStr(pendingCameraPreset.orbitStr);
+      if(lastTarget) applyTarget(lastTarget);
+      if(lastOrbit)  applyOrbit(lastOrbit);
 
-        setTimeout(()=>{
-          applyTargetStr(pendingCameraPreset.targetStr);
-          applyOrbitStr(pendingCameraPreset.orbitStr);
-        }, 120);
-
-        // 적용 후 해제
-        pendingCameraPreset = null;
-      }else{
-        // (유지) 기존 동작: 모드 전환 시 카메라 유지
+      setTimeout(()=>{
         if(lastTarget) applyTarget(lastTarget);
         if(lastOrbit)  applyOrbit(lastOrbit);
-
-        setTimeout(()=>{
-          if(lastTarget) applyTarget(lastTarget);
-          if(lastOrbit)  applyOrbit(lastOrbit);
-        }, 120);
-      }
+      }, 120);
 
       if(currentMode === 'lens'){
         tuneClearLensMaterials();
@@ -1467,8 +1399,7 @@
     /* ✅ PVP (미션 02 카드 클릭) */
     async function togglePVP(){
       if(currentMode === 'heat'){
-        // ✅ F. 2번 카드 누르면 무조건 "1번 디폴트"로 돌아가서 미션 수행
-        await setModel('lens_clear.glb', 'lens', { resetCamera:true });
+        await setModel('lens_clear.glb', 'lens');
       }
       if(currentMode !== 'lens') return;
 
@@ -1478,8 +1409,7 @@
       pvpOn = !pvpOn;
 
       if(pvpOn){
-        // ✅ F. PVP 시작은 무조건 1번 디폴트에서 시작
-        resetCameraToModeDefault('lens');
+        resetCameraToDefault();
         setTimeout(()=>{
           zoomInForPVP();
           showPVP(true);
@@ -1487,8 +1417,7 @@
         }, 140);
       }else{
         showPVP(false);
-        // ✅ PVP 닫을 때도 1번으로 복귀(일관성)
-        resetCameraToModeDefault('lens');
+        resetCameraToDefault();
         syncMissionUI();
       }
     }
@@ -1500,8 +1429,7 @@
       pvpDone = true;
       pvpOn = false;
       showPVP(false);
-      // ✅ D. 확인 누르면 1번 디폴트
-      resetCameraToModeDefault('lens');
+      resetCameraToDefault();
       syncMissionUI();
     }
     pvpConfirm.addEventListener('click', (e)=>{ e.stopPropagation(); confirmPVP(); });
@@ -1510,8 +1438,7 @@
     /* ✅ 블루 카드: 패널 오픈/클로즈 + 전용 사선 뷰로 즉시 이동 */
     async function toggleBluePanel(){
       if(currentMode === 'heat'){
-        // ✅ F. 3번 카드 누르면 무조건 "1번 디폴트"로 돌아가서 미션 수행
-        await setModel('lens_clear.glb', 'lens', { resetCamera:true });
+        await setModel('lens_clear.glb', 'lens');
       }
       if(currentMode !== 'lens') return;
 
@@ -1522,8 +1449,6 @@
 
       if(!bluePanelOpen){
         closeBluePanel();
-        // ✅ (닫을 때는 렌즈 디폴트로)
-        resetCameraToModeDefault('lens');
         return;
       }
 
@@ -1531,9 +1456,11 @@
       forceBlueOff();
       bluePanelOpen = true;
 
-      // ✅ 새 세션 초기화 (확인 전이면 성공 상태만 초기화)
+      // ✅ 새 세션에서 "ON/OFF 각각 1번" 조건을 다시 비교하도록 초기화 (done이면 유지)
       if(!blueMission.confirmed){
         blueMission.successShown = false;
+        blueMission.sawOn = false;
+        blueMission.sawOff = false;
       }
 
       applyOrbitStr(BLUE_PANEL_ORBIT_STR);
@@ -1567,12 +1494,7 @@
 
       blueOn = newState;
 
-      // ✅ (요청) ON만 눌러도 미션 성공 처리
-      if(!blueMission.confirmed && blueOn){
-        blueMission.successShown = true;
-      }
-
-      // (유지) 기존 변수들
+      // ✅ ON/OFF 각각 1번씩 수행 체크
       if(blueOn) blueMission.sawOn = true;
       else blueMission.sawOff = true;
 
@@ -1593,6 +1515,11 @@
         playBeamAnimation();
       }, 80);
 
+      // ✅ ON/OFF를 각각 한 번씩 수행했을 때만 성공/확인 노출
+      if(!blueMission.confirmed && blueMission.sawOn && blueMission.sawOff){
+        blueMission.successShown = true;
+      }
+
       setBlueUI();
       syncMissionUI();
     }
@@ -1609,35 +1536,16 @@
     });
 
     /* 백(↺) 버튼 */
-    btnReset.addEventListener('click', async ()=>{
-      // 1) 미션 전부 OFF
-      if(asdOverlay.classList.contains('show')) closeASD();
-      if(pvpOn){ pvpOn = false; showPVP(false); }
-      if(bluePanelOpen){ bluePanelOpen = false; forceBlueOff(); }
-
-      // 2) 패널류 숨김/표시 (현재 모드 기준)
-      showThickness(currentMode === 'heat');
-      bluePanelOpen = false;
-      setBlueUI();
-
-      // ✅ A/B/C: 백버튼은 "현재 모드"의 디폴트로 복귀
-      // - 투명렌즈모드에서 백 => 1번
-      // - 두께맵모드에서 백 => 2번
-      // - 옵티블루 카드 상태에서 백 => 1번 (현재모드가 lens 이므로 1번으로 복귀)
-      resetCameraToModeDefault(currentMode);
-
-      // 5) 미션 카드 UI 동기화
-      syncMissionUI();
+    btnReset.addEventListener('click', ()=>{
+      resetCameraToDefault();
     });
 
     /* 모드 */
-    // ✅ 1 : 투명렌즈모드 눌렀을때의 렌즈디폴트 (위치,크기)
-    modeLens.addEventListener('click', ()=> setModel('lens_clear.glb', 'lens', { resetCamera:true }));
-    // ✅ 2 : 렌즈두께맵 눌렀을때의 렌즈 디폴트 (위치,크기)
-    modeHeat.addEventListener('click', ()=> setModel('lens_heatmap.glb', 'heat', { resetCamera:true }));
+    modeLens.addEventListener('click', ()=> setModel('lens_clear.glb', 'lens'));
+    modeHeat.addEventListener('click', ()=> setModel('lens_heatmap.glb', 'heat'));
 
     // 초기
-    setModel('lens_clear.glb', 'lens', { resetCamera:true });
+    setModel('lens_clear.glb', 'lens');
   </script>
 </body>
 </html>
