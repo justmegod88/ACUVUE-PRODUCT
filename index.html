@@ -743,9 +743,9 @@
       <b>블루라이트 <span class="pct">55%</span> 차단</b>
     </div>
     <div id="blueInfoBody">
-      아큐브® MAX는 
+      아큐브® 오아시스 MAX는 자외선은 물론,
       블루라이트를 55% 차단하여 디지털에 노출된 눈을 보호합니다.
-      블루라이트 차단을 위한 "블루그린 틴트"를 확인해주세요.
+      블루라이트 차단 효과를 위한 "블루그린 틴트"를 확인해주세요.
     </div>
     <div id="blueInfoMission">
       <div class="left" id="blueMissionText">미션: "블루라이트 차단 on" 버튼을 눌러 차이를 비교해 보세요</div>
@@ -807,8 +807,7 @@
         <button id="asdRotateBtn" type="button" aria-label="회전">축이탈</button>
         <button id="asdBlinkBtn" type="button" aria-label="눈 깜박">깜박임</button>
       </div>
-      <div id="asdHint">아큐브 ASD는 자연스러운 눈 깜박임을 통해 축을 빠르게 안정화시키며,</div>  위 아래는 얇게 디자인되어 우수한 착용감을 제공합니다. </div>    
-      미션: ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜주세요.</div>
+      <div id="asdHint">미션. ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜주세요</div>
     </div>
   </div>
 
@@ -1067,7 +1066,7 @@
     function setASDHintSuccess(){
       if(!asdHint) return;
       asdHint.innerHTML = `
-        <span>미션 성공 : 축이 안정화되었습니다. 확인 버튼을 눌러주세요</span>
+        <span>미션성공 : 축이 안정화되었습니다. 확인 버튼을 눌러주세요</span>
         <button id="asdConfirmBtn" type="button" aria-label="확인">확인</button>
       `;
       const btn = document.getElementById('asdConfirmBtn');
@@ -1660,4 +1659,3 @@
   </script>
 </body>
 </html>
-
