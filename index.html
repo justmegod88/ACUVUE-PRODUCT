@@ -6,7 +6,33 @@
   <title>ACUVUE GLB Viewer (Optician)</title>
 
   <style>
-    html,body{height:100%;margin:0;background:#081625;overflow:hidden;font-family:-apple-system,system-ui;}
+    /* =========================
+       ✅ ACUVUE White + Blue Theme (색상만 교체)
+       - 다른 로직/구조/JS 미수정
+       ========================= */
+
+    :root{
+      --acuvue-blue:#005EB8;
+      --acuvue-blue-2:#1E78D6;
+      --acuvue-soft:#EAF3FF;
+      --acuvue-soft-2:#F5F9FF;
+      --text-navy:#0B1F33;
+      --text-sub:#30485F;
+      --line:#D9E6F5;
+      --shadow:0 18px 60px rgba(11,31,51,.18);
+      --glass:rgba(255,255,255,.86);
+      --glass-2:rgba(255,255,255,.72);
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background:linear-gradient(180deg, var(--acuvue-soft-2) 0%, #ffffff 55%, var(--acuvue-soft-2) 100%);
+      overflow:hidden;
+      font-family:-apple-system,system-ui;
+      color:var(--text-navy);
+    }
+
     model-viewer{width:100vw;height:100vh;background:transparent;display:block;}
 
     /* 상단 미션 카드 */
@@ -19,10 +45,10 @@
       flex:1;
       padding:12px 12px;
       border-radius:16px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      color:#eaf2ff;
-      backdrop-filter: blur(8px);
+      background:var(--glass);
+      border:1px solid var(--line);
+      color:var(--text-navy);
+      backdrop-filter: blur(10px);
       min-height:86px;
       box-sizing:border-box;
 
@@ -31,12 +57,14 @@
       cursor:pointer;
       transition: transform .08s ease, background .18s ease, border-color .18s ease;
       position:relative;
+      box-shadow: 0 10px 28px rgba(11,31,51,.08);
     }
     .missionCard:active{ transform: scale(.99); }
 
+    /* 기존 그린 강조 -> ACUVUE Blue 강조 */
     .missionCard.on{
-      background:rgba(0,255,140,.12);
-      border-color:rgba(0,255,140,.35);
+      background:rgba(0,94,184,.10);
+      border-color:rgba(0,94,184,.35);
     }
 
     .missionCard.done::after{
@@ -47,15 +75,15 @@
       font-weight:900;
       padding:4px 8px;
       border-radius:999px;
-      background:rgba(0,255,140,.16);
-      border:1px solid rgba(0,255,140,.35);
-      color:rgba(234,242,255,.98);
+      background:rgba(0,94,184,.12);
+      border:1px solid rgba(0,94,184,.35);
+      color:var(--acuvue-blue);
       backdrop-filter: blur(6px);
     }
 
-    .missionNo{font-weight:900;opacity:.85;font-size:14px;margin-bottom:6px;}
-    .missionTitle{font-weight:900;font-size:16px;margin-bottom:6px;}
-    .missionDesc{font-size:12.5px;line-height:1.35;opacity:.88;white-space:pre-line;}
+    .missionNo{font-weight:900;opacity:.85;font-size:14px;margin-bottom:6px;color:var(--text-sub);}
+    .missionTitle{font-weight:900;font-size:16px;margin-bottom:6px;color:var(--text-navy);}
+    .missionDesc{font-size:12.5px;line-height:1.35;opacity:.9;white-space:pre-line;color:var(--text-sub);}
 
     /* 하단 버튼 */
     #bottomBtns{
@@ -65,26 +93,33 @@
     .btn{
       flex:1;min-width:140px;
       padding:12px 12px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.08);
-      color:#eaf2ff;font-weight:900;font-size:13px;
+      border:1px solid var(--line);
+      background:var(--glass);
+      color:var(--text-navy);
+      font-weight:900;font-size:13px;
       -webkit-tap-highlight-color: transparent;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 28px rgba(11,31,51,.10);
     }
-    .btn.primary{ background:rgba(0,255,140,.12); border-color:rgba(0,255,140,.35); }
+    .btn.primary{
+      background:var(--acuvue-blue);
+      border-color:rgba(0,94,184,.65);
+      color:#ffffff;
+    }
 
     /* 작은 원형 ↺ 버튼 */
     #btnReset{
       width:46px;height:46px;min-width:46px;flex:0 0 auto;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.08);
-      color:#eaf2ff;
+      border:1px solid var(--line);
+      background:var(--glass);
+      color:var(--text-navy);
       font-weight:900;
       font-size:16px;
       display:flex;align-items:center;justify-content:center;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 10px 28px rgba(11,31,51,.10);
     }
 
     /* =========================
@@ -101,12 +136,12 @@
 
       padding:6px;
       border-radius:999px;
-      background:rgba(0,0,0,.70);
-      border:1px solid rgba(255,255,255,.16);
-      backdrop-filter: blur(10px);
+      background:var(--glass);
+      border:1px solid var(--line);
+      backdrop-filter: blur(12px);
       -webkit-tap-highlight-color: transparent;
       user-select:none;
-      box-shadow:0 18px 60px rgba(0,0,0,.35);
+      box-shadow: var(--shadow);
 
       display:flex;
       gap:6px;
@@ -116,9 +151,9 @@
     .blueSegBtn{
       padding:9px 12px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background:rgba(255,255,255,.08);
-      color:#eaf2ff;
+      border:1px solid var(--line);
+      background:rgba(0,94,184,.06);
+      color:var(--acuvue-blue);
       font-weight:900;
       font-size:13px;
       letter-spacing:.2px;
@@ -127,8 +162,9 @@
     }
     .blueSegBtn:active{ transform:scale(.98); }
     .blueSegBtn.on{
-      background:rgba(0,255,140,.14);
-      border-color:rgba(0,255,140,.40);
+      background:var(--acuvue-blue);
+      border-color:rgba(0,94,184,.65);
+      color:#ffffff;
     }
 
     /* ✅ 광선 레이어 */
@@ -154,10 +190,10 @@
       display:none;
       background:
         radial-gradient(35% 22% at 66% 52%,
-          rgba(0,200,255,.18) 0%,
-          rgba(0,200,255,.10) 22%,
-          rgba(0,200,255,.06) 38%,
-          rgba(0,200,255,0) 62%);
+          rgba(0,94,184,.18) 0%,
+          rgba(0,94,184,.12) 22%,
+          rgba(0,94,184,.08) 38%,
+          rgba(0,94,184,0) 62%);
       filter: blur(1px);
       opacity:.95;
     }
@@ -171,16 +207,16 @@
       z-index:71;
       display:none;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.55);
-      backdrop-filter: blur(12px);
-      box-shadow:0 18px 60px rgba(0,0,0,.35);
+      border:1px solid var(--line);
+      background:var(--glass);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
       overflow:hidden;
     }
     #blueInfoTop{
       padding:10px 12px;
-      border-bottom:1px solid rgba(255,255,255,.10);
-      color:#eaf2ff;
+      border-bottom:1px solid rgba(11,31,51,.10);
+      color:var(--text-navy);
       font-weight:900;
       font-size:13px;
       display:flex;
@@ -188,19 +224,19 @@
       gap:8px;
     }
     #blueInfoTop b{ font-weight:900; }
-    #blueInfoTop b .pct{ color:rgba(0,255,140,.95); }
+    #blueInfoTop b .pct{ color:var(--acuvue-blue); }
 
     #blueInfoBody{
       padding:10px 12px;
-      color:rgba(234,242,255,.88);
+      color:var(--text-sub);
       font-size:12.5px;
       line-height:1.35;
     }
 
     #blueInfoMission{
       padding:9px 12px;
-      border-top:1px solid rgba(255,255,255,.10);
-      color:rgba(234,242,255,.92);
+      border-top:1px solid rgba(11,31,51,.10);
+      color:var(--text-navy);
       font-size:12.5px;
       display:flex;
       align-items:center;
@@ -212,22 +248,24 @@
       text-overflow:ellipsis;
       white-space:nowrap;
       flex:1 1 auto;
+      color:var(--text-sub);
     }
     #blueInfoMission .confirm{
-      color:#eaf2ff;
+      color:#ffffff;
       font-weight:900;
-      opacity:.95;
+      opacity:1;
       cursor:pointer;
       user-select:none;
       padding:6px 10px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background:rgba(255,255,255,.10);
+      border:1px solid rgba(0,94,184,.65);
+      background:var(--acuvue-blue);
       backdrop-filter: blur(8px);
       -webkit-tap-highlight-color: transparent;
       flex:0 0 auto;
       white-space:nowrap;
       display:none;
+      box-shadow: 0 10px 22px rgba(0,94,184,.22);
     }
     #blueInfoMission .confirm:active{ transform:scale(.98); }
 
@@ -237,8 +275,8 @@
     #asdOverlay{
       position:fixed; inset:0; z-index:80;
       display:none;
-      background:rgba(0,0,0,.55);
-      backdrop-filter: blur(10px);
+      background:rgba(11,31,51,.22);
+      backdrop-filter: blur(12px);
       align-items:center; justify-content:center;
       padding:18px;
       box-sizing:border-box;
@@ -247,10 +285,10 @@
     #asdCard{
       width:min(920px, 96vw);
       border-radius:18px;
-      border:1px solid rgba(255,255,255,.16);
-      background:rgba(10,18,30,.62);
+      border:1px solid var(--line);
+      background:var(--glass);
       overflow:hidden;
-      box-shadow:0 18px 60px rgba(0,0,0,.55);
+      box-shadow: var(--shadow);
       position:relative;
     }
 
@@ -259,32 +297,34 @@
       width:100%;
       height:auto;
       display:block;
-      background:rgba(255,255,255,.04);
+      background:rgba(0,94,184,.03);
     }
 
     #asdClose{
       position:absolute; right:10px; top:10px;
       width:38px; height:38px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.10);
-      color:#eaf2ff;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.92);
+      color:var(--text-navy);
       font-weight:900;
       -webkit-tap-highlight-color: transparent;
       z-index:6;
+      box-shadow: 0 10px 18px rgba(11,31,51,.12);
     }
     #asdHint{
       padding:10px 12px;
-      color:#eaf2ff;
+      color:var(--text-sub);
       font-size:12.5px;
-      opacity:.9;
-      border-top:1px solid rgba(255,255,255,.10);
+      opacity:.95;
+      border-top:1px solid rgba(11,31,51,.10);
       display:flex; align-items:center; justify-content:space-between;
       gap:12px;
+      background:rgba(0,94,184,.03);
     }
     #asdHint button{
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.10);
-      color:#eaf2ff;
+      border:1px solid rgba(0,94,184,.65);
+      background:var(--acuvue-blue);
+      color:#ffffff;
       font-weight:900;
       font-size:12px;
       padding:8px 10px;
@@ -294,13 +334,14 @@
       cursor:pointer;
       flex:0 0 auto;
       white-space:nowrap;
+      box-shadow: 0 10px 22px rgba(0,94,184,.22);
     }
     #asdHint button:active{ transform:scale(.98); }
 
     #asdScene{
       position:relative;
       width:100%;
-      background:rgba(255,255,255,.04);
+      background:rgba(0,94,184,.03);
       overflow:hidden;
       aspect-ratio: 1/1;
       min-height: 360px;
@@ -345,10 +386,10 @@
       border-radius:999px;
       pointer-events:none;
       box-shadow:
-        0 0 0 1px rgba(255,255,255,.12),
-        0 18px 46px rgba(0,0,0,.22),
-        inset 0 0 24px rgba(255,255,255,.10);
-      opacity:.55;
+        0 0 0 1px rgba(11,31,51,.10),
+        0 18px 46px rgba(11,31,51,.16),
+        inset 0 0 24px rgba(255,255,255,.18);
+      opacity:.45;
       mix-blend-mode: screen;
     }
     #asdMaskShade{
@@ -356,15 +397,15 @@
       pointer-events:none;
       background:
         radial-gradient(110% 70% at 50% 18%,
-          rgba(0,0,0,.45) 0%,
-          rgba(0,0,0,.22) 32%,
-          rgba(0,0,0,0) 58%),
+          rgba(11,31,51,.38) 0%,
+          rgba(11,31,51,.16) 32%,
+          rgba(11,31,51,0) 58%),
         radial-gradient(110% 70% at 50% 90%,
-          rgba(0,0,0,.42) 0%,
-          rgba(0,0,0,.18) 34%,
-          rgba(0,0,0,0) 60%);
+          rgba(11,31,51,.34) 0%,
+          rgba(11,31,51,.14) 34%,
+          rgba(11,31,51,0) 60%);
       mix-blend-mode: multiply;
-      opacity:.85;
+      opacity:.78;
     }
 
     /* ✅✅ 실제 눈 깜박임(상/하 눈꺼풀) */
@@ -418,10 +459,10 @@
       width:54px;
       height:54px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.26);
-      background:rgba(255,255,255,.18);
+      border:1px solid rgba(0,94,184,.55);
+      background:var(--acuvue-blue);
       backdrop-filter: blur(10px);
-      color:#0b1b2e;
+      color:#ffffff;
       font-weight:900;
       font-size:12px;
       display:flex;
@@ -430,7 +471,7 @@
       -webkit-tap-highlight-color: transparent;
       user-select:none;
       cursor:pointer;
-      box-shadow:0 10px 28px rgba(0,0,0,.20);
+      box-shadow: 0 12px 26px rgba(0,94,184,.20);
       z-index:5;
     }
     #asdBlinkBtn:active{ transform:scale(.95); }
@@ -441,10 +482,10 @@
       width:54px;
       height:54px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.26);
-      background:rgba(255,255,255,.18);
+      border:1px solid rgba(0,94,184,.40);
+      background:rgba(0,94,184,.10);
       backdrop-filter: blur(10px);
-      color:#0b1b2e;
+      color:var(--acuvue-blue);
       font-weight:900;
       font-size:12px;
       display:flex;
@@ -453,24 +494,26 @@
       -webkit-tap-highlight-color: transparent;
       user-select:none;
       cursor:pointer;
-      box-shadow:0 10px 28px rgba(0,0,0,.20);
+      box-shadow: 0 10px 22px rgba(11,31,51,.12);
       z-index:5;
     }
     #asdRotateBtn:active{ transform:scale(.95); }
+
     #asdAngleBadge{
       position:absolute;
       left:14px;
       bottom:18px;
-      color:rgba(234,242,255,.88);
+      color:var(--acuvue-blue);
       font-size:12px;
       font-weight:900;
-      text-shadow:0 2px 10px rgba(0,0,0,.35);
-      background:rgba(0,0,0,.28);
-      border:1px solid rgba(255,255,255,.10);
+      text-shadow:none;
+      background:rgba(255,255,255,.86);
+      border:1px solid rgba(0,94,184,.35);
       border-radius:999px;
       padding:6px 10px;
       backdrop-filter: blur(8px);
       z-index:5;
+      box-shadow: 0 10px 22px rgba(11,31,51,.10);
     }
 
     /* PVP 큰 원형 */
@@ -485,11 +528,11 @@
       z-index:56;
       display:none;
       pointer-events:none;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      backdrop-filter: blur(8px);
+      background:rgba(0,94,184,.04);
+      border:1px solid var(--line);
+      backdrop-filter: blur(10px);
       overflow:hidden;
-      box-shadow:0 18px 70px rgba(0,0,0,.35);
+      box-shadow: var(--shadow);
     }
     #pvpBig.show{ display:block; }
     #pvpBig img{
@@ -504,48 +547,50 @@
       content:"";
       position:absolute; inset:0;
       border-radius:999px;
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.08);
+      box-shadow: inset 0 0 0 2px rgba(0,94,184,.08);
       pointer-events:none;
     }
 
     /* PVP 하단 설명 */
     #pvpOverlay{
       position:fixed; left:12px; right:12px; bottom:92px; z-index:60;
-      background:rgba(0,0,0,.62);
-      border:1px solid rgba(255,255,255,.14);
+      background:var(--glass);
+      border:1px solid var(--line);
       border-radius:14px;
       padding:10px 10px;
       display:none;
       gap:10px;
       align-items:center;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
     }
     #pvpOverlay.show{ display:flex; }
     #pvpOverlay img{
       width:88px;height:88px;object-fit:cover;border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      background:rgba(0,94,184,.03);
     }
-    #pvpText{color:#eaf2ff;font-size:12.5px;line-height:1.35; flex:1 1 auto;}
-    #pvpTitle{font-weight:900;margin-bottom:2px;}
-    #hint{opacity:.85;}
+    #pvpText{color:var(--text-sub);font-size:12.5px;line-height:1.35; flex:1 1 auto;}
+    #pvpTitle{font-weight:900;margin-bottom:2px;color:var(--text-navy);}
+    #hint{opacity:.9;color:var(--text-sub);}
 
     /* ✅ PVP 확인 버튼 */
     #pvpConfirm{
-      color:#eaf2ff;
+      color:#ffffff;
       font-weight:900;
-      opacity:.95;
+      opacity:1;
       cursor:pointer;
       user-select:none;
       padding:8px 12px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background:rgba(255,255,255,.10);
+      border:1px solid rgba(0,94,184,.65);
+      background:var(--acuvue-blue);
       backdrop-filter: blur(8px);
       -webkit-tap-highlight-color: transparent;
       flex:0 0 auto;
       white-space:nowrap;
       display:none;
+      box-shadow: 0 10px 22px rgba(0,94,184,.22);
     }
     #pvpConfirm:active{ transform:scale(.98); }
 
@@ -558,12 +603,12 @@
       z-index:67;
       display:none;
       border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(0,0,0,.38);
-      backdrop-filter: blur(10px);
+      border:1px solid var(--line);
+      background:var(--glass);
+      backdrop-filter: blur(12px);
       padding:10px 12px 12px;
       box-sizing:border-box;
-      box-shadow:0 18px 60px rgba(0,0,0,.35);
+      box-shadow: var(--shadow);
     }
     #thicknessBar.show{ display:block; }
 
@@ -574,14 +619,14 @@
       margin-bottom:8px;
     }
     #thTitle{
-      color:#eaf2ff;
+      color:var(--text-navy);
       font-weight:900;
       font-size:12.5px;
       letter-spacing:.2px;
-      opacity:.95;
+      opacity:.98;
     }
     #thUnit{
-      color:rgba(234,242,255,.70);
+      color:rgba(48,72,95,.85);
       font-size:11px;
       font-weight:700;
       letter-spacing:.1px;
@@ -595,7 +640,7 @@
     .tickLabel{
       width:46px;
       text-align:right;
-      color:rgba(234,242,255,.78);
+      color:rgba(48,72,95,.86);
       font-size:11px;
       font-weight:700;
       letter-spacing:.1px;
@@ -608,9 +653,9 @@
       height:14px;
       border-radius:999px;
       overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      box-shadow: inset 0 0 12px rgba(0,0,0,.35);
+      border:1px solid rgba(11,31,51,.12);
+      background:rgba(0,94,184,.03);
+      box-shadow: inset 0 0 12px rgba(11,31,51,.10);
     }
 
     #grad{
@@ -632,9 +677,9 @@
     #gradShine{
       position:absolute; inset:0;
       background:linear-gradient(180deg,
-        rgba(255,255,255,.22) 0%,
+        rgba(255,255,255,.30) 0%,
         rgba(255,255,255,0) 55%,
-        rgba(0,0,0,.18) 100%
+        rgba(11,31,51,.10) 100%
       );
       mix-blend-mode: overlay;
       opacity:.55;
@@ -646,7 +691,7 @@
       top:-6px;
       width:1px;
       height:26px;
-      background:rgba(255,255,255,.18);
+      background:rgba(11,31,51,.18);
     }
     .mark strong{
       position:absolute;
@@ -654,7 +699,7 @@
       left:50%;
       transform:translateX(-50%);
       font-size:10px;
-      color:rgba(234,242,255,.70);
+      color:rgba(48,72,95,.80);
       font-weight:700;
       white-space:nowrap;
     }
@@ -696,16 +741,16 @@
     <svg id="blueRaySvg" viewBox="0 0 100 100" preserveAspectRatio="none">
       <defs>
         <linearGradient id="beamInGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0"    stop-color="rgb(0,200,255)" stop-opacity="0"></stop>
-          <stop offset="0.35" stop-color="rgb(0,200,255)" stop-opacity="0.55"></stop>
-          <stop offset="0.6"  stop-color="rgb(0,200,255)" stop-opacity="1"></stop>
-          <stop offset="1"    stop-color="rgb(0,200,255)" stop-opacity="0.25"></stop>
+          <stop offset="0"    stop-color="rgb(0,94,184)" stop-opacity="0"></stop>
+          <stop offset="0.35" stop-color="rgb(0,94,184)" stop-opacity="0.50"></stop>
+          <stop offset="0.6"  stop-color="rgb(0,94,184)" stop-opacity="1"></stop>
+          <stop offset="1"    stop-color="rgb(0,94,184)" stop-opacity="0.22"></stop>
         </linearGradient>
         <linearGradient id="beamOutGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0"    stop-color="rgb(0,200,255)" stop-opacity="0.25"></stop>
-          <stop offset="0.35" stop-color="rgb(0,200,255)" stop-opacity="1"></stop>
-          <stop offset="0.75" stop-color="rgb(0,200,255)" stop-opacity="0.55"></stop>
-          <stop offset="1"    stop-color="rgb(0,200,255)" stop-opacity="0"></stop>
+          <stop offset="0"    stop-color="rgb(0,94,184)" stop-opacity="0.22"></stop>
+          <stop offset="0.35" stop-color="rgb(0,94,184)" stop-opacity="1"></stop>
+          <stop offset="0.75" stop-color="rgb(0,94,184)" stop-opacity="0.50"></stop>
+          <stop offset="1"    stop-color="rgb(0,94,184)" stop-opacity="0"></stop>
         </linearGradient>
         <filter id="beamGlow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="0.9" result="blur"/>
@@ -715,7 +760,7 @@
           </feMerge>
         </filter>
         <marker id="beamArrow" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="rgb(0,200,255)" fill-opacity="0.95"></path>
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="rgb(0,94,184)" fill-opacity="0.95"></path>
         </marker>
       </defs>
 
@@ -729,7 +774,7 @@
             stroke="url(#beamOutGrad)" stroke-width="1.15" stroke-linecap="round"
             marker-end="url(#beamArrow)"
             filter="url(#beamGlow)" opacity="0.0"></line>
-      <circle id="beamHit" cx="50" cy="50" r="1.1" fill="rgb(255,255,255)" fill-opacity="0.55" filter="url(#beamGlow)" opacity="0.0"></circle>
+      <circle id="beamHit" cx="50" cy="50" r="1.1" fill="rgb(255,255,255)" fill-opacity="0.70" filter="url(#beamGlow)" opacity="0.0"></circle>
     </svg>
   </div>
 
@@ -1659,6 +1704,3 @@
   </script>
 </body>
 </html>
-
-
-
