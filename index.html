@@ -8,7 +8,7 @@
   <style>
     /* =========================
        ✅ ACUVUE White + Blue Theme (색상만 교체)
-       - 다른 로직/구조/JS 미수정
+       - 다른 로직/구조/JS 미수정(요청 반영: 설명창 고급 효과 + PVP 원형 확대/정렬)
        ========================= */
 
     :root{
@@ -22,6 +22,13 @@
       --shadow:0 18px 60px rgba(11,31,51,.18);
       --glass:rgba(255,255,255,.86);
       --glass-2:rgba(255,255,255,.72);
+
+      /* ✅ 설명창(패널) 고급 분리용 톤 */
+      --panel-grad: linear-gradient(180deg, rgba(234,243,255,.92) 0%, rgba(255,255,255,.90) 55%, rgba(245,249,255,.86) 100%);
+      --panel-stroke: rgba(0,94,184,.18);
+      --panel-stroke-2: rgba(11,31,51,.10);
+      --panel-glow: 0 16px 50px rgba(0,94,184,.10), 0 18px 60px rgba(11,31,51,.14);
+      --panel-topline: linear-gradient(90deg, rgba(0,94,184,.75), rgba(0,94,184,.12));
     }
 
     html,body{
@@ -61,7 +68,6 @@
     }
     .missionCard:active{ transform: scale(.99); }
 
-    /* 기존 그린 강조 -> ACUVUE Blue 강조 */
     .missionCard.on{
       background:rgba(0,94,184,.10);
       border-color:rgba(0,94,184,.35);
@@ -126,7 +132,6 @@
        ✅ 블루라이트: 상태 pill + 광선(투과/꺾임) + 설명/미션
        ========================= */
 
-    /* ✅ on/off 토글 pill -> "선택형 세그먼트" */
     #bluePill{
       position:fixed;
       right:14px;
@@ -167,7 +172,6 @@
       color:#ffffff;
     }
 
-    /* ✅ 광선 레이어 */
     #blueRayLayer{
       position:fixed;
       inset:0;
@@ -181,7 +185,6 @@
       display:block;
     }
 
-    /* ✅ OFF일 때: 렌즈 뒤쪽 약한 그라데이션 */
     #blueBackGlow{
       position:fixed;
       inset:0;
@@ -198,7 +201,7 @@
       opacity:.95;
     }
 
-    /* ✅ 하단 설명/미션 패널 */
+    /* ✅ 하단 설명/미션 패널 (고급 분리: 아주 옅은 하늘/그레이 그라데이션 + 상단 라인) */
     #blueInfo{
       position:fixed;
       left:12px;
@@ -207,12 +210,30 @@
       z-index:71;
       display:none;
       border-radius:14px;
-      border:1px solid var(--line);
-      background:var(--glass);
+      border:1px solid var(--panel-stroke);
+      background: var(--panel-grad);
       backdrop-filter: blur(14px);
-      box-shadow: var(--shadow);
+      box-shadow: var(--panel-glow);
       overflow:hidden;
     }
+    #blueInfo::before{
+      content:"";
+      position:absolute;
+      left:0; right:0; top:0;
+      height:2px;
+      background: var(--panel-topline);
+      opacity:.95;
+      pointer-events:none;
+    }
+    #blueInfo::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+      pointer-events:none;
+      opacity:.55;
+    }
+
     #blueInfoTop{
       padding:10px 12px;
       border-bottom:1px solid rgba(11,31,51,.10);
@@ -285,14 +306,30 @@
     #asdCard{
       width:min(920px, 96vw);
       border-radius:18px;
-      border:1px solid var(--line);
-      background:var(--glass);
+      border:1px solid var(--panel-stroke);
+      background: var(--panel-grad);
       overflow:hidden;
-      box-shadow: var(--shadow);
+      box-shadow: var(--panel-glow);
       position:relative;
     }
+    #asdCard::before{
+      content:"";
+      position:absolute;
+      left:0; right:0; top:0;
+      height:2px;
+      background: var(--panel-topline);
+      opacity:.95;
+      pointer-events:none;
+    }
+    #asdCard::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+      pointer-events:none;
+      opacity:.55;
+    }
 
-    /* ✅✅ (수정) asdCard 내 img 기본 100% 규칙이 렌즈/눈 배경까지 덮어써서 사이즈가 안 줄었음 → 제외 */
     #asdCard img:not(#asdLensImg):not(#asdEyeMV){
       width:100%;
       height:auto;
@@ -319,7 +356,7 @@
       border-top:1px solid rgba(11,31,51,.10);
       display:flex; align-items:center; justify-content:space-between;
       gap:12px;
-      background:rgba(0,94,184,.03);
+      background: linear-gradient(180deg, rgba(234,243,255,.70) 0%, rgba(255,255,255,.55) 100%);
     }
     #asdHint button{
       border:1px solid rgba(0,94,184,.65);
@@ -349,7 +386,6 @@
       --irisY: 20px;
     }
 
-    /* ✅✅ ASD 배경(눈) : a.png (자동 깜박임 방지) */
     #asdEyeMV{
       position:absolute; inset:0;
       width:100%; height:100%;
@@ -362,7 +398,6 @@
       filter: contrast(1.02) saturate(1.02);
     }
 
-    /* ✅ 렌즈(홍채 위치) */
     #asdLensImg{
       position:absolute;
       left:50%;
@@ -408,7 +443,6 @@
       opacity:.78;
     }
 
-    /* ✅✅ 실제 눈 깜박임(상/하 눈꺼풀) */
     #asdBlinkLid{
       position:absolute;
       inset:0;
@@ -516,25 +550,37 @@
       box-shadow: 0 10px 22px rgba(11,31,51,.10);
     }
 
-    /* PVP 큰 원형 */
+    /* =========================
+       ✅ PVP 원형: 렌즈 중앙 정렬 + 살짝 더 크게 + 팝업 확대 애니메이션
+       ========================= */
+
+    @keyframes pvpPop {
+      0%   { transform: translate(-50%,-50%) scale(.94); opacity: 0; }
+      60%  { transform: translate(-50%,-50%) scale(1.02); opacity: 1; }
+      100% { transform: translate(-50%,-50%) scale(1.00); opacity: 1; }
+    }
+
     #pvpBig{
       position:fixed;
       left:50%;
-      top:49%;
+      top:50%;
       transform:translate(-50%,-50%);
-      width:min(72vw, 520px);
-      height:min(72vw, 520px);
+      width:min(76vw, 560px);
+      height:min(76vw, 560px);
       border-radius:999px;
       z-index:56;
       display:none;
       pointer-events:none;
       background:rgba(0,94,184,.04);
-      border:1px solid var(--line);
+      border:1px solid var(--panel-stroke);
       backdrop-filter: blur(10px);
       overflow:hidden;
-      box-shadow: var(--shadow);
+      box-shadow: var(--panel-glow);
     }
-    #pvpBig.show{ display:block; }
+    #pvpBig.show{
+      display:block;
+      animation: pvpPop 220ms ease-out both;
+    }
     #pvpBig img{
       width:100%;
       height:100%;
@@ -542,39 +588,60 @@
       display:block;
       border-radius:999px;
       filter:saturate(1.05) contrast(1.02);
+      transform: scale(1.02);
+      transform-origin:center;
     }
     #pvpBig::after{
       content:"";
       position:absolute; inset:0;
       border-radius:999px;
-      box-shadow: inset 0 0 0 2px rgba(0,94,184,.08);
+      box-shadow: inset 0 0 0 2px rgba(0,94,184,.08), inset 0 0 26px rgba(0,94,184,.06);
       pointer-events:none;
     }
 
-    /* PVP 하단 설명 */
+    /* PVP 하단 설명 (고급 분리) */
     #pvpOverlay{
       position:fixed; left:12px; right:12px; bottom:92px; z-index:60;
-      background:var(--glass);
-      border:1px solid var(--line);
+      background: var(--panel-grad);
+      border:1px solid var(--panel-stroke);
       border-radius:14px;
       padding:10px 10px;
       display:none;
       gap:10px;
       align-items:center;
       backdrop-filter: blur(12px);
-      box-shadow: var(--shadow);
+      box-shadow: var(--panel-glow);
+      overflow:hidden;
     }
+    #pvpOverlay::before{
+      content:"";
+      position:absolute;
+      left:0; right:0; top:0;
+      height:2px;
+      background: var(--panel-topline);
+      opacity:.95;
+      pointer-events:none;
+    }
+    #pvpOverlay::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+      pointer-events:none;
+      opacity:.55;
+    }
+
     #pvpOverlay.show{ display:flex; }
     #pvpOverlay img{
       width:88px;height:88px;object-fit:cover;border-radius:12px;
-      border:1px solid var(--line);
+      border:1px solid var(--panel-stroke-2);
       background:rgba(0,94,184,.03);
+      box-shadow: 0 10px 18px rgba(11,31,51,.10);
     }
     #pvpText{color:var(--text-sub);font-size:12.5px;line-height:1.35; flex:1 1 auto;}
     #pvpTitle{font-weight:900;margin-bottom:2px;color:var(--text-navy);}
     #hint{opacity:.9;color:var(--text-sub);}
 
-    /* ✅ PVP 확인 버튼 */
     #pvpConfirm{
       color:#ffffff;
       font-weight:900;
@@ -594,7 +661,7 @@
     }
     #pvpConfirm:active{ transform:scale(.98); }
 
-    /* 두께 그래프(가로형) */
+    /* 두께 그래프(가로형) (고급 분리) */
     #thicknessBar{
       position:fixed;
       left:12px;
@@ -603,12 +670,30 @@
       z-index:67;
       display:none;
       border-radius:14px;
-      border:1px solid var(--line);
-      background:var(--glass);
+      border:1px solid var(--panel-stroke);
+      background: var(--panel-grad);
       backdrop-filter: blur(12px);
       padding:10px 12px 12px;
       box-sizing:border-box;
-      box-shadow: var(--shadow);
+      box-shadow: var(--panel-glow);
+      overflow:hidden;
+    }
+    #thicknessBar::before{
+      content:"";
+      position:absolute;
+      left:0; right:0; top:0;
+      height:2px;
+      background: var(--panel-topline);
+      opacity:.95;
+      pointer-events:none;
+    }
+    #thicknessBar::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+      pointer-events:none;
+      opacity:.55;
     }
     #thicknessBar.show{ display:block; }
 
@@ -836,7 +921,6 @@
     <div id="asdCard">
       <button id="asdClose" type="button" aria-label="닫기">✕</button>
       <div id="asdScene">
-        <!-- ✅ (수정) 자동깜박 방지: a.png를 기본 배경으로 -->
         <img id="asdEyeMV" src="a.png" alt="Eye background" onerror="this.onerror=null; this.src='a.gif';">
         <div id="asdLensRim" aria-hidden="true"></div>
         <img id="asdLensImg" src="lens.png" alt="Lens overlay"
@@ -1137,15 +1221,14 @@
     }
     function renderASDLensTransform(extraX=0){
       if(!asdLensImg) return;
-      // ✅ CSS 변수(--irisX/--irisY)를 translate에 포함
       asdLensImg.style.transform =
         `translate(calc(-50% + ${extraX}px + var(--irisX, 0px)), calc(-50% + var(--irisY, 0px))) rotate(${asdAngle}deg)`;
       if(asdAngleBadge){
         if(asdAngle > 0) asdAngleBadge.textContent = `좌측으로 ${asdAngle}° 회전`;
         else if(asdAngle < 0) asdAngleBadge.textContent = `우측으로 ${Math.abs(asdAngle)}° 회전`;
         else asdAngleBadge.textContent = `축 안정`;
- }
-}
+      }
+    }
     function resetASDState(){
       asdAngle = ASD_START;
       asdLastDir = -1;
@@ -1332,7 +1415,9 @@
       thicknessBar.setAttribute('aria-hidden', show ? 'false' : 'true');
     }
 
-    const PVP_ZOOM_FACTOR = 0.76;
+    /* ✅ (요청) PVP 원형 이미지 + 렌즈 중앙 맞춤 & 살짝 더 확대 (기존 방식 유지: 카메라 줌) */
+    const PVP_ZOOM_FACTOR = 0.70;
+
     function zoomInForPVP(){
       try{
         const orbit = getOrbitSafe();
@@ -1460,7 +1545,6 @@
       resetASDState();
       setASDHintDefault();
 
-      /* ✅ (유지/수정) 자동 깜박임 방지: a.png로 항상 고정 */
       if(asdEyeMV){
         asdEyeMV.src = 'a.png' + '?v=' + Date.now();
       }
