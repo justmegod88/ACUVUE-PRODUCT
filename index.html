@@ -40,7 +40,7 @@
       color:var(--text-navy);
     }
 
-    model-viewer{width:100vw;height:100vh;background:transparent;display:block;}
+    model-viewer{width:100vw;height:100vh;background:transparent;display:block;position:fixed;inset:0;z-index:1;}
 
     /* 상단 미션 카드 */
     #missionBar{
@@ -148,7 +148,6 @@
       user-select:none;
       box-shadow: var(--shadow);
 
-      
       gap:6px;
       align-items:center;
       white-space:nowrap;
@@ -175,7 +174,7 @@
     #blueRayLayer{
       position:fixed;
       inset:0;
-      z-index:57;
+      z-index:200;
       pointer-events:none;
       display:none;
     }
@@ -185,10 +184,38 @@
       display:block;
     }
 
-    #blueBackGlow{
+    #blueRayLayerBack{
       position:fixed;
       inset:0;
-      z-index:56;
+      z-index:0;           /* ✅ 렌즈(model-viewer) 뒤로 */
+      pointer-events:none;
+      display:none;
+    }
+    #blueRaySvgBack{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+
+    
+    /* ✅ 출사광(beamOut)만 렌즈 뒤로 보내기용 레이어 */
+    #blueRayBehind{
+      position:fixed;
+      inset:0;
+      z-index:10; /* model-viewer(z=20)보다 아래 */
+      pointer-events:none;
+      display:none;
+    }
+    #blueRaySvgBack{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+#blueBackGlow{
+      position:fixed;
+      inset:0;
+      z-index:199;
       pointer-events:none;
       display:none;
       background:
@@ -822,46 +849,152 @@
   <div id="blueBackGlow" aria-hidden="true"></div>
 
   <!-- ✅ 광선 레이어 -->
-  <div id="blueRayLayer" aria-hidden="true">
-    <svg id="blueRaySvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+
+  <!-- ✅ 출사광(beamOut) 전용: 렌즈 뒤(뒤 레이어) -->
+  <div id="blueRayLayerBack" aria-hidden="true">
+    <svg id="blueRaySvgBack" viewBox="0 0 100 100" preserveAspectRatio="none">
       <defs>
-        <linearGradient id="beamInGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0"    stop-color="rgb(0,94,184)" stop-opacity="0"></stop>
-          <stop offset="0.35" stop-color="rgb(0,94,184)" stop-opacity="0.50"></stop>
-          <stop offset="0.6"  stop-color="rgb(0,94,184)" stop-opacity="1"></stop>
-          <stop offset="1"    stop-color="rgb(0,94,184)" stop-opacity="0.22"></stop>
+        <linearGradient id="beamOutGradBack" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"    stop-color="rgb(255,191,0)" stop-opacity="0.22"></stop>
+          <stop offset="0.35" stop-color="rgb(255,191,0)" stop-opacity="1"></stop>
+          <stop offset="0.75" stop-color="rgb(255,191,0)" stop-opacity="0.50"></stop>
+          <stop offset="1"    stop-color="rgb(255,191,0)" stop-opacity="0"></stop>
         </linearGradient>
-        <linearGradient id="beamOutGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0"    stop-color="rgb(0,94,184)" stop-opacity="0.22"></stop>
-          <stop offset="0.35" stop-color="rgb(0,94,184)" stop-opacity="1"></stop>
-          <stop offset="0.75" stop-color="rgb(0,94,184)" stop-opacity="0.50"></stop>
-          <stop offset="1"    stop-color="rgb(0,94,184)" stop-opacity="0"></stop>
-        </linearGradient>
-        <filter id="beamGlow" x="-50%" y="-50%" width="200%" height="200%">
+        <filter id="beamGlowBack" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="0.9" result="blur"/>
           <feMerge>
             <feMergeNode in="blur"/>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
-        <marker id="beamArrow" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="rgb(0,94,184)" fill-opacity="0.95"></path>
-        </marker>
       </defs>
 
-      <line id="beamIn" x1="0" y1="50" x2="50" y2="50"
-            stroke="url(#beamInGrad)" stroke-width="1.15" stroke-linecap="round"
-            filter="url(#beamGlow)" opacity="0.0"></line>
-      <line id="beamOut" x1="50" y1="50" x2="100" y2="50"
-            stroke="url(#beamOutGrad)" stroke-width="1.15" stroke-linecap="round"
-            filter="url(#beamGlow)" opacity="0.0"></line>
-      <line id="beamBend" x1="50" y1="50" x2="25" y2="70"
-            stroke="url(#beamOutGrad)" stroke-width="1.15" stroke-linecap="round"
-            marker-end="url(#beamArrow)"
-            filter="url(#beamGlow)" opacity="0.0"></line>
-      <circle id="beamHit" cx="50" cy="50" r="1.1" fill="rgb(255,255,255)" fill-opacity="0.70" filter="url(#beamGlow)" opacity="0.0"></circle>
+      <line id="beamOutBack" x1="50" y1="50" x2="100" y2="50"
+            stroke="url(#beamOutGradBack)"
+            stroke-width="3.00"
+            stroke-linecap="round"
+            filter="url(#beamGlowBack)"
+            opacity="0.0"></line>
     </svg>
   </div>
+
+<div id="blueRayLayer" aria-hidden="true">
+  <svg id="blueRaySvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+
+      <!-- 🔶 beamIn : 진노랑 -->
+      <linearGradient id="beamInGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="rgb(255,170,0)" stop-opacity="0"></stop>
+        <stop offset="0.28" stop-color="rgb(255,170,0)" stop-opacity="0.55"></stop>
+        <stop offset="0.55" stop-color="rgb(255,170,0)" stop-opacity="1"></stop>
+        <stop offset="1"    stop-color="rgb(255,170,0)" stop-opacity="0.18"></stop>
+      </linearGradient>
+
+      <!-- 🔶 beamOut : 노랑(연) -->
+      <linearGradient id="beamOutGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="rgb(255,205,70)" stop-opacity="0.10"></stop>
+        <stop offset="0.30" stop-color="rgb(255,205,70)" stop-opacity="0.75"></stop>
+        <stop offset="0.55" stop-color="rgb(255,205,70)" stop-opacity="1"></stop>
+        <stop offset="1"    stop-color="rgb(255,205,70)" stop-opacity="0"></stop>
+      </linearGradient>
+
+      <!-- ✅ beamBend(반사광) : 파란색 유지 -->
+      <linearGradient id="beamReflectGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="rgb(0,94,184)" stop-opacity="0.15"></stop>
+        <stop offset="0.30" stop-color="rgb(0,94,184)" stop-opacity="0.80"></stop>
+        <stop offset="0.55" stop-color="rgb(0,94,184)" stop-opacity="1"></stop>
+        <stop offset="1"    stop-color="rgb(0,94,184)" stop-opacity="0"></stop>
+      </linearGradient>
+
+      <filter id="beamGlow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="1.15" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+
+      <!-- ✅ 작은 '->' 느낌 화살표 (출사광/반사광) -->
+      <marker id="beamArrowBlueSmall" viewBox="0 0 12 10" refX="10.2" refY="5"
+              markerWidth="0.9" markerHeight="0.9" orient="auto">
+        <path d="M 0 1 L 11 5 L 0 9"
+              fill="none"
+              stroke="rgb(0,94,184)"
+              stroke-width="2.0"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              opacity="0.95"></path>
+      </marker>
+
+      <marker id="beamArrowYellowSmall" viewBox="0 0 12 10" refX="10.2" refY="5"
+              markerWidth="0.9" markerHeight="0.9" orient="auto">
+        <path d="M 0 1 L 11 5 L 0 9"
+              fill="none"
+              stroke="rgb(255,190,40)"
+              stroke-width="2.0"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              opacity="0.95"></path>
+      </marker>
+
+      <!-- ✅ 렌즈를 지나는 구간(출사광) 가리기용 마스크 -->
+      <mask id="lensOccludeMask">
+        <rect x="0" y="0" width="100" height="100" fill="white"></rect>
+        <!-- JS에서 위치/크기 갱신 -->
+        <ellipse id="lensOccludeEllipse" cx="56" cy="52" rx="26" ry="30" fill="black"></ellipse>
+      </mask>
+
+    </defs>
+
+    <line id="beamIn" x1="0" y1="50" x2="50" y2="50"
+          stroke="url(#beamInGrad)"
+          stroke-width="3.4"
+          stroke-linecap="round"
+          filter="url(#beamGlow)"
+          opacity="0.0"></line>
+
+    <line id="beamOutFront" x1="50" y1="50" x2="100" y2="50"
+          stroke="url(#beamOutGrad)"
+          stroke-width="3.4"
+          stroke-linecap="round"
+          marker-end="url(#beamArrowYellowSmall)"
+          mask="url(#lensOccludeMask)"
+          filter="url(#beamGlow)"
+          opacity="0.0"></line>
+
+    <line id="beamBend" x1="50" y1="50" x2="25" y2="70"
+          stroke="url(#beamReflectGrad)"
+          stroke-width="3.6"
+          stroke-linecap="round"
+          marker-end="url(#beamArrowBlueSmall)"
+          filter="url(#beamGlow)"
+          opacity="0.0"></line>
+
+    <circle id="beamHit"
+            cx="50"
+            cy="50"
+            r="1.6"
+            fill="rgb(255,255,255)"
+            fill-opacity="0.80"
+            filter="url(#beamGlow)"
+            opacity="0.0"></circle>
+
+  </svg>
+</div>
+
+  <!-- ✅ 출사광(beamOut) 전용: 렌즈 뒤 레이어 -->
+  <div id="blueRayBehind" aria-hidden="true">
+    <svg id="blueRaySvgBack" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <line id="beamOutFront" x1="50" y1="50" x2="100" y2="50"
+            stroke="url(#beamOutGrad)"
+            stroke-width="2.00"
+            stroke-linecap="round"
+            filter="url(#beamGlow)"
+            opacity="0.0"></line>
+    </svg>
+  </div>
+
+
 
   <div id="bluePill" aria-label="블루라이트 차단 선택">
     <div id="blueSegOn" class="blueSegBtn">블루라이트 차단 ON</div>
@@ -966,6 +1099,27 @@
   <script>
     const mv = document.getElementById('mv');
 
+    /* =========================
+       ✅ 터치하면 멈추는 현상 방지 (이 블록만 추가)
+       - iOS/일부 브라우저에서 GLB 애니메이션/렌더가 터치 후 pause 되는 케이스 대응
+       - 다른 로직/구조는 변경하지 않음
+       ========================= */
+    function keepMVPlaying(){
+      try{
+        if(!mv) return;
+        if(mv.paused) mv.play();
+      }catch(e){}
+    }
+    if(mv){
+      ['pointerdown','pointermove','pointerup','touchstart','touchend','mousedown','mouseup'].forEach((ev)=>{
+        try{ mv.addEventListener(ev, keepMVPlaying, { passive:true }); }catch(e){}
+      });
+    }
+    document.addEventListener('visibilitychange', ()=>{
+      if(!document.hidden) setTimeout(keepMVPlaying, 60);
+    });
+    /* ========================= */
+
     const missionASD  = document.getElementById('missionASD');
     const missionPVP  = document.getElementById('missionPVP');
     const missionBlue = document.getElementById('missionBlue');
@@ -988,15 +1142,76 @@
     const blueSegOn  = document.getElementById('blueSegOn');
     const blueSegOff = document.getElementById('blueSegOff');
     const blueRayLayer = document.getElementById('blueRayLayer');
+    const blueRayLayerBack = document.getElementById('blueRayLayerBack');
+    const blueRayBehind = document.getElementById('blueRayBehind');
     const blueBackGlow = document.getElementById('blueBackGlow');
     const blueInfo = document.getElementById('blueInfo');
     const blueMissionText = document.getElementById('blueMissionText');
     const blueMissionConfirm = document.getElementById('blueMissionConfirm');
 
     const beamIn  = document.getElementById('beamIn');
-    const beamOut = document.getElementById('beamOut');
+    const beamOut = document.getElementById('beamOutBack');
+    const beamOutFront = document.getElementById('beamOutFront');
     const beamBend = document.getElementById('beamBend');
     const beamHit = document.getElementById('beamHit');
+
+    const lensOccludeEllipse = document.getElementById('lensOccludeEllipse');
+
+
+    /* =========================
+       ✅ [추가] iOS Safari에서 SVG gradient/filter 라인이 '안 보이는' 케이스 최후 방어
+       - 로직은 그대로, 렌더링 문제일 때만 '렌더 친화' 속성으로 보정
+       ========================= */
+    const __isIOS = (()=> {
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+      const iOS = /iP(hone|od|ad)/.test(platform);
+      const iPadOS13Plus = (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      return iOS || iPadOS13Plus;
+    })();
+    const __isSafari = /^((?!chrome|crios|android).)*safari/i.test(navigator.userAgent || '');
+    const __isSafariIOS = __isIOS && __isSafari;
+
+    function __forceSvgRedraw(){
+      try{
+        const layer = document.getElementById('blueRayLayer');
+        const svg = document.getElementById('blueRaySvg');
+        if(!layer || !svg) return;
+
+        // display:none -> block 전환 직후 Safari가 paint를 스킵하는 케이스 방지
+        svg.style.transform = 'translateZ(0)';
+        const prev = svg.style.display || 'block';
+        svg.style.display = 'none';
+        // 강제 reflow
+        void svg.getBoundingClientRect();
+        svg.style.display = prev;
+
+        // line bbox 계산 강제 (일부 Safari에서 효과 있음)
+        try{ svg.getBBox(); }catch(e){}
+      }catch(e){}
+    }
+
+    function __patchBeamsForSafari(){
+      if(!__isSafariIOS) return;
+      // gradient + filter 조합이 안 보이는 케이스가 있어, beamIn/Out만 최소 보정
+      [beamIn, beamOut].forEach(el=>{
+        if(!el) return;
+        try{ el.setAttribute('filter','none'); }catch(e){}
+        try{ el.style.filter = 'none'; }catch(e){}
+        // gradient가 paint를 못할 때를 대비한 fallback: solid stroke
+        try{ el.setAttribute('stroke','rgb(255,191,0)'); }catch(e){}
+        try{ el.style.stroke = 'rgb(255,191,0)'; }catch(e){}
+        try{ el.setAttribute('shape-rendering','geometricPrecision'); }catch(e){}
+        try{ el.setAttribute('vector-effect','non-scaling-stroke'); }catch(e){}
+      });
+      [beamBend].forEach(el=>{
+        if(!el) return;
+        try{ el.setAttribute('shape-rendering','geometricPrecision'); }catch(e){}
+        try{ el.setAttribute('vector-effect','non-scaling-stroke'); }catch(e){}
+      });
+    }
+    /* ========================= */
+
 
     const asdEyeMV = document.getElementById('asdEyeMV');
     const asdLensImg = document.getElementById('asdLensImg');
@@ -1049,42 +1264,82 @@
       sawOff: false
     };
 
-    let beamAnimTimer = null;
-    function animateBeamLine(el){
-      if(!el) return;
-      el.setAttribute('stroke-dasharray', '140');
-      el.setAttribute('stroke-dashoffset', '140');
-      void el.getBoundingClientRect();
-      el.style.transition = 'stroke-dashoffset 260ms linear';
-      el.setAttribute('stroke-dashoffset', '0');
-    }
+    let beamAnimToken = 0;
+    let beamGeom = null;
 
-    function getOpacity(el){
-      const a = el.getAttribute('opacity');
-      const s = (el.style && el.style.opacity) ? el.style.opacity : null;
-      return parseFloat((s != null && s !== '') ? s : (a != null ? a : '0')) || 0;
+    /* =========================
+       ✅ 빔 애니메이션(모바일/iOS 안전)
+       - stroke-dash 사용 없이, 라인을 "그려지는" 방식으로 애니메이션
+       - OFF: 입사광 → 출사광 (순차)
+       - ON : 입사광 → (출사광 + 반사광 동시 분기) + 중앙 히트 점
+       ========================= */
+    function setLineFull(el, g){
+      if(!el || !g) return;
+      el.setAttribute('x1', g.x1); el.setAttribute('y1', g.y1);
+      el.setAttribute('x2', g.x2); el.setAttribute('y2', g.y2);
+    }
+    function setLineProgress(el, g, t){
+      if(!el || !g) return;
+      const tt = Math.max(0, Math.min(1, t));
+      const x2 = g.x1 + (g.x2 - g.x1) * tt;
+      const y2 = g.y1 + (g.y2 - g.y1) * tt;
+      el.setAttribute('x1', g.x1); el.setAttribute('y1', g.y1);
+      el.setAttribute('x2', x2);   el.setAttribute('y2', y2);
+    }
+    function animateDraw(el, g, ms, delay=0, token=0){
+      if(!el || !g) return;
+      const startAt = performance.now() + delay;
+      const endAt = startAt + ms;
+
+      // 시작은 안그려진 상태
+      setLineProgress(el, g, 0);
+      el.style.opacity = '';
+      el.setAttribute('opacity', el.getAttribute('opacity') || '1');
+
+      const tick = (now)=>{
+        if(token !== beamAnimToken) return; // 중간에 취소된 경우
+        if(now < startAt){ requestAnimationFrame(tick); return; }
+        const t = (now - startAt) / ms;
+        if(t >= 1){
+          setLineFull(el, g);
+          return;
+        }
+        setLineProgress(el, g, t);
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
     }
 
     function playBeamAnimation(){
-      if(beamAnimTimer) clearTimeout(beamAnimTimer);
-      const oIn  = getOpacity(beamIn);
-      const oOut = getOpacity(beamOut);
-      const oB   = getOpacity(beamBend);
+      beamAnimToken++;
+      const token = beamAnimToken;
 
-      if(oIn  > 0) animateBeamLine(beamIn);
-      setTimeout(()=>{ if(oOut > 0) animateBeamLine(beamOut); }, 90);
-      setTimeout(()=>{ if(oB   > 0) animateBeamLine(beamBend); }, 120);
+      // 좌표 최신화
+      if(!beamGeom) updateBeams();
 
-      beamAnimTimer = setTimeout(()=>{
-        [beamIn, beamOut, beamBend].forEach(el=>{
-          if(!el) return;
-          el.style.transition = '';
-          el.removeAttribute('stroke-dasharray');
-          el.removeAttribute('stroke-dashoffset');
-        });
-        beamAnimTimer = null;
-      }, 420);
+      // 상태별 기본 가시성
+      syncBeamVisibility();
+
+      // OFF: 입사 → 출사
+      if(!blueOn){
+        beamHit.setAttribute('opacity','0');
+        beamBend.setAttribute('opacity','0');
+
+        // 입사광 그리기
+        animateDraw(beamIn, beamGeom?.in, 180, 0, token);
+        // 출사광 그리기(뒤쪽, 렌즈 구간 마스크)
+        animateDraw(beamOut, beamGeom?.out, 220, 140, token);
+        return;
+      }
+
+      // ON: 입사 → (출사+반사) 동시
+      beamHit.setAttribute('opacity','0.92');
+
+      animateDraw(beamIn, beamGeom?.in, 180, 0, token);
+      animateDraw(beamOut, beamGeom?.out, 220, 120, token);
+      animateDraw(beamBend, beamGeom?.bend, 220, 120, token);
     }
+    /* ========================= */
 
     function setBlueUI(){
       const visible = (bluePanelOpen && currentMode === 'lens');
@@ -1094,6 +1349,8 @@
       blueInfo.setAttribute('aria-hidden', visible ? 'false' : 'true');
 
       blueRayLayer.style.display = visible ? 'block' : 'none';
+      blueRayLayerBack.style.display = visible ? 'block' : 'none';
+      if(blueRayBehind) blueRayBehind.style.display = visible ? 'block' : 'none';
       blueBackGlow.style.display = (visible && !blueOn) ? 'block' : 'none';
 
       blueSegOn.classList.toggle('on', blueOn === true);
@@ -1109,6 +1366,8 @@
 
       syncBeamVisibility();
       if(visible){
+        __patchBeamsForSafari();
+        __forceSvgRedraw();
         updateBeams();
         playBeamAnimation();
       }
@@ -1119,6 +1378,7 @@
       if(!visible){
         beamIn.setAttribute('opacity','0');
         beamOut.setAttribute('opacity','0');
+        if(beamOutFront) beamOutFront.setAttribute('opacity','0');
         beamBend.setAttribute('opacity','0');
         beamHit.setAttribute('opacity','0');
         return;
@@ -1127,6 +1387,7 @@
       if(!blueOn){
         beamIn.setAttribute('opacity','0.95');
         beamOut.setAttribute('opacity','0.95');
+        if(beamOutFront) beamOutFront.setAttribute('opacity','0');
         beamBend.setAttribute('opacity','0');
         beamHit.setAttribute('opacity','0');
         return;
@@ -1134,46 +1395,99 @@
 
       beamIn.setAttribute('opacity','0.95');
       beamOut.setAttribute('opacity','0.50');
+      if(beamOutFront) beamOutFront.setAttribute('opacity','0');
       beamBend.setAttribute('opacity','0.55');
       beamHit.setAttribute('opacity','0.90');
     }
 
-    function updateBeams(){
-      const visible = (bluePanelOpen && currentMode === 'lens');
-      if(!visible) return;
+ function updateBeams(){
+  const visible = (bluePanelOpen && currentMode === 'lens');
+  if(!visible) return;
 
-      const rect = mv.getBoundingClientRect();
+  const rect = mv.getBoundingClientRect();
 
-      const hitX = rect.left + rect.width * 0.39;
-      const hitY = rect.top  + rect.height * 0.35;
+  // 히트 포인트(렌즈 안쪽 특정 지점)
+  const hitX = rect.left + rect.width * 0.39;
+  const hitY = rect.top  + rect.height * 0.35;
 
-      const toVw = (x)=> (x / window.innerWidth) * 100;
-      const toVh = (y)=> (y / window.innerHeight) * 100;
+  const toVw = (x)=> (x / window.innerWidth) * 100;
+  const toVh = (y)=> (y / window.innerHeight) * 100;
 
-      const hx = toVw(hitX), hy = toVh(hitY);
+  // ✅ iOS Safari에서 viewBox 밖으로 크게 나가면 line이 통째로 안 그려지는 케이스 방지
+  const clamp = (v, min, max)=> Math.max(min, Math.min(max, v));
 
-      const inX1 = rect.left - rect.width * 0.60;
-      beamIn.setAttribute('x1', toVw(inX1));
-      beamIn.setAttribute('y1', hy);
-      beamIn.setAttribute('x2', hx);
-      beamIn.setAttribute('y2', hy);
+  const hx = clamp(toVw(hitX), 0, 100);
+  const hy = clamp(toVh(hitY), 0, 100);
 
-      const outX2 = rect.left + rect.width * 1.60;
-      beamOut.setAttribute('x1', hx);
-      beamOut.setAttribute('y1', hy);
-      beamOut.setAttribute('x2', toVw(outX2));
-      beamOut.setAttribute('y2', hy);
+  // =========================
+  // ✅ 원하는 입사각: 수평 기준 약 165° 느낌(=약 15° 기울기)
+  // - 왼쪽에서 살짝 위에서 내려오며(hit로) 들어오는 모습
+  // - 출사광은 같은 선상(꺾임 없음)
+  // =========================
+  const slope = Math.tan((15 * Math.PI) / 180); // 15°
 
-      const bendX2 = hitX - rect.width * 0.32;
-      const bendY2 = hitY - rect.height * 0.18;
-      beamBend.setAttribute('x1', hx);
-      beamBend.setAttribute('y1', hy);
-      beamBend.setAttribute('x2', toVw(bendX2));
-      beamBend.setAttribute('y2', toVh(bendY2));
+  // 입사광 시작점(왼쪽 경계 x=0)
+  const inX1 = 0;
+  const inY1 = clamp(hy - (slope * hx), 0, 100);
 
-      beamHit.setAttribute('cx', hx);
-      beamHit.setAttribute('cy', hy);
-    }
+  // 출사광 끝점(오른쪽 경계 x=100) : 같은 직선 연장
+  const outX2 = 100;
+  const outY2 = clamp(hy + (slope * (outX2 - hx)), 0, 100);
+
+  // -------------------------
+  // ✅ 입사광(beamIn): (0,inY1) -> (hx,hy)
+  // -------------------------
+  beamIn.setAttribute('x1', inX1);
+  beamIn.setAttribute('y1', inY1);
+  beamIn.setAttribute('x2', hx);
+  beamIn.setAttribute('y2', hy);
+
+  // -------------------------
+  // ✅ 출사광(beamOut): (hx,hy) -> (100,outY2)  (꺾임 없음)
+  // -------------------------
+  beamOut.setAttribute('x1', hx);
+  beamOut.setAttribute('y1', hy);
+  beamOut.setAttribute('x2', outX2);
+  beamOut.setAttribute('y2', outY2);
+
+  // -------------------------
+  // ✅ 반사광(beamBend): (hx,hy) -> 위로 튀는 모습(파란색)
+  // -------------------------
+  const bendX2 = clamp(toVw(hitX - rect.width * 0.08), 0, 100);
+  const bendY2 = clamp(toVh(hitY - rect.height * 0.15), 18, 100);
+
+  beamBend.setAttribute('x1', hx);
+  beamBend.setAttribute('y1', hy);
+  beamBend.setAttribute('x2', bendX2);
+  beamBend.setAttribute('y2', bendY2);
+
+  // 중앙 히트 포인트(흰 점)
+  beamHit.setAttribute('cx', hx);
+  beamHit.setAttribute('cy', hy);
+
+  // -------------------------
+  // ✅ 출사광이 렌즈를 "지나는 구간"이 앞에서 안보이게: 마스크(타원) 위치 갱신
+  // - 대략 렌즈 중심/크기 기준(카메라 시점 따라 조금 달라도 자연스럽게)
+  // -------------------------
+  if(lensOccludeEllipse){
+    const lensCx = clamp(toVw(rect.left + rect.width * 0.57), 0, 100);
+    const lensCy = clamp(toVh(rect.top  + rect.height * 0.53), 0, 100);
+    const rx = clamp((rect.width / window.innerWidth) * 100 * 0.24, 8, 40);
+    const ry = clamp((rect.height / window.innerHeight) * 100 * 0.28, 10, 45);
+
+    lensOccludeEllipse.setAttribute('cx', lensCx);
+    lensOccludeEllipse.setAttribute('cy', lensCy);
+    lensOccludeEllipse.setAttribute('rx', rx);
+    lensOccludeEllipse.setAttribute('ry', ry);
+  }
+
+  // 애니메이션용 좌표 저장
+  beamGeom = {
+    in:  { x1: inX1, y1: inY1, x2: hx,   y2: hy },
+    out: { x1: hx,   y1: hy,   x2: outX2,y2: outY2 },
+    bend:{ x1: hx,   y1: hy,   x2: bendX2,y2: bendY2 }
+  };
+}   
 
     mv.addEventListener('camera-change', ()=>{
       if(bluePanelOpen && currentMode === 'lens') updateBeams();
@@ -1517,6 +1831,7 @@
       restoreOriginalColors();
       orbitBeforeBlue = null;
       targetBeforeBlue = null;
+      __patchBeamsForSafari();
       setBlueUI();
       syncMissionUI();
     }
@@ -1524,6 +1839,7 @@
     function closeBluePanel(){
       bluePanelOpen = false;
       forceBlueOff();
+      __patchBeamsForSafari();
       setBlueUI();
       syncMissionUI();
     }
@@ -1626,8 +1942,13 @@
       }
 
       setModeButtons();
+      __patchBeamsForSafari();
       setBlueUI();
       syncMissionUI();
+
+      /* ✅ 터치/로드 후 멈춤 방지: 로드 끝나면 재생 상태 한번 더 강제 */
+      keepMVPlaying();
+      setTimeout(keepMVPlaying, 120);
     });
 
     function toggleASD(){
@@ -1706,10 +2027,13 @@
       setTimeout(()=>{
         applyOrbitStr(BLUE_PANEL_ORBIT_STR);
         applyTargetStr(BLUE_PANEL_TARGET_STR);
+        __patchBeamsForSafari();
+        __forceSvgRedraw();
         updateBeams();
         playBeamAnimation();
       }, 120);
 
+      __patchBeamsForSafari();
       setBlueUI();
       syncMissionUI();
     }
@@ -1749,10 +2073,13 @@
       setTimeout(()=>{
         applyOrbitStr(BLUE_PANEL_ORBIT_STR);
         applyTargetStr(BLUE_PANEL_TARGET_STR);
+        __patchBeamsForSafari();
+        __forceSvgRedraw();
         updateBeams();
         playBeamAnimation();
       }, 80);
 
+      __patchBeamsForSafari();
       setBlueUI();
       syncMissionUI();
     }
@@ -1764,6 +2091,7 @@
       e.stopPropagation();
       blueMission.confirmed = true;
       blueMission.successShown = false;
+      __patchBeamsForSafari();
       setBlueUI();
       syncMissionUI();
     });
@@ -1788,29 +2116,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
