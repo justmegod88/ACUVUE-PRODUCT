@@ -1400,15 +1400,12 @@
       beamHit.setAttribute('opacity','0.90');
     }
 
- function updateBeams(){
+ 
+function updateBeams(){
   const visible = (bluePanelOpen && currentMode === 'lens');
   if(!visible) return;
 
   const rect = mv.getBoundingClientRect();
-
-  // 히트 포인트(렌즈 안쪽 특정 지점)
-  const hitX = rect.left + rect.width * 0.39;
-  const hitY = rect.top  + rect.height * 0.35;
 
   const toVw = (x)=> (x / window.innerWidth) * 100;
   const toVh = (y)=> (y / window.innerHeight) * 100;
@@ -1416,23 +1413,37 @@
   // ✅ iOS Safari에서 viewBox 밖으로 크게 나가면 line이 통째로 안 그려지는 케이스 방지
   const clamp = (v, min, max)=> Math.max(min, Math.min(max, v));
 
-  const hx = clamp(toVw(hitX), 0, 100);
-  const hy = clamp(toVh(hitY), 0, 100);
+  // =========================
+  // ✅ 렌즈 중심(화면상) 계산
+  // - model-viewer의 bounding rect 비율 기반(카메라/회전/드래그에도 자연스럽게 따라감)
+  // =========================
+  const lensCx = clamp(toVw(rect.left + rect.width  * 0.35), 0, 100);
+  const lensCy = clamp(toVh(rect.top  + rect.height * 0.35), 0, 100);
+  const rx = clamp((rect.width  / window.innerWidth)  * 100 * 0.24, 8, 40);
+  const ry = clamp((rect.height / window.innerHeight) * 100 * 0.28, 10, 45);
 
   // =========================
   // ✅ 원하는 입사각: 수평 기준 약 165° 느낌(=약 15° 기울기)
-  // - 왼쪽에서 살짝 위에서 내려오며(hit로) 들어오는 모습
-  // - 출사광은 같은 선상(꺾임 없음)
+  // - hit(흰 점) 위치를 렌즈 "표면(타원 경계)"에 고정
+  // - 입사/출사/반사 모두 이 hit를 기준으로 계산
   // =========================
-  const slope = Math.tan((15 * Math.PI) / 180); // 15°
+  const m = Math.tan((15 * Math.PI) / 180); // 15°
 
-  // 입사광 시작점(왼쪽 경계 x=0)
+  // ✅ line: (lensCx, lensCy) 를 지나며 기울기 m 인 직선과
+  //    ellipse: ((x-lensCx)/rx)^2 + ((y-lensCy)/ry)^2 = 1 의 교점
+  //    -> 좌측(입사) 표면 교점을 hit 로 사용
+    // ✅ 히트 포인트를 렌즈 중심(시각적 중심)에 고정
+  // - 렌즈 오빗/움직임에도 항상 렌즈 중심을 기준으로 따라오도록
+  const hx = lensCx;
+  const hy = lensCy;
+
+  // 입사광 시작점(왼쪽 경계 x=0) : 같은 직선 연장
   const inX1 = 0;
-  const inY1 = clamp(hy - (slope * hx), 0, 100);
+  const inY1 = clamp(hy - (m * hx), 0, 100);
 
-  // 출사광 끝점(오른쪽 경계 x=100) : 같은 직선 연장
+  // 출사광 끝점(오른쪽 경계 x=100) : 같은 직선 연장(꺾임 없음)
   const outX2 = 100;
-  const outY2 = clamp(hy + (slope * (outX2 - hx)), 0, 100);
+  const outY2 = clamp(hy + (m * (outX2 - hx)), 0, 100);
 
   // -------------------------
   // ✅ 입사광(beamIn): (0,inY1) -> (hx,hy)
@@ -1452,9 +1463,10 @@
 
   // -------------------------
   // ✅ 반사광(beamBend): (hx,hy) -> 위로 튀는 모습(파란색)
+  // - 길이는 기존 비율 유지하되, 렌즈 중심 기준으로 자연스럽게 따라감
   // -------------------------
-  const bendX2 = clamp(toVw(hitX - rect.width * 0.08), 0, 100);
-  const bendY2 = clamp(toVh(hitY - rect.height * 0.15), 18, 100);
+  const bendX2 = clamp(hx - rx * 0.55, 0, 100);
+  const bendY2 = clamp(hy - ry * 0.95, 18, 100);
 
   beamBend.setAttribute('x1', hx);
   beamBend.setAttribute('y1', hy);
@@ -1467,14 +1479,9 @@
 
   // -------------------------
   // ✅ 출사광이 렌즈를 "지나는 구간"이 앞에서 안보이게: 마스크(타원) 위치 갱신
-  // - 대략 렌즈 중심/크기 기준(카메라 시점 따라 조금 달라도 자연스럽게)
+  // - 렌즈 중심/크기 동일 값 사용(카메라 움직여도 함께 추적)
   // -------------------------
   if(lensOccludeEllipse){
-    const lensCx = clamp(toVw(rect.left + rect.width * 0.57), 0, 100);
-    const lensCy = clamp(toVh(rect.top  + rect.height * 0.53), 0, 100);
-    const rx = clamp((rect.width / window.innerWidth) * 100 * 0.24, 8, 40);
-    const ry = clamp((rect.height / window.innerHeight) * 100 * 0.28, 10, 45);
-
     lensOccludeEllipse.setAttribute('cx', lensCx);
     lensOccludeEllipse.setAttribute('cy', lensCy);
     lensOccludeEllipse.setAttribute('rx', rx);
@@ -1483,13 +1490,14 @@
 
   // 애니메이션용 좌표 저장
   beamGeom = {
-    in:  { x1: inX1, y1: inY1, x2: hx,   y2: hy },
-    out: { x1: hx,   y1: hy,   x2: outX2,y2: outY2 },
+    in:  { x1: inX1, y1: inY1, x2: hx,    y2: hy },
+    out: { x1: hx,   y1: hy,   x2: outX2, y2: outY2 },
     bend:{ x1: hx,   y1: hy,   x2: bendX2,y2: bendY2 }
   };
-}   
+}
 
-    mv.addEventListener('camera-change', ()=>{
+
+mv.addEventListener('camera-change', ()=>{
       if(bluePanelOpen && currentMode === 'lens') updateBeams();
     });
     window.addEventListener('resize', ()=>{
