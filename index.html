@@ -837,114 +837,207 @@
     #thHint{ display:none; }
   
     /* =========================
-       ✅ ACUVUE Tutorial (NAVER style-ish)
-       - 컬러: ACUVUE Blue
-       - 순서: 렌즈 조작 → 하단 버튼 → 미션 카드
-       - 인디케이터(1/3 + dots) 포함
+       ✅ ASD Tutorial (Auto) + Key Message Popup
+       - 기존 로직/스타일 최대한 유지, 추가 요소만
        ========================= */
+    #tutorialLayer{
+      position:fixed; inset:0; z-index:95;
+      display:none;
+      background:rgba(8,22,37,.45);
+      backdrop-filter: blur(3px);
+    }
+    #tutorialLayer.show{display:block;}
+    .tutBox{
+      position:absolute;
+      width:min(320px, 84vw);
+      background:#0B5C8A;
+      color:#fff;
+      border-radius:16px;
+      padding:14px 14px 12px;
+      box-shadow:0 18px 60px rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .tutBox .tutTitle{font-weight:800; margin-bottom:8px; font-size:16px;}
+    .tutBox .tutText{line-height:1.35; font-size:14px; opacity:.95;}
+    .tutBox .tutBtn{
+      margin-top:12px;
+      width:100%;
+      height:42px;
+      border-radius:12px;
+      border:2px solid rgba(0,0,0,.35);
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      font-weight:800;
+      cursor:pointer;
+    }
+    /* step positions */
+    #tutLeft{left:14px; top:42%; transform:translateY(-50%);}
+    #tutBottom{left:50%; bottom:112px; transform:translateX(-50%);}
+    #tutTop{left:50%; top:96px; transform:translateX(-50%);}
 
+    /* Key message popup (카드 클릭 시 먼저) */
+    #asdKeyMsgLayer{
+      position:fixed; inset:0; z-index:96;
+      display:none;
+      background:rgba(8,22,37,.45);
+      backdrop-filter: blur(3px);
+    }
+    #asdKeyMsgLayer.show{display:block;}
+    #asdKeyMsgCard{
+      position:absolute;
+      left:16px; top:50%;
+      transform:translateY(-50%);
+      width:min(320px, 84vw);
+      background:#0B5C8A;
+      color:#fff;
+      border-radius:22px;
+      padding:18px 16px 14px;
+      box-shadow:0 18px 60px rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.18);
+    }
+    #asdKeyMsgCard .kmTitle{font-weight:900; font-size:18px; margin-bottom:10px;}
+    #asdKeyMsgCard .kmText{font-size:14px; line-height:1.4; opacity:.95;}
+    #asdKeyMsgCard .kmBtn{
+      margin-top:14px;
+      width:100%;
+      height:44px;
+      border-radius:14px;
+      border:2px solid rgba(0,0,0,.35);
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+
+    /* =========================
+       ✅ [NEW] 튜토리얼 가이드 (네이버 느낌 + ACUVUE 컬러)
+       - 순서: 렌즈조작 → 하단버튼 → 미션카드
+       ========================= */
     #tutorialOverlay{
       position:fixed; inset:0;
-      z-index:120;
+      z-index:140;
       display:none;
-      background:rgba(11,31,51,.28);
+      background:rgba(11,31,51,.22);
       backdrop-filter: blur(6px);
       pointer-events:auto;
     }
     #tutorialOverlay.show{ display:block; }
 
-    /* 하이라이트(네이버 튜토리얼 느낌) */
     #tutorialHighlight{
       position:fixed;
-      z-index:121;
-      border-radius:18px;
-      border:1px solid rgba(0,94,184,.28);
-      box-shadow: 0 0 0 9999px rgba(11,31,51,.30);
-      background:rgba(255,255,255,.06);
+      z-index:141;
+      border-radius:22px;
+      box-shadow: 0 0 0 9999px rgba(11,31,51,.28);
+      border:1px solid rgba(0,94,184,.30);
+      background:rgba(255,255,255,.08);
       pointer-events:none;
     }
 
-    /* 버블 */
+    #tutorialArrow{
+      position:fixed;
+      inset:0;
+      z-index:142;
+      pointer-events:none;
+    }
+    #tutorialArrowPath{ filter: drop-shadow(0 10px 20px rgba(0,94,184,.18)); }
+
+    #tutorialHand{
+      position:fixed;
+      z-index:143;
+      width:46px; height:46px;
+      border-radius:999px;
+      display:flex; align-items:center; justify-content:center;
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(0,94,184,.28);
+      box-shadow: 0 12px 22px rgba(11,31,51,.16);
+      font-size:22px;
+      pointer-events:none;
+      transform: translate(-50%,-50%);
+      opacity:0;
+    }
+
     #tutorialBubble{
       position:fixed;
-      z-index:122;
-      width:min(520px, 92vw);
-      border-radius:16px;
-      border:1px solid rgba(0,94,184,.20);
+      z-index:144;
+      width:min(560px, 92vw);
+      border-radius:18px;
+      border:1px solid rgba(0,94,184,.22);
       background: rgba(255,255,255,.92);
-      backdrop-filter: blur(14px);
       box-shadow: 0 18px 60px rgba(11,31,51,.18);
       overflow:hidden;
+      backdrop-filter: blur(14px);
     }
 
-    /* 상단 얇은 라인 (ACUVUE) */
-    #tutorialBubble::before{
-      content:"";
-      position:absolute; left:0; right:0; top:0;
-      height:2px;
-      background: linear-gradient(90deg, rgba(0,94,184,.85), rgba(0,94,184,.12));
-      opacity:.95;
-      pointer-events:none;
+    #tutorialClose{
+      position:absolute; right:10px; top:10px;
+      width:34px; height:34px;
+      border-radius:999px;
+      border:1px solid rgba(11,31,51,.10);
+      background:rgba(255,255,255,.92);
+      color:var(--text-navy);
+      font-weight:900;
+      -webkit-tap-highlight-color: transparent;
+      cursor:pointer;
     }
 
-    #tutorialHead{
-      padding:10px 12px;
-      border-bottom:1px solid rgba(11,31,51,.08);
+    #tutorialBubbleHead{
+      padding:12px 14px;
+      background: linear-gradient(180deg, rgba(0,94,184,.10) 0%, rgba(234,243,255,.72) 100%);
+      border-bottom:1px solid rgba(11,31,51,.10);
+      font-weight:900;
+      font-size:13.5px;
+      color:var(--text-navy);
       display:flex;
       align-items:center;
-      justify-content:space-between;
       gap:10px;
     }
-    #tutorialTitle{
+    #tutorialGift{
+      margin-left:auto;
+      font-size:12px;
       font-weight:900;
-      font-size:13px;
-      color:var(--text-navy);
-      letter-spacing:.2px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    #tutorialBadge{
-      font-size:11px;
-      font-weight:900;
-      color:var(--acuvue-blue);
-      background:rgba(0,94,184,.10);
-      border:1px solid rgba(0,94,184,.22);
-      padding:4px 8px;
+      padding:5px 9px;
       border-radius:999px;
+      background:rgba(0,94,184,.10);
+      border:1px solid rgba(0,94,184,.28);
+      color:var(--acuvue-blue);
       white-space:nowrap;
     }
 
-    #tutorialBody{
-      padding:12px 12px;
+    #tutorialBubbleBody{
+      padding:14px 14px 12px;
       color:var(--text-sub);
       font-size:13px;
       line-height:1.45;
       white-space:pre-line;
     }
 
-    #tutorialFoot{
-      padding:10px 12px;
-      border-top:1px solid rgba(11,31,51,.08);
+    #tutorialBubbleFoot{
+      padding:12px 14px;
+      border-top:1px solid rgba(11,31,51,.10);
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,.85) 0%, rgba(245,249,255,.78) 100%);
     }
 
-    /* dots */
     #tutorialDots{
       display:flex;
-      align-items:center;
       gap:6px;
+      align-items:center;
     }
-    .tutDot{
-      width:7px;height:7px;border-radius:999px;
-      background:rgba(48,72,95,.18);
+    #tutorialDots .dot{
+      width:8px; height:8px;
+      border-radius:999px;
+      background:rgba(48,72,95,.20);
+      border:1px solid rgba(48,72,95,.12);
+      box-sizing:border-box;
     }
-    .tutDot.on{
+    #tutorialDots .dot.on{
       background:var(--acuvue-blue);
-      box-shadow: 0 0 0 4px rgba(0,94,184,.10);
+      border-color:rgba(0,94,184,.45);
+      box-shadow: 0 8px 18px rgba(0,94,184,.22);
     }
 
     #tutorialNext{
@@ -952,8 +1045,8 @@
       background:var(--acuvue-blue);
       color:#fff;
       font-weight:900;
-      font-size:12.5px;
-      padding:9px 12px;
+      font-size:12.8px;
+      padding:9px 14px;
       border-radius:12px;
       -webkit-tap-highlight-color: transparent;
       cursor:pointer;
@@ -962,6 +1055,339 @@
     }
     #tutorialNext:active{ transform:scale(.98); }
 
+  </style>
+</head>
+
+<body>
+  <!-- ✅ 미션 카드 -->
+  <div id="missionBar">
+    <div id="missionASD" class="missionCard" role="button" tabindex="0" aria-label="ASD 축안정화 보기">
+      <div class="missionNo">01</div>
+      <div class="missionTitle">ASD 축안정화</div>
+      <div class="missionDesc">카드를 눌러 확인</div>
+    </div>
+    <div id="missionPVP" class="missionCard" role="button" tabindex="0" aria-label="PVP 보기">
+      <div class="missionNo">02</div>
+      <div class="missionTitle">ASD 편안한 시야</div>
+      <div class="missionDesc">카드를 눌러 확인</div>
+    </div>
+    <div id="missionBlue" class="missionCard" role="button" tabindex="0" aria-label="옵티블루 보기">
+      <div class="missionNo">03</div>
+      <div class="missionTitle">ASD 착용감</div>
+      <div class="missionDesc">카드를 눌러 확인</div>
+    </div>
+  </div>
+
+  <!-- ✅ OFF일 때 렌즈 뒤쪽 그라데이션 번짐 -->
+  <div id="blueBackGlow" aria-hidden="true"></div>
+
+  <!-- ✅ 광선 레이어 -->
+
+  <!-- ✅ 출사광(beamOut) 전용: 렌즈 뒤(뒤 레이어) -->
+  <div id="blueRayLayerBack" aria-hidden="true">
+    <svg id="blueRaySvgBack" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="beamOutGradBack" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"    stop-color="rgb(255,191,0)" stop-opacity="0.22"></stop>
+          <stop offset="0.35" stop-color="rgb(255,191,0)" stop-opacity="1"></stop>
+          <stop offset="0.75" stop-color="rgb(255,191,0)" stop-opacity="0.50"></stop>
+          <stop offset="1"    stop-color="rgb(255,191,0)" stop-opacity="0"></stop>
+        </linearGradient>
+        <filter id="beamGlowBack" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="0.9" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <line id="beamOutBack" x1="50" y1="50" x2="100" y2="50"
+            stroke="url(#beamOutGradBack)"
+            stroke-width="3.00"
+            stroke-linecap="round"
+            filter="url(#beamGlowBack)"
+            opacity="0.0"></line>
+    </svg>
+  </div>
+
+<div id="blueRayLayer" aria-hidden="true">
+  <svg id="blueRaySvg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+
+      <!-- 🔶 beamIn : 진노랑 -->
+      <linearGradient id="beamInGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="rgb(255,170,0)" stop-opacity="0"></stop>
+        <stop offset="0.28" stop-color="rgb(255,170,0)" stop-opacity="0.55"></stop>
+        <stop offset="0.55" stop-color="rgb(255,170,0)" stop-opacity="1"></stop>
+        <stop offset="1"    stop-color="rgb(255,170,0)" stop-opacity="0.18"></stop>
+      </linearGradient>
+
+      <!-- 🔶 beamOut : 노랑(연) -->
+      <linearGradient id="beamOutGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="rgb(255,205,70)" stop-opacity="0.10"></stop>
+        <stop offset="0.30" stop-color="rgb(255,205,70)" stop-opacity="0.75"></stop>
+        <stop offset="0.55" stop-color="rgb(255,205,70)" stop-opacity="1"></stop>
+        <stop offset="1"    stop-color="rgb(255,205,70)" stop-opacity="0"></stop>
+      </linearGradient>
+
+      <!-- ✅ beamBend(반사광) : 파란색 유지 -->
+      <linearGradient id="beamReflectGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"    stop-color="rgb(0,94,184)" stop-opacity="0.15"></stop>
+        <stop offset="0.30" stop-color="rgb(0,94,184)" stop-opacity="0.80"></stop>
+        <stop offset="0.55" stop-color="rgb(0,94,184)" stop-opacity="1"></stop>
+        <stop offset="1"    stop-color="rgb(0,94,184)" stop-opacity="0"></stop>
+      </linearGradient>
+
+      <filter id="beamGlow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="1.15" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+
+      <!-- ✅ 작은 '->' 느낌 화살표 (출사광/반사광) -->
+      <marker id="beamArrowBlueSmall" viewBox="0 0 12 10" refX="10.2" refY="5"
+              markerWidth="0.9" markerHeight="0.9" orient="auto">
+        <path d="M 0 1 L 11 5 L 0 9"
+              fill="none"
+              stroke="rgb(0,94,184)"
+              stroke-width="2.0"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              opacity="0.95"></path>
+      </marker>
+
+      <marker id="beamArrowYellowSmall" viewBox="0 0 12 10" refX="10.2" refY="5"
+              markerWidth="0.9" markerHeight="0.9" orient="auto">
+        <path d="M 0 1 L 11 5 L 0 9"
+              fill="none"
+              stroke="rgb(255,190,40)"
+              stroke-width="2.0"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              opacity="0.95"></path>
+      </marker>
+
+      <!-- ✅ 렌즈를 지나는 구간(출사광) 가리기용 마스크 -->
+      <mask id="lensOccludeMask">
+        <rect x="0" y="0" width="100" height="100" fill="white"></rect>
+        <!-- JS에서 위치/크기 갱신 -->
+        <ellipse id="lensOccludeEllipse" cx="56" cy="52" rx="26" ry="30" fill="black"></ellipse>
+      </mask>
+
+    </defs>
+
+    <line id="beamIn" x1="0" y1="50" x2="50" y2="50"
+          stroke="url(#beamInGrad)"
+          stroke-width="3.4"
+          stroke-linecap="round"
+          filter="url(#beamGlow)"
+          opacity="0.0"></line>
+
+    <line id="beamOutFront" x1="50" y1="50" x2="100" y2="50"
+          stroke="url(#beamOutGrad)"
+          stroke-width="3.4"
+          stroke-linecap="round"
+          marker-end="url(#beamArrowYellowSmall)"
+          mask="url(#lensOccludeMask)"
+          filter="url(#beamGlow)"
+          opacity="0.0"></line>
+
+    <line id="beamBend" x1="50" y1="50" x2="25" y2="70"
+          stroke="url(#beamReflectGrad)"
+          stroke-width="3.6"
+          stroke-linecap="round"
+          marker-end="url(#beamArrowBlueSmall)"
+          filter="url(#beamGlow)"
+          opacity="0.0"></line>
+
+    <circle id="beamHit"
+            cx="50"
+            cy="50"
+            r="1.6"
+            fill="rgb(255,255,255)"
+            fill-opacity="0.80"
+            filter="url(#beamGlow)"
+            opacity="0.0"></circle>
+
+  </svg>
+</div>
+
+  <!-- ✅ 출사광(beamOut) 전용: 렌즈 뒤 레이어 -->
+  <div id="blueRayBehind" aria-hidden="true">
+    <svg id="blueRaySvgBack" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <line id="beamOutFront" x1="50" y1="50" x2="100" y2="50"
+            stroke="url(#beamOutGrad)"
+            stroke-width="2.00"
+            stroke-linecap="round"
+            filter="url(#beamGlow)"
+            opacity="0.0"></line>
+    </svg>
+  </div>
+
+
+
+  <div id="bluePill" aria-label="블루라이트 차단 선택">
+    <div id="blueSegOn" class="blueSegBtn">블루라이트 차단 ON</div>
+    <div id="blueSegOff" class="blueSegBtn">OFF</div>
+  </div>
+
+  <div id="blueInfo" aria-hidden="true">
+    <div id="blueInfoTop">
+      <b>블루라이트 <span class="pct">55%</span> 차단</b>
+    </div>
+    <div id="blueInfoBody">
+      아큐브 MAX는,
+      블루라이트를 55% 차단하여 디지털에 노출된 눈을 보호합니다.
+      블루라이트 차단을 위한 "블루 그린 틴트"를 확인해주세요.
+    </div>
+    <div id="blueInfoMission">
+      <div class="left" id="blueMissionText">미션: "블루라이트 차단 on" 버튼을 눌러 차이를 비교해 보세요</div>
+      <div class="confirm" id="blueMissionConfirm">확인</div>
+    </div>
+  </div>
+
+  <div id="thicknessBar" aria-hidden="true">
+    <div id="thHeader">
+      <div id="thTitle">두께</div>
+      <div id="thUnit">mm</div>
+    </div>
+    <div id="gradRow">
+      <div class="tickLabel">얇음_0.0</div>
+      <div id="gradWrap">
+        <div id="grad"></div>
+        <div id="gradShine"></div>
+        <div class="mark m0"><strong>0.0</strong></div>
+        <div class="mark m25"><strong>0.1</strong></div>
+        <div class="mark m50"><strong>0.2</strong></div>
+        <div class="mark m75"><strong>0.3</strong></div>
+        <div class="mark m100"><strong>0.4</strong></div>
+      </div>
+      <div class="tickLabel" style="text-align:left;width:46px;">0.4_두껍</div>
+    </div>
+    <div id="thHint"></div>
+  </div>
+
+  <div id="pvpBig">
+    <img id="pvpBigImg" src="PVP.gif" alt="PVP Big" onerror="this.onerror=null; this.src='PVP.jpeg';">
+  </div>
+
+  <div id="pvpOverlay">
+    <img id="pvpThumb" src="PVP.png" alt="PVP" onerror="this.onerror=null; this.src='PVP.jpeg';">
+    <div id="pvpText">
+      <div id="pvpTitle">PVP 습윤 인자</div>
+      <div id="hint">렌즈 내 PVP 습윤인자가 수분을 더 오랫동안 눈물막 유지하여 건조감을 감소 시킵니다.</div>
+    </div>
+    <div id="pvpConfirm" role="button" tabindex="0" aria-label="확인">확인</div>
+  </div>
+
+  <div id="asdOverlay" aria-hidden="true">
+    <div id="asdCard">
+      <button id="asdClose" type="button" aria-label="닫기">✕</button>
+      <div id="asdScene">
+        <img id="asdEyeMV" src="a.png" alt="Eye background" onerror="this.onerror=null; this.src='a.gif';">
+        <div id="asdLensRim" aria-hidden="true"></div>
+        <img id="asdLensImg" src="lens.png" alt="Lens overlay"
+             onerror="this.style.display='none'; document.getElementById('asdHint').textContent='lens.png / lens2.png 파일을 같은 폴더에 넣어주세요.';">
+        <div id="asdMaskShade" aria-hidden="true"></div>
+                <img id="asdUpperLid" src="upper_lid.png" alt="Upper eyelid overlay" onerror="this.style.display='none';">
+
+        <div id="asdBlinkLid" aria-hidden="true">
+          <div id="asdLidTop"></div>
+          <div id="asdLidBot"></div>
+        </div>
+
+        <div id="asdAngleBadge">20°</div>
+        <button id="asdRotateBtn" type="button" aria-label="회전">축이탈</button>
+        <button id="asdBlinkBtn" type="button" aria-label="눈 깜박">깜박임</button>
+      </div>
+      <div id="asdHint">미션1. ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜 보세요</div>
+    </div>
+  </div>
+
+  
+  <!-- ✅ [NEW] 자동 가이드(네이버 튜토리얼 느낌 / ACUVUE 컬러) -->
+  <div id="tutorialOverlay" aria-hidden="true">
+    <div id="tutorialHighlight" aria-hidden="true"></div>
+
+    <svg id="tutorialArrow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <marker id="tutArrowHead" viewBox="0 0 10 10" refX="8.5" refY="5"
+                markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke="var(--acuvue-blue)" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round"></path>
+        </marker>
+      </defs>
+      <path id="tutorialArrowPath" d="M10,10 Q50,50 90,90" fill="none" stroke="var(--acuvue-blue)"
+            stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#tutArrowHead)"
+            opacity="0.0"></path>
+    </svg>
+
+    <div id="tutorialHand" aria-hidden="true">👆</div>
+
+    <div id="tutorialBubble" role="dialog" aria-label="가이드">
+      <button id="tutorialClose" type="button" aria-label="닫기">✕</button>
+      <div id="tutorialBubbleHead">
+        <span id="tutorialTitle">가이드</span>
+        <span id="tutorialGift" style="display:none;">🎁 기프티콘</span>
+      </div>
+      <div id="tutorialBubbleBody"></div>
+      <div id="tutorialBubbleFoot">
+        <div id="tutorialDots" aria-hidden="true">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <button id="tutorialNext" type="button" aria-label="확인">확인</button>
+      </div>
+    </div>
+  </div>
+
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+
+  <model-viewer
+    id="mv"
+    src="lens_clear.glb"
+    camera-controls
+    camera-orbit="0deg 100deg 2.6m"
+    camera-target="0m 0.015m 0m"
+    touch-action="pan-y"
+    exposure="1.35"
+    tone-mapping="aces"
+    environment-image="neutral"
+    shadow-intensity="0"
+    style="display:block;">
+  </model-viewer>
+
+  <div id="bottomBtns">
+    <button id="btnReset" title="처음 위치로">↺</button>
+    <button id="modeLens" class="btn primary">투명 렌즈 모드</button>
+    <button id="modeHeat" class="btn">렌즈 두께 MAP</button>
+  </div>
+
+  <script>
+    const mv = document.getElementById('mv');
+
+    /* =========================
+       ✅ 터치하면 멈추는 현상 방지 (이 블록만 추가)
+       - iOS/일부 브라우저에서 GLB 애니메이션/렌더가 터치 후 pause 되는 케이스 대응
+       - 다른 로직/구조는 변경하지 않음
+       ========================= */
+    function keepMVPlaying(){
+      try{
+        if(!mv) return;
+        if(mv.paused) mv.play();
+      }catch(e){}
+    }
+    if(mv){
+      ['pointerdown','pointermove','pointerup','touchstart','touchend','mousedown','mouseup'].forEach((ev)=>{
+        try{ mv.addEventListener(ev, keepMVPlaying, { passive:true }); }catch(e){}
+      });
+    }
+    document.addEventListener('visibilitychange', ()=>{
+      if(!document.hidden) setTimeout(keepMVPlaying, 60);
+    });
     /* ========================= */
 
     const missionASD  = document.getElementById('missionASD');
@@ -1971,78 +2397,128 @@ mv.addEventListener('camera-change', ()=>{
     // ✅ Auto Tutorial (좌측 → 하단 → 상단)
     // - 튜토리얼 버튼 없이, 창을 켜면 바로 시작
     // =========================
-        // =========================
-    // ✅ Tutorial (NAVER style-ish) : 렌즈조작 → 하단버튼 → 미션카드
-    // =========================
-    const tutorialOverlay = document.getElementById('tutorialOverlay');
+    
+    /* =========================
+       ✅ [NEW] 자동 튜토리얼(네이버 느낌)
+       - 순서: 렌즈조작 → 하단버튼 → 미션카드
+       - 인디케이터(dot) 포함
+       - 세션 1회 노출
+       ========================= */
+    const tutorialOverlay   = document.getElementById('tutorialOverlay');
     const tutorialHighlight = document.getElementById('tutorialHighlight');
-    const tutorialBubble = document.getElementById('tutorialBubble');
-    const tutorialBody = document.getElementById('tutorialBody');
-    const tutorialTitle = document.getElementById('tutorialTitle');
-    const tutorialBadge = document.getElementById('tutorialBadge');
-    const tutorialDots = Array.from(document.querySelectorAll('#tutorialDots .tutDot'));
-    const tutorialNext = document.getElementById('tutorialNext');
+    const tutorialBubble    = document.getElementById('tutorialBubble');
+    const tutorialBody      = document.getElementById('tutorialBubbleBody');
+    const tutorialNext      = document.getElementById('tutorialNext');
+    const tutorialClose     = document.getElementById('tutorialClose');
+    const tutorialDots      = document.getElementById('tutorialDots');
+    const tutorialGift      = document.getElementById('tutorialGift');
+    const tutorialTitle     = document.getElementById('tutorialTitle');
+
+    const tutorialArrowPath = document.getElementById('tutorialArrowPath');
+    const tutorialHand      = document.getElementById('tutorialHand');
 
     const tutorialSteps = [
       {
-        title: '렌즈 조작',
-        target: ()=> mv,
-        body: '렌즈를 좌우로 움직여\n아큐브 난시렌즈를 체험해 보세요.'
+        title: '가이드 1/3',
+        body: '렌즈를 좌우로 움직여
+아큐브 난시렌즈를 체험해 보세요',
+        target: ()=> mv,                 // 화면 중앙 렌즈 영역
+        highlight: (rect)=> {
+          // model-viewer는 전체 화면이라 중앙 원형처럼 강조
+          const size = Math.min(window.innerWidth, window.innerHeight) * 0.42;
+          const cx = window.innerWidth * 0.52;
+          const cy = window.innerHeight * 0.52;
+          return { x: cx - size/2, y: cy - size/2, w: size, h: size, r: 999 };
+        },
+        showGift: false
       },
       {
-        title: '모드 전환',
+        title: '가이드 2/3',
+        body: '렌즈 두께 MAP을 눌러
+렌즈 가장자리 두께를 확인해 보세요',
         target: ()=> document.getElementById('bottomBtns'),
-        body: '렌즈 두께 MAP을 눌러\n렌즈 가장자리 두께를 확인해 보세요.'
+        highlight: null,
+        showGift: false
       },
       {
-        title: '미션 완료',
+        title: '가이드 3/3',
+        body: '각 카드를 눌러 미션 완료 시,
+기프티콘!',
         target: ()=> document.getElementById('missionBar'),
-        body: '각 카드를 눌러 미션 완료 시,\n기프티콘 제공!'
+        highlight: null,
+        showGift: true
       }
     ];
-
     let tutorialIdx = 0;
 
     function setDots(i){
-      tutorialDots.forEach((d, idx)=> d.classList.toggle('on', idx === i));
-      tutorialBadge.textContent = `${i+1}/${tutorialSteps.length}`;
-      tutorialNext.textContent = (i === tutorialSteps.length - 1) ? '확인' : '다음';
-      tutorialNext.setAttribute('aria-label', (i === tutorialSteps.length - 1) ? '확인' : '다음');
+      if(!tutorialDots) return;
+      const dots = Array.from(tutorialDots.querySelectorAll('.dot'));
+      dots.forEach((d, idx)=> d.classList.toggle('on', idx === i));
     }
 
-    function placeTutorial(targetEl){
+    function placeTutorial(targetEl, step){
       if(!targetEl) return;
 
-      // model-viewer는 화면 전체라 "렌즈 조작" 단계에서 중앙 영역만 강조
-      let r = targetEl.getBoundingClientRect();
-      if(targetEl === mv){
-        const w = Math.min(window.innerWidth * 0.66, 520);
-        const h = Math.min(window.innerHeight * 0.42, 420);
-        const cx = window.innerWidth * 0.50;
-        const cy = window.innerHeight * 0.45;
-        r = { left: cx - w/2, top: cy - h/2, width: w, height: h, right: cx + w/2, bottom: cy + h/2 };
+      const r = targetEl.getBoundingClientRect();
+      const pad = 8;
+
+      // highlight rect
+      let hx, hy, hw, hh, radius = 22;
+      if(step && typeof step.highlight === 'function'){
+        const h = step.highlight(r);
+        hx=h.x; hy=h.y; hw=h.w; hh=h.h; radius=h.r ?? 22;
+      }else{
+        hx = r.left - pad;
+        hy = r.top  - pad;
+        hw = r.width  + pad*2;
+        hh = r.height + pad*2;
       }
 
-      // highlight
-      tutorialHighlight.style.left = (r.left - 6) + 'px';
-      tutorialHighlight.style.top = (r.top - 6) + 'px';
-      tutorialHighlight.style.width = (r.width + 12) + 'px';
-      tutorialHighlight.style.height = (r.height + 12) + 'px';
+      tutorialHighlight.style.left = hx + 'px';
+      tutorialHighlight.style.top = hy + 'px';
+      tutorialHighlight.style.width = hw + 'px';
+      tutorialHighlight.style.height = hh + 'px';
+      tutorialHighlight.style.borderRadius = radius + 'px';
 
-      // bubble 위치: 기본 아래쪽, 공간 없으면 위로
-      const bubbleW = Math.min(520, window.innerWidth * 0.92);
+      // bubble 위치: 기본은 highlight 아래, 부족하면 위
+      const bubbleW = Math.min(560, window.innerWidth * 0.92);
       const bubbleRect = tutorialBubble.getBoundingClientRect();
-      const bubbleH = bubbleRect.height || 180;
+      const bubbleH = bubbleRect.height || 170;
 
-      let x = Math.max(12, Math.min(window.innerWidth - bubbleW - 12, r.left));
-      let y = r.bottom + 12;
+      let bx = Math.max(12, Math.min(window.innerWidth - bubbleW - 12, hx));
+      let by = hy + hh + 14;
 
-      if(y + bubbleH > window.innerHeight - 12){
-        y = Math.max(12, r.top - bubbleH - 12);
+      if(by + bubbleH > window.innerHeight - 12){
+        by = Math.max(12, hy - bubbleH - 14);
       }
 
-      tutorialBubble.style.left = x + 'px';
-      tutorialBubble.style.top = y + 'px';
+      tutorialBubble.style.left = bx + 'px';
+      tutorialBubble.style.top = by + 'px';
+
+      // hand (하이라이트 중앙)
+      const handX = hx + hw*0.55;
+      const handY = hy + hh*0.62;
+      if(tutorialHand){
+        tutorialHand.style.left = handX + 'px';
+        tutorialHand.style.top  = handY + 'px';
+        tutorialHand.style.opacity = '1';
+      }
+
+      // curved arrow: bubble -> highlight
+      if(tutorialArrowPath){
+        const startX = (bx + bubbleW*0.22) / window.innerWidth  * 100;
+        const startY = (by + bubbleH*0.55) / window.innerHeight * 100;
+
+        const endX   = (hx + hw*0.55) / window.innerWidth  * 100;
+        const endY   = (hy + hh*0.35) / window.innerHeight * 100;
+
+        const midX   = (startX + endX)/2;
+        const midY   = Math.min(startY, endY) - 10;
+
+        tutorialArrowPath.setAttribute('d', `M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`);
+        tutorialArrowPath.style.opacity = '0.95';
+      }
     }
 
     function showTutorialStep(i){
@@ -2051,58 +2527,70 @@ mv.addEventListener('camera-change', ()=>{
 
       tutorialIdx = i;
 
+      const targetEl = step.target?.();
+      if(!targetEl) return;
+
       tutorialOverlay.classList.add('show');
       tutorialOverlay.setAttribute('aria-hidden','false');
 
       tutorialTitle.textContent = step.title;
       tutorialBody.textContent = step.body;
 
-      setDots(i);
+      tutorialGift.style.display = step.showGift ? 'inline-flex' : 'none';
 
-      const targetEl = step.target?.();
-      placeTutorial(targetEl);
+      setDots(i);
+      placeTutorial(targetEl, step);
     }
 
-    function closeTutorial(){
+    function closeTutorial(persist=true){
       tutorialOverlay.classList.remove('show');
       tutorialOverlay.setAttribute('aria-hidden','true');
+      if(tutorialHand) tutorialHand.style.opacity = '0';
+      if(tutorialArrowPath) tutorialArrowPath.style.opacity = '0';
+      if(persist){
+        try{ sessionStorage.setItem('acuvue_tutorial_done','1'); }catch(e){}
+      }
     }
 
     if(tutorialNext){
       tutorialNext.addEventListener('click', ()=>{
         const next = tutorialIdx + 1;
         if(next >= tutorialSteps.length){
-          try{ sessionStorage.setItem('asd_tutorial_done','1'); }catch(e){}
-          closeTutorial();
+          closeTutorial(true);
           return;
         }
         showTutorialStep(next);
       });
     }
-
-    // 배경 클릭은 무시(네이버 튜토리얼처럼 다음 버튼으로만 진행)
+    if(tutorialClose){
+      tutorialClose.addEventListener('click', ()=> closeTutorial(true));
+    }
     if(tutorialOverlay){
       tutorialOverlay.addEventListener('click', (e)=>{
-        // bubble 안 클릭은 무시
-        if(e.target === tutorialOverlay) e.stopPropagation();
+        if(e.target === tutorialOverlay) closeTutorial(true);
       });
     }
 
     window.addEventListener('resize', ()=>{
       if(tutorialOverlay && tutorialOverlay.classList.contains('show')){
         const step = tutorialSteps[tutorialIdx];
-        placeTutorial(step?.target?.());
+        const targetEl = step?.target?.();
+        if(targetEl) placeTutorial(targetEl, step);
       }
     });
 
     // 자동 시작(세션 1회)
-    (function autoStartTutorial(){
+    window.addEventListener('load', ()=>{
       let done = false;
-      try{ done = sessionStorage.getItem('asd_tutorial_done') === '1'; }catch(e){}
+      try{ done = sessionStorage.getItem('acuvue_tutorial_done') === '1'; }catch(e){}
       if(done) return;
-      setTimeout(()=>{ showTutorialStep(0); }, 380);
-    })();
-    // =========================
+
+      // 첫 렌더 후 표시
+      setTimeout(()=>{ showTutorialStep(0); }, 420);
+    });
+    /* ========================= */
+
+    });
 
 // =========================
     // ✅ ASD Key Message → ASD 화면(미션) 흐름
@@ -2125,26 +2613,21 @@ mv.addEventListener('camera-change', ()=>{
 </script>
 
   <!-- ✅ Auto Tutorial Layer (좌측 → 하단 → 상단) -->
-    <!-- Tutorial (NAVER style-ish) -->
-  <div id="tutorialOverlay" aria-hidden="true">
-    <div id="tutorialHighlight" aria-hidden="true"></div>
-
-    <div id="tutorialBubble" role="dialog" aria-label="튜토리얼 안내">
-      <div id="tutorialHead">
-        <div id="tutorialTitle">가이드</div>
-        <div id="tutorialBadge">1/3</div>
-      </div>
-
-      <div id="tutorialBody"></div>
-
-      <div id="tutorialFoot">
-        <div id="tutorialDots" aria-hidden="true">
-          <span class="tutDot on"></span>
-          <span class="tutDot"></span>
-          <span class="tutDot"></span>
-        </div>
-        <button id="tutorialNext" type="button" aria-label="다음">다음</button>
-      </div>
+  <div id="tutorialLayer" aria-hidden="true">
+    <div class="tutBox" id="tutLeft" style="display:none;">
+      <div class="tutTitle">가이드 1</div>
+      <div class="tutText">렌즈를 드래그 및 확대, 축소해 보세요.<br/>아큐브 난시 렌즈 구조를 생생하게 확인할 수 있습니다.</div>
+      <button class="tutBtn" id="tutNext1">확인</button>
+    </div>
+    <div class="tutBox" id="tutBottom" style="display:none;">
+      <div class="tutTitle">가이드 2</div>
+      <div class="tutText">‘렌즈 두께 MAP’을 클릭하여<br/>렌즈의 가장 얇은 부분(보라색)을 확인해 보세요!</div>
+      <button class="tutBtn" id="tutNext2">확인</button>
+    </div>
+    <div class="tutBox" id="tutTop" style="display:none;">
+      <div class="tutTitle">가이드 3</div>
+      <div class="tutText">각 카드를 눌러 미션을 진행해 보세요.<br/>미션 완료시 기프티콘!</div>
+      <button class="tutBtn" id="tutDone">확인</button>
     </div>
   </div>
 
