@@ -197,8 +197,6 @@
       display:block;
     }
 
-
-    
     /* ✅ 출사광(beamOut)만 렌즈 뒤로 보내기용 레이어 */
     #blueRayBehind{
       position:fixed;
@@ -212,7 +210,8 @@
       height:100%;
       display:block;
     }
-#blueBackGlow{
+
+    #blueBackGlow{
       position:fixed;
       inset:0;
       z-index:199;
@@ -436,7 +435,6 @@
       z-index:3; /* ✅ 렌즈 위에 덮이도록 */
       filter: drop-shadow(0 2px 10px rgba(0,0,0,.18));
     }
-
 
     #asdLensImg{
       position:absolute;
@@ -835,6 +833,169 @@
     .m100{ left:100%; }
 
     #thHint{ display:none; }
+
+    /* =========================
+       ✅ [추가] 튜토리얼 가이드(자동 3-step: 좌측 → 하단 → 상단)
+       - 튜토리얼 버튼 없음
+       ========================= */
+    #tutorialOverlay{
+      position:fixed; inset:0;
+      z-index:120;
+      display:none;
+      background:rgba(11,31,51,.18);
+      backdrop-filter: blur(6px);
+      pointer-events:auto;
+    }
+    #tutorialOverlay.show{ display:block; }
+
+    #tutorialHighlight{
+      position:fixed;
+      z-index:121;
+      border-radius:18px;
+      box-shadow: 0 0 0 9999px rgba(11,31,51,.22);
+      border:1px solid rgba(0,94,184,.25);
+      background:rgba(255,255,255,.10);
+      pointer-events:none;
+    }
+
+    #tutorialBubble{
+      position:fixed;
+      z-index:122;
+      width:min(520px, 92vw);
+      border-radius:16px;
+      border:1px solid var(--panel-stroke);
+      background: var(--panel-grad);
+      box-shadow: var(--panel-glow);
+      overflow:hidden;
+    }
+    #tutorialBubble::before{
+      content:"";
+      position:absolute;
+      left:0; right:0; top:0;
+      height:2px;
+      background: var(--panel-topline);
+      opacity:.95;
+      pointer-events:none;
+    }
+    #tutorialBubbleHead{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(11,31,51,.10);
+      font-weight:900;
+      font-size:13px;
+      color:var(--text-navy);
+    }
+    #tutorialBubbleBody{
+      padding:10px 12px;
+      color:var(--text-sub);
+      font-size:12.5px;
+      line-height:1.35;
+    }
+    #tutorialBubbleFoot{
+      padding:10px 12px;
+      border-top:1px solid rgba(11,31,51,.10);
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+    }
+    #tutorialNext{
+      border:1px solid rgba(0,94,184,.65);
+      background:var(--acuvue-blue);
+      color:#fff;
+      font-weight:900;
+      font-size:12.5px;
+      padding:8px 12px;
+      border-radius:12px;
+      -webkit-tap-highlight-color: transparent;
+      cursor:pointer;
+      box-shadow: 0 10px 22px rgba(0,94,184,.22);
+    }
+    #tutorialNext:active{ transform:scale(.98); }
+
+    /* =========================
+       ✅ [추가] ASD 키 메시지 팝업 (카드 클릭 → 확인 → 미션팝업 전환)
+       ========================= */
+    #asdKeyOverlay{
+      position:fixed; inset:0;
+      z-index:90; /* asdOverlay(80)보다 위, 튜토리얼(120)보다 아래 */
+      display:none;
+      background:rgba(11,31,51,.22);
+      backdrop-filter: blur(12px);
+      align-items:center; justify-content:center;
+      padding:18px;
+      box-sizing:border-box;
+    }
+    #asdKeyOverlay.show{ display:flex; }
+
+    #asdKeyCard{
+      width:min(720px, 94vw);
+      border-radius:18px;
+      border:1px solid var(--panel-stroke);
+      background: var(--panel-grad);
+      overflow:hidden;
+      box-shadow: var(--panel-glow);
+      position:relative;
+    }
+    #asdKeyCard::before{
+      content:"";
+      position:absolute;
+      left:0; right:0; top:0;
+      height:2px;
+      background: var(--panel-topline);
+      opacity:.95;
+      pointer-events:none;
+    }
+    #asdKeyCard::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:18px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+      pointer-events:none;
+      opacity:.55;
+    }
+    #asdKeyClose{
+      position:absolute; right:10px; top:10px;
+      width:38px; height:38px; border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.92);
+      color:var(--text-navy);
+      font-weight:900;
+      -webkit-tap-highlight-color: transparent;
+      z-index:6;
+      box-shadow: 0 10px 18px rgba(11,31,51,.12);
+      cursor:pointer;
+    }
+    #asdKeyHead{
+      padding:12px 12px;
+      border-bottom:1px solid rgba(11,31,51,.10);
+      font-weight:900;
+      font-size:14px;
+      color:var(--text-navy);
+    }
+    #asdKeyBody{
+      padding:12px 12px;
+      color:var(--text-sub);
+      font-size:12.5px;
+      line-height:1.4;
+    }
+    #asdKeyFoot{
+      padding:12px 12px;
+      border-top:1px solid rgba(11,31,51,.10);
+      display:flex;
+      justify-content:flex-end;
+    }
+    #asdKeyConfirm{
+      border:1px solid rgba(0,94,184,.65);
+      background:var(--acuvue-blue);
+      color:#fff;
+      font-weight:900;
+      font-size:12.5px;
+      padding:10px 14px;
+      border-radius:12px;
+      -webkit-tap-highlight-color: transparent;
+      cursor:pointer;
+      box-shadow: 0 10px 22px rgba(0,94,184,.22);
+    }
+    #asdKeyConfirm:active{ transform:scale(.98); }
   </style>
 </head>
 
@@ -843,17 +1004,17 @@
   <div id="missionBar">
     <div id="missionASD" class="missionCard" role="button" tabindex="0" aria-label="ASD 기술 보기">
       <div class="missionNo">01</div>
-      <div class="missionTitle">ASD 기술</div>
+      <div class="missionTitle">ASD 축안정화</div>
       <div class="missionDesc">카드를 눌러 확인</div>
     </div>
     <div id="missionPVP" class="missionCard" role="button" tabindex="0" aria-label="PVP 보기">
       <div class="missionNo">02</div>
-      <div class="missionTitle">눈물 안정화</div>
+      <div class="missionTitle">ASD 편안한 시야</div>
       <div class="missionDesc">카드를 눌러 확인</div>
     </div>
     <div id="missionBlue" class="missionCard" role="button" tabindex="0" aria-label="옵티블루 보기">
       <div class="missionNo">03</div>
-      <div class="missionTitle">옵티블루 기술</div>
+      <div class="missionTitle">ASD 착용감</div>
       <div class="missionDesc">카드를 눌러 확인</div>
     </div>
   </div>
@@ -1007,8 +1168,6 @@
     </svg>
   </div>
 
-
-
   <div id="bluePill" aria-label="블루라이트 차단 선택">
     <div id="blueSegOn" class="blueSegBtn">블루라이트 차단 ON</div>
     <div id="blueSegOff" class="blueSegBtn">OFF</div>
@@ -1063,6 +1222,20 @@
     <div id="pvpConfirm" role="button" tabindex="0" aria-label="확인">확인</div>
   </div>
 
+  <!-- ✅ [추가] ASD 키 메시지 팝업 -->
+  <div id="asdKeyOverlay" aria-hidden="true">
+    <div id="asdKeyCard" role="dialog" aria-label="ASD 키 메시지">
+      <button id="asdKeyClose" type="button" aria-label="닫기">✕</button>
+      <div id="asdKeyHead">ASD 축안정화</div>
+      <div id="asdKeyBody">
+        아큐브 ASD는 자연스러운 눈 깜박임을 통해 빠르고 정확하게 축 안정화를 합니다.
+      </div>
+      <div id="asdKeyFoot">
+        <button id="asdKeyConfirm" type="button" aria-label="확인">확인</button>
+      </div>
+    </div>
+  </div>
+
   <div id="asdOverlay" aria-hidden="true">
     <div id="asdCard">
       <button id="asdClose" type="button" aria-label="닫기">✕</button>
@@ -1072,7 +1245,7 @@
         <img id="asdLensImg" src="lens.png" alt="Lens overlay"
              onerror="this.style.display='none'; document.getElementById('asdHint').textContent='lens.png / lens2.png 파일을 같은 폴더에 넣어주세요.';">
         <div id="asdMaskShade" aria-hidden="true"></div>
-                <img id="asdUpperLid" src="upper_lid.png" alt="Upper eyelid overlay" onerror="this.style.display='none';">
+        <img id="asdUpperLid" src="upper_lid.png" alt="Upper eyelid overlay" onerror="this.style.display='none';">
 
         <div id="asdBlinkLid" aria-hidden="true">
           <div id="asdLidTop"></div>
@@ -1083,7 +1256,19 @@
         <button id="asdRotateBtn" type="button" aria-label="회전">축이탈</button>
         <button id="asdBlinkBtn" type="button" aria-label="눈 깜박">깜박임</button>
       </div>
-      <div id="asdHint">아큐브 ASD는 자연스로운 눈 깜박임을 통해 빠르고 정확하게 축 안정화를 합니다.  미션: ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜주세요</div>
+      <div id="asdHint">‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜 보세요</div>
+    </div>
+  </div>
+
+  <!-- ✅ [추가] 튜토리얼(자동) -->
+  <div id="tutorialOverlay" aria-hidden="true">
+    <div id="tutorialHighlight" aria-hidden="true"></div>
+    <div id="tutorialBubble" role="dialog" aria-label="튜토리얼 안내">
+      <div id="tutorialBubbleHead">가이드</div>
+      <div id="tutorialBubbleBody"></div>
+      <div id="tutorialBubbleFoot">
+        <button id="tutorialNext" type="button" aria-label="확인">확인</button>
+      </div>
     </div>
   </div>
 
@@ -1171,6 +1356,21 @@
 
     const lensOccludeEllipse = document.getElementById('lensOccludeEllipse');
 
+    /* =========================
+       ✅ [추가] ASD 키 메시지 DOM
+       ========================= */
+    const asdKeyOverlay = document.getElementById('asdKeyOverlay');
+    const asdKeyClose = document.getElementById('asdKeyClose');
+    const asdKeyConfirm = document.getElementById('asdKeyConfirm');
+
+    /* =========================
+       ✅ [추가] 튜토리얼 DOM
+       ========================= */
+    const tutorialOverlay = document.getElementById('tutorialOverlay');
+    const tutorialHighlight = document.getElementById('tutorialHighlight');
+    const tutorialBubble = document.getElementById('tutorialBubble');
+    const tutorialBody = document.getElementById('tutorialBubbleBody');
+    const tutorialNext = document.getElementById('tutorialNext');
 
     /* =========================
        ✅ [추가] iOS Safari에서 SVG gradient/filter 라인이 '안 보이는' 케이스 최후 방어
@@ -1225,7 +1425,6 @@
       });
     }
     /* ========================= */
-
 
     const asdEyeMV = document.getElementById('asdEyeMV');
     const asdLensImg = document.getElementById('asdLensImg');
@@ -1414,104 +1613,81 @@
       beamHit.setAttribute('opacity','0.90');
     }
 
- 
-function updateBeams(){
-  const visible = (bluePanelOpen && currentMode === 'lens');
-  if(!visible) return;
+    function updateBeams(){
+      const visible = (bluePanelOpen && currentMode === 'lens');
+      if(!visible) return;
 
-  const rect = mv.getBoundingClientRect();
+      const rect = mv.getBoundingClientRect();
 
-  const toVw = (x)=> (x / window.innerWidth) * 100;
-  const toVh = (y)=> (y / window.innerHeight) * 100;
+      const toVw = (x)=> (x / window.innerWidth) * 100;
+      const toVh = (y)=> (y / window.innerHeight) * 100;
 
-  // ✅ iOS Safari에서 viewBox 밖으로 크게 나가면 line이 통째로 안 그려지는 케이스 방지
-  const clamp = (v, min, max)=> Math.max(min, Math.min(max, v));
+      // ✅ iOS Safari에서 viewBox 밖으로 크게 나가면 line이 통째로 안 그려지는 케이스 방지
+      const clamp = (v, min, max)=> Math.max(min, Math.min(max, v));
 
-  // =========================
-  // ✅ 렌즈 중심(화면상) 계산
-  // - model-viewer의 bounding rect 비율 기반(카메라/회전/드래그에도 자연스럽게 따라감)
-  // =========================
-  const lensCx = clamp(toVw(rect.left + rect.width  * 0.35), 0, 100);
-  const lensCy = clamp(toVh(rect.top  + rect.height * 0.35), 0, 100);
-  const rx = clamp((rect.width  / window.innerWidth)  * 100 * 0.24, 8, 40);
-  const ry = clamp((rect.height / window.innerHeight) * 100 * 0.28, 10, 45);
+      // =========================
+      // ✅ 렌즈 중심(화면상) 계산
+      // =========================
+      const lensCx = clamp(toVw(rect.left + rect.width  * 0.35), 0, 100);
+      const lensCy = clamp(toVh(rect.top  + rect.height * 0.35), 0, 100);
+      const rx = clamp((rect.width  / window.innerWidth)  * 100 * 0.24, 8, 40);
+      const ry = clamp((rect.height / window.innerHeight) * 100 * 0.28, 10, 45);
 
-  // =========================
-  // ✅ 원하는 입사각: 수평 기준 약 165° 느낌(=약 15° 기울기)
-  // - hit(흰 점) 위치를 렌즈 "표면(타원 경계)"에 고정
-  // - 입사/출사/반사 모두 이 hit를 기준으로 계산
-  // =========================
-  const m = Math.tan((15 * Math.PI) / 180); // 15°
+      const m = Math.tan((15 * Math.PI) / 180); // 15°
 
-  // ✅ line: (lensCx, lensCy) 를 지나며 기울기 m 인 직선과
-  //    ellipse: ((x-lensCx)/rx)^2 + ((y-lensCy)/ry)^2 = 1 의 교점
-  //    -> 좌측(입사) 표면 교점을 hit 로 사용
-    // ✅ 히트 포인트를 렌즈 중심(시각적 중심)에 고정
-  // - 렌즈 오빗/움직임에도 항상 렌즈 중심을 기준으로 따라오도록
-  const hx = lensCx;
-  const hy = lensCy;
+      // ✅ 히트 포인트를 렌즈 중심(시각적 중심)에 고정
+      const hx = lensCx;
+      const hy = lensCy;
 
-  // 입사광 시작점(왼쪽 경계 x=0) : 같은 직선 연장
-  const inX1 = 0;
-  const inY1 = clamp(hy - (m * hx), 0, 100);
+      // 입사광 시작점(왼쪽 경계 x=0)
+      const inX1 = 0;
+      const inY1 = clamp(hy - (m * hx), 0, 100);
 
-  // 출사광 끝점(오른쪽 경계 x=100) : 같은 직선 연장(꺾임 없음)
-  const outX2 = 100;
-  const outY2 = clamp(hy + (m * (outX2 - hx)), 0, 100);
+      // 출사광 끝점(오른쪽 경계 x=100)
+      const outX2 = 100;
+      const outY2 = clamp(hy + (m * (outX2 - hx)), 0, 100);
 
-  // -------------------------
-  // ✅ 입사광(beamIn): (0,inY1) -> (hx,hy)
-  // -------------------------
-  beamIn.setAttribute('x1', inX1);
-  beamIn.setAttribute('y1', inY1);
-  beamIn.setAttribute('x2', hx);
-  beamIn.setAttribute('y2', hy);
+      // 입사광
+      beamIn.setAttribute('x1', inX1);
+      beamIn.setAttribute('y1', inY1);
+      beamIn.setAttribute('x2', hx);
+      beamIn.setAttribute('y2', hy);
 
-  // -------------------------
-  // ✅ 출사광(beamOut): (hx,hy) -> (100,outY2)  (꺾임 없음)
-  // -------------------------
-  beamOut.setAttribute('x1', hx);
-  beamOut.setAttribute('y1', hy);
-  beamOut.setAttribute('x2', outX2);
-  beamOut.setAttribute('y2', outY2);
+      // 출사광
+      beamOut.setAttribute('x1', hx);
+      beamOut.setAttribute('y1', hy);
+      beamOut.setAttribute('x2', outX2);
+      beamOut.setAttribute('y2', outY2);
 
-  // -------------------------
-  // ✅ 반사광(beamBend): (hx,hy) -> 위로 튀는 모습(파란색)
-  // - 길이는 기존 비율 유지하되, 렌즈 중심 기준으로 자연스럽게 따라감
-  // -------------------------
-  const bendX2 = clamp(hx - rx * 0.55, 0, 100);
-  const bendY2 = clamp(hy - ry * 0.95, 18, 100);
+      // 반사광
+      const bendX2 = clamp(hx - rx * 0.55, 0, 100);
+      const bendY2 = clamp(hy - ry * 0.95, 18, 100);
 
-  beamBend.setAttribute('x1', hx);
-  beamBend.setAttribute('y1', hy);
-  beamBend.setAttribute('x2', bendX2);
-  beamBend.setAttribute('y2', bendY2);
+      beamBend.setAttribute('x1', hx);
+      beamBend.setAttribute('y1', hy);
+      beamBend.setAttribute('x2', bendX2);
+      beamBend.setAttribute('y2', bendY2);
 
-  // 중앙 히트 포인트(흰 점)
-  beamHit.setAttribute('cx', hx);
-  beamHit.setAttribute('cy', hy);
+      // 히트 점
+      beamHit.setAttribute('cx', hx);
+      beamHit.setAttribute('cy', hy);
 
-  // -------------------------
-  // ✅ 출사광이 렌즈를 "지나는 구간"이 앞에서 안보이게: 마스크(타원) 위치 갱신
-  // - 렌즈 중심/크기 동일 값 사용(카메라 움직여도 함께 추적)
-  // -------------------------
-  if(lensOccludeEllipse){
-    lensOccludeEllipse.setAttribute('cx', lensCx);
-    lensOccludeEllipse.setAttribute('cy', lensCy);
-    lensOccludeEllipse.setAttribute('rx', rx);
-    lensOccludeEllipse.setAttribute('ry', ry);
-  }
+      // 마스크 타원 갱신
+      if(lensOccludeEllipse){
+        lensOccludeEllipse.setAttribute('cx', lensCx);
+        lensOccludeEllipse.setAttribute('cy', lensCy);
+        lensOccludeEllipse.setAttribute('rx', rx);
+        lensOccludeEllipse.setAttribute('ry', ry);
+      }
 
-  // 애니메이션용 좌표 저장
-  beamGeom = {
-    in:  { x1: inX1, y1: inY1, x2: hx,    y2: hy },
-    out: { x1: hx,   y1: hy,   x2: outX2, y2: outY2 },
-    bend:{ x1: hx,   y1: hy,   x2: bendX2,y2: bendY2 }
-  };
-}
+      beamGeom = {
+        in:  { x1: inX1, y1: inY1, x2: hx,    y2: hy },
+        out: { x1: hx,   y1: hy,   x2: outX2, y2: outY2 },
+        bend:{ x1: hx,   y1: hy,   x2: bendX2,y2: bendY2 }
+      };
+    }
 
-
-mv.addEventListener('camera-change', ()=>{
+    mv.addEventListener('camera-change', ()=>{
       if(bluePanelOpen && currentMode === 'lens') updateBeams();
     });
     window.addEventListener('resize', ()=>{
@@ -1526,7 +1702,7 @@ mv.addEventListener('camera-change', ()=>{
 
     function setASDHintDefault(){
       if(!asdHint) return;
-      asdHint.innerHTML = '아큐브 ASD는 자연스로운 눈 깜박임을 통해 빠르고 정확하게 축 안정화를 합니다.  미션: ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜주세요';
+      asdHint.innerHTML = '‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜 보세요';
     }
     function setASDHintSuccess(){
       if(!asdHint) return;
@@ -1892,6 +2068,41 @@ mv.addEventListener('camera-change', ()=>{
       syncMissionUI();
     }
 
+    /* =========================
+       ✅ [추가] ASD 키 메시지 → 확인 → 미션(ASD 오버레이) 전환
+       ========================= */
+    function openASDKey(){
+      if(bluePanelOpen) closeBluePanel();
+      if(pvpOn) forcePVPOff();
+      if(asdOverlay.classList.contains('show')) closeASD();
+
+      asdKeyOverlay.classList.add('show');
+      asdKeyOverlay.setAttribute('aria-hidden','false');
+    }
+    function closeASDKey(){
+      asdKeyOverlay.classList.remove('show');
+      asdKeyOverlay.setAttribute('aria-hidden','true');
+    }
+
+    if(asdKeyClose){
+      asdKeyClose.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        closeASDKey();
+      });
+    }
+    if(asdKeyOverlay){
+      asdKeyOverlay.addEventListener('click', (e)=>{
+        if(e.target === asdKeyOverlay) closeASDKey();
+      });
+    }
+    if(asdKeyConfirm){
+      asdKeyConfirm.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        closeASDKey();
+        openASD();
+      });
+    }
+
     function setModel(file, mode, options = {}){
       const { resetCamera = false } = options;
 
@@ -1973,9 +2184,15 @@ mv.addEventListener('camera-change', ()=>{
       setTimeout(keepMVPlaying, 120);
     });
 
+    /* =========================
+       ✅ [수정] ASD 카드 클릭: 키 메시지 → 확인 → 미션 오버레이
+       ========================= */
     function toggleASD(){
       if(asdOverlay.classList.contains('show')) closeASD();
-      else openASD();
+      else{
+        // 키 메시지 팝업 먼저
+        openASDKey();
+      }
     }
     missionASD.addEventListener('click', toggleASD);
     missionASD.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') toggleASD(); });
@@ -1991,6 +2208,7 @@ mv.addEventListener('camera-change', ()=>{
 
       if(!pvpOn && bluePanelOpen) closeBluePanel();
       if(asdOverlay.classList.contains('show')) closeASD();
+      if(asdKeyOverlay && asdKeyOverlay.classList.contains('show')) closeASDKey();
 
       pvpOn = !pvpOn;
 
@@ -2028,6 +2246,7 @@ mv.addEventListener('camera-change', ()=>{
 
       forcePVPOff();
       if(asdOverlay.classList.contains('show')) closeASD();
+      if(asdKeyOverlay && asdKeyOverlay.classList.contains('show')) closeASDKey();
 
       bluePanelOpen = !bluePanelOpen;
 
@@ -2120,6 +2339,7 @@ mv.addEventListener('camera-change', ()=>{
 
     btnReset.addEventListener('click', async ()=>{
       if(asdOverlay.classList.contains('show')) closeASD();
+      if(asdKeyOverlay && asdKeyOverlay.classList.contains('show')) closeASDKey();
       if(pvpOn){ pvpOn = false; showPVP(false); }
       if(bluePanelOpen){ bluePanelOpen = false; forceBlueOff(); }
 
@@ -2135,6 +2355,110 @@ mv.addEventListener('camera-change', ()=>{
     modeHeat.addEventListener('click', ()=> setModel('lens_heatmap.glb', 'heat', { resetCamera:false }));
 
     setModel('lens_clear.glb', 'lens', { resetCamera:true });
+
+    /* =========================
+       ✅ [추가] 자동 튜토리얼(좌측 → 하단 → 상단)
+       - "확인" 누를 때마다 다음 단계
+       ========================= */
+    const tutorialSteps = [
+      {
+        key: 'left',
+        target: ()=> document.getElementById('missionASD'),
+        title: '가이드 1/3',
+        body: '좌측 상단 카드에서 기능 미션을 확인할 수 있어요.'
+      },
+      {
+        key: 'bottom',
+        target: ()=> document.getElementById('bottomBtns'),
+        title: '가이드 2/3',
+        body: '하단 버튼에서 투명 렌즈 / 두께 MAP 모드를 전환할 수 있어요.'
+      },
+      {
+        key: 'top',
+        target: ()=> document.getElementById('missionBar'),
+        title: '가이드 3/3',
+        body: '상단 카드들을 순서대로 눌러 기능을 확인해 보세요.'
+      }
+    ];
+    let tutorialIdx = 0;
+
+    function placeTutorial(targetEl){
+      if(!targetEl) return;
+      const r = targetEl.getBoundingClientRect();
+
+      // highlight
+      tutorialHighlight.style.left = (r.left - 6) + 'px';
+      tutorialHighlight.style.top = (r.top - 6) + 'px';
+      tutorialHighlight.style.width = (r.width + 12) + 'px';
+      tutorialHighlight.style.height = (r.height + 12) + 'px';
+
+      // bubble 위치: 기본은 아래쪽, 화면 밖이면 위로
+      const bubbleW = Math.min(520, window.innerWidth * 0.92);
+      const bubbleH = tutorialBubble.getBoundingClientRect().height || 160;
+
+      let x = Math.max(12, Math.min(window.innerWidth - bubbleW - 12, r.left));
+      let y = r.bottom + 12;
+
+      // 아래 공간 부족하면 위로
+      if(y + bubbleH > window.innerHeight - 12){
+        y = Math.max(12, r.top - bubbleH - 12);
+      }
+
+      tutorialBubble.style.left = x + 'px';
+      tutorialBubble.style.top = y + 'px';
+    }
+
+    function showTutorialStep(i){
+      const step = tutorialSteps[i];
+      if(!step) return;
+
+      const targetEl = step.target();
+      if(!targetEl) return;
+
+      tutorialIdx = i;
+      tutorialOverlay.classList.add('show');
+      tutorialOverlay.setAttribute('aria-hidden','false');
+
+      document.getElementById('tutorialBubbleHead').textContent = step.title;
+      tutorialBody.textContent = step.body;
+
+      placeTutorial(targetEl);
+    }
+
+    function closeTutorial(){
+      tutorialOverlay.classList.remove('show');
+      tutorialOverlay.setAttribute('aria-hidden','true');
+    }
+
+    if(tutorialNext){
+      tutorialNext.addEventListener('click', ()=>{
+        const next = tutorialIdx + 1;
+        if(next >= tutorialSteps.length){
+          try{ sessionStorage.setItem('acuvue_tutorial_done','1'); }catch(e){}
+          closeTutorial();
+          return;
+        }
+        showTutorialStep(next);
+      });
+    }
+
+    window.addEventListener('resize', ()=>{
+      if(tutorialOverlay.classList.contains('show')){
+        const step = tutorialSteps[tutorialIdx];
+        const targetEl = step?.target?.();
+        if(targetEl) placeTutorial(targetEl);
+      }
+    });
+
+    // 자동 시작(세션 1회)
+    (function autoStartTutorial(){
+      let done = false;
+      try{ done = sessionStorage.getItem('acuvue_tutorial_done') === '1'; }catch(e){}
+      if(done) return;
+
+      // 첫 렌더 후 표시
+      setTimeout(()=>{ showTutorialStep(0); }, 380);
+    })();
   </script>
 </body>
 </html>
