@@ -380,13 +380,26 @@
     }
     #asdHint{
       padding:10px 12px;
-      color:var(--text-sub);
-      font-size:12.5px;
-      opacity:.95;
+      color:var(--text-navy);
+      font-size:14px;
+      font-weight:800;
+      line-height:1.35;
       border-top:1px solid rgba(11,31,51,.10);
       display:flex; align-items:center; justify-content:space-between;
       gap:12px;
       background: linear-gradient(180deg, rgba(234,243,255,.70) 0%, rgba(255,255,255,.55) 100%);
+    }
+    #asdHint .missionLabel{
+      color:var(--acuvue-blue);
+      font-weight:900;
+      margin-right:6px;
+      letter-spacing:.2px;
+    }
+    #asdHint .missionDone{
+      color:var(--acuvue-blue);
+      font-weight:900;
+      margin-right:6px;
+      letter-spacing:.2px;
     }
     #asdHint button{
       border:1px solid rgba(0,94,184,.65);
@@ -1856,12 +1869,12 @@
 
     function setASDHintDefault(){
       if(!asdHint) return;
-      asdHint.innerHTML = '‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜 보세요';
+      asdHint.innerHTML = '<span><b class="missionLabel">미션 1.</b>‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜 보세요</span>';
     }
     function setASDHintSuccess(){
       if(!asdHint) return;
       asdHint.innerHTML = `
-        <span>미션성공 : 축이 안정화되었습니다. 확인 버튼을 눌러주세요</span>
+        <span><b class="missionDone">미션 완료</b>축이 안정화되었습니다. 확인 버튼을 눌러주세요</span>
         <button id="asdConfirmBtn" type="button" aria-label="확인">확인</button>
       `;
       const btn = document.getElementById('asdConfirmBtn');
