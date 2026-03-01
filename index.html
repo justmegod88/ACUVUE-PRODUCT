@@ -839,31 +839,70 @@
        - 튜토리얼 버튼 없음
        - 컬러는 ACUVUE 블루
        ========================= */
-    #tutorialOverlay{
-      position:fixed; inset:0;
-      z-index:120;
-      display:none;
-      background:rgba(11,31,51,.28);
-      backdrop-filter: blur(6px);
-      pointer-events:auto;
-    }
-    #tutorialOverlay.show{ display:block; }
+    
+#tutorialOverlay{
+  position:fixed; inset:0;
+  z-index:120;
+  display:none;
+  pointer-events:auto;
+}
+#tutorialOverlay.show{ display:block; }
 
-    /* 네이버 튜토리얼 느낌: 하이라이트는 테두리 + 살짝 glow */
-    #tutorialHighlight{
-      position:fixed;
-      z-index:121;
-      border-radius:18px;
-      box-shadow:
-        0 0 0 9999px rgba(11,31,51,.36),
-        0 0 0 2px rgba(0,94,184,.55),
-        0 12px 30px rgba(0,94,184,.18);
-      border:1px solid rgba(255,255,255,.38);
-      background:rgba(255,255,255,.10);
-      pointer-events:none;
-    }
+/* ✅ 화면 전체 흐림 + 딤(하지만 강조 영역은 '뚫려서' 선명하게) */
+#tutorialDim{
+  position:fixed; inset:0;
+  z-index:121;
+  background:rgba(11,31,51,.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 
-    /* Bubble 카드 */
+  /* cutout vars (px) */
+  --hx: 12px;
+  --hy: 12px;
+  --hw: 100px;
+  --hh: 80px;
+
+  /* ✅ 1) 전체(불투명) 마스크 2) 강조영역(불투명) 마스크 → XOR로 '구멍' 생성 */
+  -webkit-mask-image:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0);
+  -webkit-mask-size:
+    100% 100%,
+    var(--hw) var(--hh);
+  -webkit-mask-position:
+    0 0,
+    var(--hx) var(--hy);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-composite: xor;
+
+  /* 표준(지원되는 브라우저용) */
+  mask-image:
+    linear-gradient(#000 0 0),
+    linear-gradient(#000 0 0);
+  mask-size:
+    100% 100%,
+    var(--hw) var(--hh);
+  mask-position:
+    0 0,
+    var(--hx) var(--hy);
+  mask-repeat: no-repeat;
+  mask-composite: exclude;
+}
+
+/* ✅ step1 전용 손가락(강조영역 안에서만 표시) */
+#tutorialFinger{
+  position:fixed;
+  z-index:122;
+  display:none;
+  width:74px;
+  height:74px;
+  pointer-events:none;
+  opacity:.95;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 12px 20px rgba(0,0,0,.18));
+}
+#tutorialFinger svg{ width:100%; height:100%; display:block; }
+/* Bubble 카드 */
     #tutorialBubble{
       position:fixed;
       z-index:122;
@@ -1332,7 +1371,13 @@
 
   <!-- ✅ [수정] 네이버 스타일 튜토리얼 -->
   <div id="tutorialOverlay" aria-hidden="true">
-    <div id="tutorialHighlight" aria-hidden="true"></div>
+    <div id="tutorialDim" aria-hidden="true"></div>
+    <div id="tutorialFinger" aria-hidden="true">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <path d="M38 10c0-3.3-2.7-6-6-6s-6 2.7-6 6v20l-2-2c-2.2-2.2-5.8-2.2-8 0s-2.2 5.8 0 8l12 12c2.4 2.4 5.6 3.7 9 3.7H42c6.6 0 12-5.4 12-12V30c0-3.3-2.7-6-6-6-1.3 0-2.6.4-3.6 1.2-.8-2.3-3-4-5.4-4-1.5 0-2.9.5-4 1.4V10z" fill="rgba(255,255,255,.95)"/>
+        <path d="M38 10c0-3.3-2.7-6-6-6s-6 2.7-6 6v20l-2-2c-2.2-2.2-5.8-2.2-8 0s-2.2 5.8 0 8l12 12c2.4 2.4 5.6 3.7 9 3.7H42c6.6 0 12-5.4 12-12V30c0-3.3-2.7-6-6-6-1.3 0-2.6.4-3.6 1.2-.8-2.3-3-4-5.4-4-1.5 0-2.9.5-4 1.4V10z" fill="none" stroke="rgba(0,94,184,.55)" stroke-width="2.2" stroke-linejoin="round"/>
+      </svg>
+    </div>
 
     <div id="tutorialBubble" role="dialog" aria-label="튜토리얼 안내">
       <div id="tutorialBubbleHead">
@@ -1451,7 +1496,8 @@
        ✅ [수정] 튜토리얼 DOM (네이버 스타일)
        ========================= */
     const tutorialOverlay = document.getElementById('tutorialOverlay');
-    const tutorialHighlight = document.getElementById('tutorialHighlight');
+    const tutorialDim = document.getElementById('tutorialDim');
+    const tutorialFinger = document.getElementById('tutorialFinger');
     const tutorialBubble = document.getElementById('tutorialBubble');
     const tutorialBody = document.getElementById('tutorialBubbleBody');
     const tutorialNext = document.getElementById('tutorialNext');
@@ -2471,18 +2517,39 @@
       dots.forEach((d, idx)=> d.classList.toggle('on', idx === i));
     }
 
-    function placeTutorial(targetEl){
-      if(!targetEl) return;
+    
+function placeTutorial(targetEl){
+  if(!targetEl) return;
+  const r = targetEl.getBoundingClientRect();
 
-      const r = targetEl.getBoundingClientRect();
+  // ✅ cutout (선명 영역) 위치/크기 설정
+  const pad = 10; // 강조 영역 여백
+  const hx = Math.max(8, r.left - pad);
+  const hy = Math.max(8, r.top - pad);
+  const hw = Math.min(window.innerWidth - hx - 8, r.width + pad*2);
+  const hh = Math.min(window.innerHeight - hy - 8, r.height + pad*2);
 
-      // highlight
-      tutorialHighlight.style.left = (r.left - 8) + 'px';
-      tutorialHighlight.style.top = (r.top - 8) + 'px';
-      tutorialHighlight.style.width = (r.width + 16) + 'px';
-      tutorialHighlight.style.height = (r.height + 16) + 'px';
+  if(tutorialDim){
+    tutorialDim.style.setProperty('--hx', hx + 'px');
+    tutorialDim.style.setProperty('--hy', hy + 'px');
+    tutorialDim.style.setProperty('--hw', hw + 'px');
+    tutorialDim.style.setProperty('--hh', hh + 'px');
+  }
 
-      // bubble 위치: 기본은 아래쪽, 화면 밖이면 위로
+  // ✅ step1(조작)에서만 손가락 표시: 강조 영역 중앙
+  if(tutorialFinger){
+    if(tutorialIdx === 0){
+      tutorialFinger.style.display = 'block';
+      const fx = hx + hw * 0.50;
+      const fy = hy + hh * 0.60;
+      tutorialFinger.style.left = fx + 'px';
+      tutorialFinger.style.top  = fy + 'px';
+    }else{
+      tutorialFinger.style.display = 'none';
+    }
+  }
+
+  // bubble 위치: 기본은 아래쪽, 화면 밖이면 위로
       const bubbleW = Math.min(520, window.innerWidth * 0.92);
 
       // 현재 bubble 높이 계산
@@ -2525,6 +2592,7 @@
     function closeTutorial(){
       tutorialOverlay.classList.remove('show');
       tutorialOverlay.setAttribute('aria-hidden','true');
+      if(tutorialFinger) tutorialFinger.style.display = 'none';
     }
 
     if(tutorialNext){
