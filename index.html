@@ -726,140 +726,8 @@
     </div>
   </div>
 
-  <div id="blueBackGlow" aria-hidden="true"></div>
 
-  <div id="blueRayLayerBack" aria-hidden="true">
-    <svg id="blueRaySvgBack" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="beamOutGradBack" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="rgb(255,191,0)" stop-opacity="0.22"></stop>
-          <stop offset="0.35" stop-color="rgb(255,191,0)" stop-opacity="1"></stop>
-          <stop offset="0.75" stop-color="rgb(255,191,0)" stop-opacity="0.50"></stop>
-          <stop offset="1" stop-color="rgb(255,191,0)" stop-opacity="0"></stop>
-        </linearGradient>
-        <filter id="beamGlowBack" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="0.9" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
 
-      <line id="beamOutBack" x1="50" y1="50" x2="100" y2="50"
-            stroke="url(#beamOutGradBack)"
-            stroke-width="3.00"
-            stroke-linecap="round"
-            filter="url(#beamGlowBack)"
-            opacity="0.0"></line>
-    </svg>
-  </div>
-
-  <div id="blueRayLayer" aria-hidden="true">
-    <svg id="blueRaySvg" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="beamInGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="rgb(255,170,0)" stop-opacity="0"></stop>
-          <stop offset="0.28" stop-color="rgb(255,170,0)" stop-opacity="0.55"></stop>
-          <stop offset="0.55" stop-color="rgb(255,170,0)" stop-opacity="1"></stop>
-          <stop offset="1" stop-color="rgb(255,170,0)" stop-opacity="0.18"></stop>
-        </linearGradient>
-
-        <linearGradient id="beamOutGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="rgb(255,205,70)" stop-opacity="0.10"></stop>
-          <stop offset="0.30" stop-color="rgb(255,205,70)" stop-opacity="0.75"></stop>
-          <stop offset="0.55" stop-color="rgb(255,205,70)" stop-opacity="1"></stop>
-          <stop offset="1" stop-color="rgb(255,205,70)" stop-opacity="0"></stop>
-        </linearGradient>
-
-        <linearGradient id="beamReflectGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="rgb(0,94,184)" stop-opacity="0.15"></stop>
-          <stop offset="0.30" stop-color="rgb(0,94,184)" stop-opacity="0.80"></stop>
-          <stop offset="0.55" stop-color="rgb(0,94,184)" stop-opacity="1"></stop>
-          <stop offset="1" stop-color="rgb(0,94,184)" stop-opacity="0"></stop>
-        </linearGradient>
-
-        <filter id="beamGlow" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="1.15" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-
-        <marker id="beamArrowBlueSmall" viewBox="0 0 12 10" refX="10.2" refY="5"
-                markerWidth="0.9" markerHeight="0.9" orient="auto">
-          <path d="M 0 1 L 11 5 L 0 9"
-                fill="none"
-                stroke="rgb(0,94,184)"
-                stroke-width="2.0"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                opacity="0.95"></path>
-        </marker>
-
-        <marker id="beamArrowYellowSmall" viewBox="0 0 12 10" refX="10.2" refY="5"
-                markerWidth="0.9" markerHeight="0.9" orient="auto">
-          <path d="M 0 1 L 11 5 L 0 9"
-                fill="none"
-                stroke="rgb(255,190,40)"
-                stroke-width="2.0"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                opacity="0.95"></path>
-        </marker>
-
-        <mask id="lensOccludeMask">
-          <rect x="0" y="0" width="100" height="100" fill="white"></rect>
-          <ellipse id="lensOccludeEllipse" cx="56" cy="52" rx="26" ry="30" fill="black"></ellipse>
-        </mask>
-      </defs>
-
-      <line id="beamIn" x1="0" y1="50" x2="50" y2="50"
-            stroke="url(#beamInGrad)"
-            stroke-width="3.4"
-            stroke-linecap="round"
-            filter="url(#beamGlow)"
-            opacity="0.0"></line>
-
-      <line id="beamOutFront" x1="50" y1="50" x2="100" y2="50"
-            stroke="url(#beamOutGrad)"
-            stroke-width="3.4"
-            stroke-linecap="round"
-            marker-end="url(#beamArrowYellowSmall)"
-            mask="url(#lensOccludeMask)"
-            filter="url(#beamGlow)"
-            opacity="0.0"></line>
-
-      <line id="beamBend" x1="50" y1="50" x2="25" y2="70"
-            stroke="url(#beamReflectGrad)"
-            stroke-width="3.6"
-            stroke-linecap="round"
-            marker-end="url(#beamArrowBlueSmall)"
-            filter="url(#beamGlow)"
-            opacity="0.0"></line>
-
-      <circle id="beamHit"
-              cx="50"
-              cy="50"
-              r="1.6"
-              fill="rgb(255,255,255)"
-              fill-opacity="0.80"
-              filter="url(#beamGlow)"
-              opacity="0.0"></circle>
-    </svg>
-  </div>
-
-  <div id="blueRayBehind" aria-hidden="true">
-    <svg id="blueRaySvgBack" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <line id="beamOutFront" x1="50" y1="50" x2="100" y2="50"
-            stroke="url(#beamOutGrad)"
-            stroke-width="2.00"
-            stroke-linecap="round"
-            filter="url(#beamGlow)"
-            opacity="0.0"></line>
-    </svg>
-  </div>
 
 
 
@@ -1008,22 +876,6 @@
 
     const thicknessBar = document.getElementById('thicknessBar');
 
-    const bluePill = document.getElementById('bluePill');
-    const blueSegOn  = document.getElementById('blueSegOn');
-    const blueSegOff = document.getElementById('blueSegOff');
-    const blueRayLayer = document.getElementById('blueRayLayer');
-    const blueRayLayerBack = document.getElementById('blueRayLayerBack');
-    const blueRayBehind = document.getElementById('blueRayBehind');
-    const blueBackGlow = document.getElementById('blueBackGlow');
-    const blueInfo = document.getElementById('blueInfo');
-    const blueMissionText = document.getElementById('blueMissionText');
-    const blueMissionConfirm = document.getElementById('blueMissionConfirm');
-
-    const beamIn  = document.getElementById('beamIn');
-    const beamOut = document.getElementById('beamOutBack');
-    const beamOutFront = document.getElementById('beamOutFront');
-    const beamBend = document.getElementById('beamBend');
-    const beamHit = document.getElementById('beamHit');
 
     const lensOccludeEllipse = document.getElementById('lensOccludeEllipse');
 
@@ -1102,54 +954,6 @@
     const HEAT_DEFAULT_TARGET_STR = '0m 0.015m 0m';
 
     let pendingCameraPreset = null;
-
-    const BLUEGREEN_TINT = [0.55, 1.08, 0.72, 0.45];
-    let allMaterialBackup = null;
-
-    const blueMission = {
-      successShown: false,
-      confirmed: false,
-      sawOn: false,
-      sawOff: false
-    };
-
-    let beamAnimToken = 0;
-    let beamGeom = null;
-
-    function setLineFull(el, g){
-      if(!el || !g) return;
-      el.setAttribute('x1', g.x1); el.setAttribute('y1', g.y1);
-      el.setAttribute('x2', g.x2); el.setAttribute('y2', g.y2);
-    }
-    function setLineProgress(el, g, t){
-      if(!el || !g) return;
-      const tt = Math.max(0, Math.min(1, t));
-      const x2 = g.x1 + (g.x2 - g.x1) * tt;
-      const y2 = g.y1 + (g.y2 - g.y1) * tt;
-      el.setAttribute('x1', g.x1); el.setAttribute('y1', g.y1);
-      el.setAttribute('x2', x2);   el.setAttribute('y2', y2);
-    }
-    function animateDraw(el, g, ms, delay=0, token=0){
-      if(!el || !g) return;
-      const startAt = performance.now() + delay;
-      setLineProgress(el, g, 0);
-      el.style.opacity = '';
-      el.setAttribute('opacity', el.getAttribute('opacity') || '1');
-
-      const tick = (now)=>{
-        if(token !== beamAnimToken) return;
-        if(now < startAt){ requestAnimationFrame(tick); return; }
-        const t = (now - startAt) / ms;
-        if(t >= 1){
-          setLineFull(el, g);
-          return;
-        }
-        setLineProgress(el, g, t);
-        requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }
-
 
 
     mv.addEventListener('camera-change', ()=>{
