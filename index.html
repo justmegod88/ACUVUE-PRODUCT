@@ -128,7 +128,190 @@
       box-shadow: 0 10px 28px rgba(11,31,51,.10);
     }
 
-   
+    /* =========================
+       ✅ 블루라이트: 상태 pill + 광선(투과/꺾임) + 설명/미션
+       ========================= */
+
+    #bluePill{
+      position:fixed;
+      right:14px;
+      bottom:210px;
+      z-index:72;
+      display:none;
+
+      padding:6px;
+      border-radius:999px;
+      background:var(--glass);
+      border:1px solid var(--line);
+      backdrop-filter: blur(12px);
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      box-shadow: var(--shadow);
+
+      gap:6px;
+      align-items:center;
+      white-space:nowrap;
+    }
+    .blueSegBtn{
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(0,94,184,.06);
+      color:var(--acuvue-blue);
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:.2px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .blueSegBtn:active{ transform:scale(.98); }
+    .blueSegBtn.on{
+      background:var(--acuvue-blue);
+      border-color:rgba(0,94,184,.65);
+      color:#ffffff;
+    }
+
+    #blueRayLayer{
+      position:fixed;
+      inset:0;
+      z-index:200;
+      pointer-events:none;
+      display:none;
+    }
+    #blueRaySvg{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    #blueRayLayerBack{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      display:none;
+    }
+    #blueRaySvgBack{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    #blueRayBehind{
+      position:fixed;
+      inset:0;
+      z-index:10;
+      pointer-events:none;
+      display:none;
+    }
+    #blueRaySvgBack{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+    #blueBackGlow{
+      position:fixed;
+      inset:0;
+      z-index:199;
+      pointer-events:none;
+      display:none;
+      background:
+        radial-gradient(35% 22% at 66% 52%,
+          rgba(0,94,184,.18) 0%,
+          rgba(0,94,184,.12) 22%,
+          rgba(0,94,184,.08) 38%,
+          rgba(0,94,184,0) 62%);
+      filter: blur(1px);
+      opacity:.95;
+    }
+
+    #blueInfo{
+      position:fixed;
+      left:12px;
+      right:12px;
+      bottom:92px;
+      z-index:71;
+      display:none;
+      border-radius:14px;
+      border:1px solid var(--panel-stroke);
+      background: var(--panel-grad);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--panel-glow);
+      overflow:hidden;
+    }
+    #blueInfo::before{
+      content:"";
+      position:absolute;
+      left:0; right:0; top:0;
+      height:2px;
+      background: var(--panel-topline);
+      opacity:.95;
+      pointer-events:none;
+    }
+    #blueInfo::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:14px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+      pointer-events:none;
+      opacity:.55;
+    }
+
+    #blueInfoTop{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(11,31,51,.10);
+      color:var(--text-navy);
+      font-weight:900;
+      font-size:13px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    #blueInfoTop b{ font-weight:900; }
+    #blueInfoTop b .pct{ color:var(--acuvue-blue); }
+
+    #blueInfoBody{
+      padding:10px 12px;
+      color:var(--text-sub);
+      font-size:12.5px;
+      line-height:1.35;
+    }
+
+    #blueInfoMission{
+      padding:9px 12px;
+      border-top:1px solid rgba(11,31,51,.10);
+      color:var(--text-navy);
+      font-size:12.5px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    #blueInfoMission .left{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      flex:1 1 auto;
+      color:var(--text-sub);
+    }
+    #blueInfoMission .confirm{
+      color:#ffffff;
+      font-weight:900;
+      opacity:1;
+      cursor:pointer;
+      user-select:none;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(0,94,184,.65);
+      background:var(--acuvue-blue);
+      backdrop-filter: blur(8px);
+      -webkit-tap-highlight-color: transparent;
+      flex:0 0 auto;
+      white-space:nowrap;
+      display:none;
+      box-shadow: 0 10px 22px rgba(0,94,184,.22);
+    }
+    #blueInfoMission .confirm:active{ transform:scale(.98); }
 
     /* ASD 오버레이 */
     #asdOverlay{
@@ -862,6 +1045,25 @@
     </svg>
   </div>
 
+  <div id="bluePill" aria-label="블루라이트 차단 선택">
+    <div id="blueSegOn" class="blueSegBtn">블루라이트 차단 ON</div>
+    <div id="blueSegOff" class="blueSegBtn">OFF</div>
+  </div>
+
+  <div id="blueInfo" aria-hidden="true">
+    <div id="blueInfoTop">
+      <b>블루라이트 <span class="pct">55%</span> 차단</b>
+    </div>
+    <div id="blueInfoBody">
+      아큐브 MAX는,
+      블루라이트를 55% 차단하여 디지털에 노출된 눈을 보호합니다.
+      블루라이트 차단을 위한 "블루 그린 틴트"를 확인해주세요.
+    </div>
+    <div id="blueInfoMission">
+      <div class="left" id="blueMissionText">미션: "블루라이트 차단 on" 버튼을 눌러 차이를 비교해 보세요</div>
+      <div class="confirm" id="blueMissionConfirm">확인</div>
+    </div>
+  </div>
 
   <div id="thicknessBar" aria-hidden="true">
     <div id="thHeader">
@@ -935,7 +1137,7 @@
     </div>
     <div class="tutBox" id="tutTop" style="display:none;">
       <div class="tutTitle">가이드 3</div>
-      <div class="tutText">각 카드를 눌러 체험을 진행해 보세요.<br/></div>
+      <div class="tutText">각 카드를 눌러 미션을 진행해 보세요.<br/>미션 완료시 기프티콘!</div>
       <button class="tutBtn" id="tutDone">확인</button>
     </div>
   </div>
@@ -1170,7 +1372,28 @@
       animateDraw(beamBend, beamGeom?.bend, 220, 120, token);
     }
 
-   
+    function setBlueUI(){
+      const visible = (bluePanelOpen && currentMode === 'lens');
+
+      bluePill.style.display = visible ? 'flex' : 'none';
+      blueInfo.style.display = visible ? 'block' : 'none';
+      blueInfo.setAttribute('aria-hidden', visible ? 'false' : 'true');
+
+      blueRayLayer.style.display = visible ? 'block' : 'none';
+      blueRayLayerBack.style.display = visible ? 'block' : 'none';
+      if(blueRayBehind) blueRayBehind.style.display = visible ? 'block' : 'none';
+      blueBackGlow.style.display = (visible && !blueOn) ? 'block' : 'none';
+
+      blueSegOn.classList.toggle('on', blueOn === true);
+      blueSegOff.classList.toggle('on', blueOn === false);
+
+      if(blueMission.successShown && !blueMission.confirmed){
+        blueMissionText.textContent = '미션 성공: 확인 버튼을 눌러주세요';
+        blueMissionConfirm.style.display = 'block';
+      }else{
+        blueMissionText.textContent = '미션: "블루라이트 차단 on" 버튼을 눌러 차이를 비교해 보세요';
+        blueMissionConfirm.style.display = 'none';
+      }
 
       syncBeamVisibility();
       if(visible){
