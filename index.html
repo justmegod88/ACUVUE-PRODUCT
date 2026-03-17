@@ -506,8 +506,7 @@
       opacity:.70;
       pointer-events:none;
       will-change: transform, opacity;
-      mix-blend-mode:normal;
-      filter:saturate(1.08) contrast(1.06);
+      z-index:2;
     }
 
     #asdLensRim{
@@ -524,6 +523,7 @@
         0 18px 46px rgba(11,31,51,.16),
         inset 0 0 24px rgba(255,255,255,.18);
       opacity:.45;
+      z-index:2;
     }
 
     #asdMaskShade{
@@ -540,7 +540,7 @@
           rgba(11,31,51,.14) 34%,
           rgba(11,31,51,0) 60%);
       opacity:.78;
-      mix-blend-mode:multiply;
+      z-index:2;
     }
 
     #asdBlinkLid{
@@ -549,8 +549,7 @@
       pointer-events:none;
       z-index:4;
     }
-    #asdLidTop,
-    #asdLidBot{
+    #asdLidTop, #asdLidBot{
       position:absolute;
       left:0;
       right:0;
@@ -575,8 +574,7 @@
           rgba(40,25,22,.98) 92%);
       transform: translateY(110%);
     }
-    #asdLidTop::after,
-    #asdLidBot::after{
+    #asdLidTop::after, #asdLidBot::after{
       content:"";
       position:absolute;
       left:-10%;
@@ -603,10 +601,6 @@
       align-items:center;
       justify-content:center;
       z-index:5;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
-      cursor:pointer;
-      box-shadow: 0 10px 22px rgba(11,31,51,.12);
     }
     #asdBlinkBtn{
       right:14px;
@@ -620,6 +614,7 @@
       border:1px solid rgba(0,94,184,.35);
       background:rgba(255,255,255,.92);
       color:var(--acuvue-blue);
+      box-shadow: 0 10px 22px rgba(11,31,51,.12);
     }
 
     #asdAngleBadge{
@@ -643,140 +638,165 @@
       position:fixed;
       inset:0;
       display:none;
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+    }
+    #tutorialLayer{
       z-index:95;
+      background:rgba(11,31,51,.38);
     }
-    #tutorialLayer.show,
-    #asdKeyMsgLayer.show{
-      display:block;
-    }
-
-    /* 가이드용 마스크 */
-    #tutorialMask{
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:rgba(8,22,37,.42);
-      backdrop-filter: blur(3px);
-      -webkit-mask-repeat:no-repeat;
-      -webkit-mask-composite: xor;
-              mask-composite: exclude;
-      transition: -webkit-mask .22s ease, mask .22s ease;
-    }
-
-    /* 강조 링 */
-    #tutorialFocus{
-      position:absolute;
-      pointer-events:none;
-      border:2px solid rgba(255,255,255,.88);
-      box-shadow:
-        0 0 0 6px rgba(255,255,255,.12),
-        0 12px 34px rgba(0,0,0,.12);
-      transition: all .22s ease;
-    }
-
-    /* 가이드 팝업 */
-    .tutBox{
-      position:absolute;
-      width:min(380px, calc(100vw - 40px));
-      background:linear-gradient(180deg, #1E63B8 0%, #0A5FBE 100%);
-      color:#fff;
-      border-radius:24px;
-      padding:18px 18px 16px;
-      box-shadow:
-        0 18px 48px rgba(0,0,0,.20),
-        0 6px 18px rgba(0,94,184,.22);
-      border:1px solid rgba(255,255,255,.20);
-      overflow:hidden;
-    }
-    .tutBox::before{
-      content:"";
-      position:absolute;
-      left:0;
-      right:0;
-      top:0;
-      height:2px;
-      background:linear-gradient(90deg, rgba(255,255,255,.85), rgba(255,255,255,0));
-      opacity:.85;
-    }
-    .tutBox::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:24px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
-      pointer-events:none;
-    }
-    .tutBox .tutTitle{
-      font-weight:900;
-      margin-bottom:10px;
-      font-size:18px;
-      letter-spacing:-.2px;
-    }
-    .tutBox .tutText{
-      line-height:1.5;
-      font-size:14px;
-      opacity:.96;
-      word-break:keep-all;
-    }
-    .tutBox .tutBtn{
-      margin-top:16px;
-      width:100%;
-      height:50px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.70);
-      background:#fff;
-      color:var(--acuvue-blue);
-      font-weight:900;
-      font-size:15px;
-      cursor:pointer;
-      box-shadow: inset 0 -2px 0 rgba(0,0,0,.04);
-    }
-
-    /* 키 메시지 팝업은 가이드와 다르게 유지 */
     #asdKeyMsgLayer{
       z-index:96;
       background:rgba(8,22,37,.45);
-      backdrop-filter: blur(3px);
     }
+    #tutorialLayer.show,
+    #asdKeyMsgLayer.show{ display:block; }
+
+    /* 투명 강조 영역 */
+    #tutorialHole{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      z-index:1;
+      background:rgba(255,255,255,.01);
+      box-shadow:
+        0 0 0 9999px rgba(11,31,51,.28);
+    }
+
+    #tutorialFocus{
+      position:absolute;
+      z-index:2;
+      pointer-events:none;
+      border:4px solid rgba(255,255,255,.92);
+      box-shadow:
+        0 0 0 2px rgba(255,255,255,.18) inset,
+        0 8px 28px rgba(11,31,51,.22),
+        0 0 0 9999px rgba(11,31,51,.14);
+    }
+
+    .focus-round{
+      border-radius:999px;
+    }
+    .focus-card{
+      border-radius:30px;
+    }
+
+    .tutBox{
+      position:absolute;
+      width:min(320px, calc(100vw - 32px));
+      background:#1567C5;
+      color:#fff;
+      border-radius:24px;
+      padding:22px 20px 18px;
+      box-shadow:
+        0 18px 42px rgba(0,0,0,.20),
+        0 0 0 2px rgba(255,255,255,.08) inset,
+        0 0 0 2px rgba(30,120,214,.35);
+      border:1px solid rgba(255,255,255,.14);
+      z-index:3;
+      box-sizing:border-box;
+    }
+
+    .tutBox .tutTitle{
+      font-weight:900;
+      margin-bottom:12px;
+      font-size:24px;
+      line-height:1;
+      letter-spacing:-.4px;
+    }
+
+    .tutBox .tutText{
+      line-height:1.48;
+      font-size:15px;
+      opacity:.98;
+      word-break:keep-all;
+    }
+
+    .tutBox .tutBtn{
+      margin-top:18px;
+      width:100%;
+      height:68px;
+      border-radius:22px;
+      border:none;
+      background:#fff;
+      color:#1567C5;
+      font-weight:900;
+      font-size:18px;
+      cursor:pointer;
+      box-shadow:
+        0 6px 18px rgba(255,255,255,.14) inset,
+        0 4px 10px rgba(11,31,51,.12);
+    }
+
+    /* 1번 오버플로우 방지 */
+    #tutLeft{
+      left:16px;
+      right:16px;
+      top:52%;
+      transform:translateY(-50%);
+      width:auto;
+      max-width:calc(100vw - 32px);
+    }
+    #tutBottom{
+      left:50%;
+      bottom:154px;
+      transform:translateX(-50%);
+    }
+    #tutTop{
+      left:50%;
+      top:124px;
+      transform:translateX(-50%);
+    }
+
     #asdKeyMsgCard{
       position:absolute;
       left:16px;
+      right:16px;
       top:50%;
       transform:translateY(-50%);
-      width:min(320px, 84vw);
-      background:#0B5C8A;
+      width:auto;
+      max-width:360px;
+      background:#1567C5;
       color:#fff;
-      border-radius:22px;
-      padding:18px 16px 14px;
-      box-shadow:0 18px 60px rgba(0,0,0,.28);
-      border:1px solid rgba(255,255,255,.18);
-    }
-    #asdKeyMsgCard .kmTitle{
-      font-weight:900;
-      font-size:18px;
-      margin-bottom:10px;
-    }
-    #asdKeyMsgCard .kmText{
-      font-size:14px;
-      line-height:1.4;
-      opacity:.95;
-    }
-    #asdKeyMsgCard .kmBtn{
-      margin-top:14px;
-      width:100%;
-      height:44px;
-      border-radius:14px;
-      border:2px solid rgba(0,0,0,.35);
-      background:rgba(255,255,255,.14);
-      color:#fff;
-      font-weight:900;
-      cursor:pointer;
+      border-radius:24px;
+      padding:22px 20px 18px;
+      box-shadow:
+        0 18px 42px rgba(0,0,0,.22),
+        0 0 0 2px rgba(255,255,255,.08) inset;
+      border:1px solid rgba(255,255,255,.14);
+      box-sizing:border-box;
     }
 
-    /* 초기 위치 */
-    #tutLeft{ left:20px; top:50%; transform:translateY(-50%); display:none; }
-    #tutBottom{ left:20px; bottom:88px; display:none; }
-    #tutTop{ left:20px; top:126px; display:none; }
+    #asdKeyMsgCard .kmTitle{
+      font-weight:900;
+      margin-bottom:12px;
+      font-size:24px;
+      line-height:1;
+      letter-spacing:-.4px;
+    }
+
+    #asdKeyMsgCard .kmText{
+      line-height:1.5;
+      font-size:15px;
+      opacity:.98;
+      word-break:keep-all;
+    }
+
+    #asdKeyMsgCard .kmBtn{
+      margin-top:18px;
+      width:100%;
+      height:68px;
+      border-radius:22px;
+      border:none;
+      background:#fff;
+      color:#1567C5;
+      font-weight:900;
+      font-size:18px;
+      cursor:pointer;
+      box-shadow:
+        0 6px 18px rgba(255,255,255,.14) inset,
+        0 4px 10px rgba(11,31,51,.12);
+    }
   </style>
 </head>
 
@@ -853,24 +873,22 @@
   </div>
 
   <div id="tutorialLayer" aria-hidden="true">
-    <div id="tutorialMask"></div>
-    <div id="tutorialFocus"></div>
+    <div id="tutorialHole"></div>
+    <div id="tutorialFocus" class="focus-round"></div>
 
     <div class="tutBox" id="tutLeft" style="display:none;">
       <div class="tutTitle">가이드 1</div>
-      <div class="tutText">렌즈를 드래그 및 확대, 축소해 보세요.<br>아큐브 난시 렌즈 구조를 생생하게 확인할 수 있습니다.</div>
+      <div class="tutText">렌즈를 드래그 및 확대, 축소해 보세요.<br/>아큐브 난시 렌즈 구조를 생생하게 확인할 수 있습니다.</div>
       <button class="tutBtn" id="tutNext1">확인</button>
     </div>
-
     <div class="tutBox" id="tutBottom" style="display:none;">
       <div class="tutTitle">가이드 2</div>
-      <div class="tutText">‘렌즈 두께 MAP’을 클릭하여<br>렌즈의 가장 얇은 부분(보라색)을 확인해 보세요!</div>
+      <div class="tutText">‘렌즈 두께 MAP’을 클릭하여<br/>렌즈의 가장 얇은 부분(보라색)을 확인해 보세요!</div>
       <button class="tutBtn" id="tutNext2">확인</button>
     </div>
-
     <div class="tutBox" id="tutTop" style="display:none;">
       <div class="tutTitle">가이드 3</div>
-      <div class="tutText">각 카드를 눌러 미션을 진행해 보세요.<br>미션 완료시 기프티콘!</div>
+      <div class="tutText">각 카드를 눌러 미션을 진행해 보세요.<br/>미션 완료시 기프티콘!</div>
       <button class="tutBtn" id="tutDone">확인</button>
     </div>
   </div>
@@ -878,7 +896,7 @@
   <div id="asdKeyMsgLayer" aria-hidden="true">
     <div id="asdKeyMsgCard">
       <div class="kmTitle">키 메시지</div>
-      <div class="kmText">아큐브 ASD는 자연스러운 눈 깜박임을 통해<br>빠르고 정확하게 축 안정화를 합니다.</div>
+      <div class="kmText">아큐브 ASD는 자연스러운 눈 깜박임을 통해<br/>빠르고 정확하게 축 안정화를 합니다.</div>
       <button class="kmBtn" id="asdKeyConfirm">확인</button>
     </div>
   </div>
@@ -1410,122 +1428,86 @@
 
     setModel('lens_clear.glb', 'lens', { resetCamera:true });
 
-    /* 튜토리얼 */
     const tutorialLayer = document.getElementById('tutorialLayer');
-    const tutorialMask = document.getElementById('tutorialMask');
-    const tutorialFocus = document.getElementById('tutorialFocus');
     const tutLeft = document.getElementById('tutLeft');
     const tutBottom = document.getElementById('tutBottom');
     const tutTop = document.getElementById('tutTop');
+    const tutorialFocus = document.getElementById('tutorialFocus');
+    const tutorialHole = document.getElementById('tutorialHole');
+    const missionBar = document.getElementById('missionBar');
+    const bottomBtns = document.getElementById('bottomBtns');
 
-    function applyTutorialHole(rect, radius = 24){
-      if(!rect || !tutorialMask || !tutorialFocus) return;
+    function setTutorialFocusRect(rect, shape='card'){
+      if(!rect || !tutorialFocus || !tutorialHole) return;
 
-      const left = Math.max(8, rect.left - 8);
-      const top = Math.max(8, rect.top - 8);
-      const width = Math.min(window.innerWidth - left - 8, rect.width + 16);
-      const height = Math.min(window.innerHeight - top - 8, rect.height + 16);
+      const pad = shape === 'round' ? 14 : 8;
+      const left = Math.max(8, rect.left - pad);
+      const top = Math.max(8, rect.top - pad);
+      const width = Math.min(window.innerWidth - 16, rect.width + pad * 2);
+      const height = Math.min(window.innerHeight - 16, rect.height + pad * 2);
 
-      tutorialMask.style.webkitMask =
-        `linear-gradient(#000 0 0), radial-gradient(circle at center, transparent 98%, #000 100%)`;
-      tutorialMask.style.webkitMaskRepeat = 'no-repeat, no-repeat';
-      tutorialMask.style.webkitMaskSize =
-        `100% 100%, ${width}px ${height}px`;
-      tutorialMask.style.webkitMaskPosition =
-        `0 0, ${left}px ${top}px`;
+      tutorialFocus.className = '';
+      tutorialFocus.id = 'tutorialFocus';
+      tutorialFocus.classList.add(shape === 'round' ? 'focus-round' : 'focus-card');
 
-      tutorialFocus.style.left = `${left}px`;
-      tutorialFocus.style.top = `${top}px`;
-      tutorialFocus.style.width = `${width}px`;
-      tutorialFocus.style.height = `${height}px`;
-      tutorialFocus.style.borderRadius = `${radius}px`;
-      tutorialFocus.style.display = 'block';
-    }
+      tutorialFocus.style.left = left + 'px';
+      tutorialFocus.style.top = top + 'px';
+      tutorialFocus.style.width = width + 'px';
+      tutorialFocus.style.height = height + 'px';
 
-    function positionTutorialBox(box, where){
-      if(!box) return;
-      if(where === 'center-left'){
-        box.style.left = '20px';
-        box.style.right = 'auto';
-        box.style.top = '50%';
-        box.style.bottom = 'auto';
-        box.style.transform = 'translateY(-50%)';
-      }else if(where === 'bottom'){
-        box.style.left = '20px';
-        box.style.right = '20px';
-        box.style.top = 'auto';
-        box.style.bottom = '72px';
-        box.style.transform = 'none';
-        box.style.width = 'auto';
-      }else if(where === 'top'){
-        box.style.left = '20px';
-        box.style.right = '20px';
-        box.style.top = '124px';
-        box.style.bottom = 'auto';
-        box.style.transform = 'none';
-        box.style.width = 'auto';
+      if(shape === 'round'){
+        const cx = left + width / 2;
+        const cy = top + height / 2;
+        const rx = width / 2;
+        const ry = height / 2;
+        tutorialHole.style.clipPath = `polygon(0 0,100% 0,100% 100%,0 100%,0 0),
+          path('M ${cx-rx} ${cy}
+          a ${rx} ${ry} 0 1 0 ${rx*2} 0
+          a ${rx} ${ry} 0 1 0 -${rx*2} 0 Z')`;
+      }else{
+        const r = 26;
+        tutorialHole.style.clipPath = `
+          polygon(0 0,100% 0,100% 100%,0 100%,0 0),
+          path('M ${left+r} ${top}
+          H ${left+width-r}
+          Q ${left+width} ${top} ${left+width} ${top+r}
+          V ${top+height-r}
+          Q ${left+width} ${top+height} ${left+width-r} ${top+height}
+          H ${left+r}
+          Q ${left} ${top+height} ${left} ${top+height-r}
+          V ${top+r}
+          Q ${left} ${top} ${left+r} ${top} Z')`;
       }
     }
 
-    function getLensFocusRect(){
-      const r = mv.getBoundingClientRect();
-      const size = Math.min(r.width * 0.70, r.height * 0.70, window.innerWidth - 40);
-      const left = (window.innerWidth - size) / 2;
-      const top = (window.innerHeight - size) / 2 - 12;
-      return { left, top, width:size, height:size };
-    }
+    function refreshTutorialFocus(step){
+      if(!tutorialLayer.classList.contains('show')) return;
 
-    function getBottomFocusRect(){
-      const r = document.getElementById('bottomBtns').getBoundingClientRect();
-      return {
-        left:r.left,
-        top:r.top,
-        width:r.width,
-        height:r.height
-      };
-    }
-
-    function getTopCardFocusRect(){
-      const r = document.getElementById('missionBar').getBoundingClientRect();
-      return {
-        left:r.left,
-        top:r.top,
-        width:r.width,
-        height:r.height
-      };
+      if(step === 1){
+        const mvRect = mv.getBoundingClientRect();
+        const size = Math.min(mvRect.width * 0.70, mvRect.height * 0.70, window.innerWidth - 60);
+        const rect = {
+          left: (window.innerWidth - size) / 2,
+          top: Math.max(120, (window.innerHeight - size) / 2 - 40),
+          width: size,
+          height: size
+        };
+        setTutorialFocusRect(rect, 'round');
+      }else if(step === 2){
+        setTutorialFocusRect(bottomBtns.getBoundingClientRect(), 'card');
+      }else if(step === 3){
+        setTutorialFocusRect(missionBar.getBoundingClientRect(), 'card');
+      }
     }
 
     function showTut(step){
       tutorialLayer.classList.add('show');
       tutorialLayer.setAttribute('aria-hidden','false');
-
-      tutLeft.style.display = 'none';
-      tutBottom.style.display = 'none';
-      tutTop.style.display = 'none';
-
-      if(step === 1){
-        const rect = getLensFocusRect();
-        applyTutorialHole(rect, Math.round(rect.width / 2));
-        tutLeft.style.display = 'block';
-        tutLeft.style.width = 'min(380px, calc(100vw - 40px))';
-        positionTutorialBox(tutLeft, 'center-left');
-      }
-
-      if(step === 2){
-        const rect = getBottomFocusRect();
-        applyTutorialHole(rect, 22);
-        tutBottom.style.display = 'block';
-        tutBottom.style.width = 'auto';
-        positionTutorialBox(tutBottom, 'bottom');
-      }
-
-      if(step === 3){
-        const rect = getTopCardFocusRect();
-        applyTutorialHole(rect, 20);
-        tutTop.style.display = 'block';
-        tutTop.style.width = 'auto';
-        positionTutorialBox(tutTop, 'top');
-      }
+      tutLeft.style.display = (step===1)?'block':'none';
+      tutBottom.style.display = (step===2)?'block':'none';
+      tutTop.style.display = (step===3)?'block':'none';
+      refreshTutorialFocus(step);
+      tutorialLayer.dataset.step = String(step);
     }
 
     function hideTut(){
@@ -1534,8 +1516,10 @@
       tutLeft.style.display = 'none';
       tutBottom.style.display = 'none';
       tutTop.style.display = 'none';
-      tutorialFocus.style.display = 'none';
-      tutorialMask.style.webkitMask = 'none';
+      tutorialFocus.style.width = '0px';
+      tutorialFocus.style.height = '0px';
+      tutorialHole.style.clipPath = '';
+      delete tutorialLayer.dataset.step;
     }
 
     document.getElementById('tutNext1')?.addEventListener('click', ()=>showTut(2));
@@ -1550,10 +1534,8 @@
     });
 
     window.addEventListener('resize', ()=>{
-      if(!tutorialLayer.classList.contains('show')) return;
-      if(tutLeft.style.display === 'block') showTut(1);
-      else if(tutBottom.style.display === 'block') showTut(2);
-      else if(tutTop.style.display === 'block') showTut(3);
+      const step = Number(tutorialLayer.dataset.step || 0);
+      if(step) refreshTutorialFocus(step);
     });
 
     const asdKeyMsgLayer = document.getElementById('asdKeyMsgLayer');
