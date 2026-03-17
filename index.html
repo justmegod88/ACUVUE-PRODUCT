@@ -617,15 +617,18 @@
 
     #tutorialSpot{
       position:fixed;
+      inset:0;
       pointer-events:none;
       z-index:94;
+      background:rgba(8,22,37,.58);
+      backdrop-filter:blur(2px);
+      -webkit-mask-repeat:no-repeat;
+      -webkit-mask-size:100% 100%;
+      -webkit-mask-position:center;
+      mask-repeat:no-repeat;
+      mask-size:100% 100%;
+      mask-position:center;
       display:none;
-      border-radius:28px;
-      background:transparent;
-      box-shadow:
-        0 0 0 9999px rgba(8,22,37,.62),
-        0 0 0 2px rgba(255,255,255,.20),
-        0 0 28px rgba(255,255,255,.16);
     }
     #tutorialSpot.show{ display:block; }
 
@@ -1339,23 +1342,29 @@
     function setTutorialHighlight(rect, radius = 24){
       if(!rect) return;
 
-      tutorialSpot.style.left = `${rect.left - 10}px`;
-      tutorialSpot.style.top = `${rect.top - 10}px`;
-      tutorialSpot.style.width = `${rect.width + 20}px`;
-      tutorialSpot.style.height = `${rect.height + 20}px`;
-      tutorialSpot.style.borderRadius = `${radius}px`;
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const rx = rect.width / 2 + radius;
+      const ry = rect.height / 2 + radius;
+
+      const mask = `
+        radial-gradient(
+          ellipse ${rx}px ${ry}px at ${x}px ${y}px,
+          transparent 0,
+          transparent 92%,
+          black 100%
+        )
+      `;
+
+      tutorialSpot.style.webkitMaskImage = mask;
+      tutorialSpot.style.maskImage = mask;
       tutorialSpot.classList.add('show');
     }
 
-    function highlightElement(el, extra = 18){
+    function highlightElement(el, extra = 24){
       if(!el) return;
       const rect = el.getBoundingClientRect();
-      tutorialSpot.style.left = `${rect.left - extra}px`;
-      tutorialSpot.style.top = `${rect.top - extra}px`;
-      tutorialSpot.style.width = `${rect.width + extra * 2}px`;
-      tutorialSpot.style.height = `${rect.height + extra * 2}px`;
-      tutorialSpot.style.borderRadius = `${Math.max(24, extra)}px`;
-      tutorialSpot.classList.add('show');
+      setTutorialHighlight(rect, extra);
     }
 
     function showTut(step){
@@ -1374,11 +1383,11 @@
           width: rect.width * 0.56,
           height: rect.height * 0.50
         };
-        setTutorialHighlight(lensRect, 28);
+        setTutorialHighlight(lensRect, 12);
       }else if(step === 2){
-        highlightElement(document.getElementById('bottomBtns'), 16);
+        highlightElement(document.getElementById('bottomBtns'), 18);
       }else if(step === 3){
-        highlightElement(document.getElementById('missionBar'), 14);
+        highlightElement(document.getElementById('missionBar'), 18);
       }
     }
 
@@ -1389,11 +1398,8 @@
       tutBottom.style.display = 'none';
       tutTop.style.display = 'none';
       tutorialSpot.classList.remove('show');
-      tutorialSpot.style.left = '';
-      tutorialSpot.style.top = '';
-      tutorialSpot.style.width = '';
-      tutorialSpot.style.height = '';
-      tutorialSpot.style.borderRadius = '';
+      tutorialSpot.style.webkitMaskImage = '';
+      tutorialSpot.style.maskImage = '';
     }
 
     document.getElementById('tutNext1')?.addEventListener('click', ()=>showTut(2));
