@@ -607,74 +607,59 @@
       position:fixed;
       inset:0;
       display:none;
-      background:transparent;
+      background:rgba(8,22,37,.45);
+      backdrop-filter: blur(3px);
     }
     #tutorialLayer{ z-index:95; }
     #asdKeyMsgLayer{ z-index:96; }
     #tutorialLayer.show,
     #asdKeyMsgLayer.show{ display:block; }
 
-    /* 하이라이트 배경 */
     #tutorialSpot{
       position:fixed;
-      inset:0;
       pointer-events:none;
       z-index:94;
       display:none;
-    }
-    #tutorialSpot.show{ display:block; }
-
-    #tutorialDim{
-      position:absolute;
-      inset:0;
-      background:rgba(8,22,37,.58);
-      backdrop-filter: blur(2px);
-    }
-
-    #tutorialHole{
-      position:absolute;
       border-radius:28px;
       background:transparent;
       box-shadow:
-        0 0 0 9999px rgba(8,22,37,.58),
-        0 0 0 2px rgba(255,255,255,.18),
-        0 10px 40px rgba(255,255,255,.18);
-      backdrop-filter:none;
+        0 0 0 9999px rgba(8,22,37,.62),
+        0 0 0 2px rgba(255,255,255,.20),
+        0 0 28px rgba(255,255,255,.16);
     }
+    #tutorialSpot.show{ display:block; }
 
     .tutBox{
       position:absolute;
       width:min(320px, 84vw);
-      color:#ffffff;
-      border-radius:24px;
-      padding:16px 16px 14px;
       background:#005EB8;
-      border:1.5px solid rgba(255,255,255,.28);
-      box-shadow:0 18px 48px rgba(11,31,51,.20);
+      color:#fff;
+      border-radius:18px;
+      padding:16px 16px 14px;
+      box-shadow:0 24px 80px rgba(0,0,0,.35);
+      border:2px solid rgba(255,255,255,.25);
     }
     .tutBox .tutTitle{
       font-weight:900;
       margin-bottom:8px;
       font-size:17px;
-      color:#ffffff;
     }
     .tutBox .tutText{
-      line-height:1.42;
+      line-height:1.4;
       font-size:14px;
-      opacity:.98;
-      color:rgba(255,255,255,.96);
+      opacity:.95;
     }
     .tutBox .tutBtn{
       margin-top:14px;
       width:100%;
       height:44px;
+      border-radius:12px;
       border:none;
-      border-radius:14px;
-      background:rgba(255,255,255,.92);
-      color:var(--acuvue-blue);
+      background:#ffffff;
+      color:#005EB8;
       font-weight:900;
       cursor:pointer;
-      box-shadow:0 8px 20px rgba(11,31,51,.12);
+      box-shadow:0 8px 20px rgba(0,0,0,.14);
     }
 
     #tutLeft{ left:14px; top:42%; transform:translateY(-50%); }
@@ -790,10 +775,7 @@
     </div>
   </div>
 
-  <div id="tutorialSpot">
-    <div id="tutorialDim"></div>
-    <div id="tutorialHole"></div>
-  </div>
+  <div id="tutorialSpot"></div>
 
   <div id="tutorialLayer" aria-hidden="true">
     <div class="tutBox" id="tutLeft" style="display:none;">
@@ -1350,7 +1332,6 @@
 
     const tutorialLayer = document.getElementById('tutorialLayer');
     const tutorialSpot = document.getElementById('tutorialSpot');
-    const tutorialHole = document.getElementById('tutorialHole');
     const tutLeft = document.getElementById('tutLeft');
     const tutBottom = document.getElementById('tutBottom');
     const tutTop = document.getElementById('tutTop');
@@ -1358,19 +1339,23 @@
     function setTutorialHighlight(rect, radius = 24){
       if(!rect) return;
 
-      tutorialHole.style.left = `${rect.left - radius}px`;
-      tutorialHole.style.top = `${rect.top - radius}px`;
-      tutorialHole.style.width = `${rect.width + radius * 2}px`;
-      tutorialHole.style.height = `${rect.height + radius * 2}px`;
-      tutorialHole.style.borderRadius = `${Math.max(22, radius)}px`;
-
+      tutorialSpot.style.left = `${rect.left - 10}px`;
+      tutorialSpot.style.top = `${rect.top - 10}px`;
+      tutorialSpot.style.width = `${rect.width + 20}px`;
+      tutorialSpot.style.height = `${rect.height + 20}px`;
+      tutorialSpot.style.borderRadius = `${radius}px`;
       tutorialSpot.classList.add('show');
     }
 
-    function highlightElement(el, extra = 24){
+    function highlightElement(el, extra = 18){
       if(!el) return;
       const rect = el.getBoundingClientRect();
-      setTutorialHighlight(rect, extra);
+      tutorialSpot.style.left = `${rect.left - extra}px`;
+      tutorialSpot.style.top = `${rect.top - extra}px`;
+      tutorialSpot.style.width = `${rect.width + extra * 2}px`;
+      tutorialSpot.style.height = `${rect.height + extra * 2}px`;
+      tutorialSpot.style.borderRadius = `${Math.max(24, extra)}px`;
+      tutorialSpot.classList.add('show');
     }
 
     function showTut(step){
@@ -1389,11 +1374,11 @@
           width: rect.width * 0.56,
           height: rect.height * 0.50
         };
-        setTutorialHighlight(lensRect, 18);
+        setTutorialHighlight(lensRect, 28);
       }else if(step === 2){
-        highlightElement(document.getElementById('bottomBtns'), 18);
+        highlightElement(document.getElementById('bottomBtns'), 16);
       }else if(step === 3){
-        highlightElement(document.getElementById('missionBar'), 18);
+        highlightElement(document.getElementById('missionBar'), 14);
       }
     }
 
@@ -1404,8 +1389,11 @@
       tutBottom.style.display = 'none';
       tutTop.style.display = 'none';
       tutorialSpot.classList.remove('show');
-      tutorialHole.style.left = '-9999px';
-      tutorialHole.style.top = '-9999px';
+      tutorialSpot.style.left = '';
+      tutorialSpot.style.top = '';
+      tutorialSpot.style.width = '';
+      tutorialSpot.style.height = '';
+      tutorialSpot.style.borderRadius = '';
     }
 
     document.getElementById('tutNext1')?.addEventListener('click', ()=>showTut(2));
