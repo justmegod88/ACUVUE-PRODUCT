@@ -615,9 +615,65 @@
     #tutorialLayer.show,
     #asdKeyMsgLayer.show{ display:block; }
 
-    .tutBox,
+    #tutorialSpot{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:94;
+      background:rgba(8,22,37,.58);
+      backdrop-filter:blur(2px);
+      -webkit-mask-repeat:no-repeat;
+      -webkit-mask-size:100% 100%;
+      -webkit-mask-position:center;
+      mask-repeat:no-repeat;
+      mask-size:100% 100%;
+      mask-position:center;
+      display:none;
+    }
+    #tutorialSpot.show{ display:block; }
+
+    .tutBox{
+      position:absolute;
+      width:min(320px, 84vw);
+      background:#005EB8;
+      color:#fff;
+      border-radius:18px;
+      padding:16px 16px 14px;
+      box-shadow:0 24px 80px rgba(0,0,0,.35);
+      border:2px solid rgba(255,255,255,.25);
+    }
+    .tutBox .tutTitle{
+      font-weight:900;
+      margin-bottom:8px;
+      font-size:17px;
+    }
+    .tutBox .tutText{
+      line-height:1.4;
+      font-size:14px;
+      opacity:.95;
+    }
+    .tutBox .tutBtn{
+      margin-top:14px;
+      width:100%;
+      height:44px;
+      border-radius:12px;
+      border:none;
+      background:#ffffff;
+      color:#005EB8;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(0,0,0,.14);
+    }
+
+    #tutLeft{ left:14px; top:42%; transform:translateY(-50%); }
+    #tutBottom{ left:50%; bottom:112px; transform:translateX(-50%); }
+    #tutTop{ left:50%; top:96px; transform:translateX(-50%); }
+
     #asdKeyMsgCard{
       position:absolute;
+      left:16px;
+      top:50%;
+      transform:translateY(-50%);
       width:min(320px, 84vw);
       background:#0B5C8A;
       color:#fff;
@@ -626,22 +682,16 @@
       box-shadow:0 18px 60px rgba(0,0,0,.25);
       border:1px solid rgba(255,255,255,.18);
     }
-
-    .tutBox .tutTitle,
     #asdKeyMsgCard .kmTitle{
       font-weight:800;
       margin-bottom:8px;
       font-size:16px;
     }
-
-    .tutBox .tutText,
     #asdKeyMsgCard .kmText{
       line-height:1.35;
       font-size:14px;
       opacity:.95;
     }
-
-    .tutBox .tutBtn,
     #asdKeyMsgCard .kmBtn{
       margin-top:12px;
       width:100%;
@@ -652,16 +702,6 @@
       color:#fff;
       font-weight:800;
       cursor:pointer;
-    }
-
-    #tutLeft{ left:14px; top:42%; transform:translateY(-50%); }
-    #tutBottom{ left:50%; bottom:112px; transform:translateX(-50%); }
-    #tutTop{ left:50%; top:96px; transform:translateX(-50%); }
-
-    #asdKeyMsgCard{
-      left:16px;
-      top:50%;
-      transform:translateY(-50%);
     }
   </style>
 </head>
@@ -738,20 +778,22 @@
     </div>
   </div>
 
+  <div id="tutorialSpot"></div>
+
   <div id="tutorialLayer" aria-hidden="true">
     <div class="tutBox" id="tutLeft" style="display:none;">
       <div class="tutTitle">가이드 1</div>
-      <div class="tutText">렌즈를 드래그 및 확대, 축소해 보세요.<br/>아큐브 난시 렌즈 구조를 생생하게 확인할 수 있습니다.</div>
+      <div class="tutText">렌즈를 드래그 및 확대, 축소해 보세요.<br>아큐브 난시 렌즈 구조를 생생하게 확인할 수 있습니다.</div>
       <button class="tutBtn" id="tutNext1">확인</button>
     </div>
     <div class="tutBox" id="tutBottom" style="display:none;">
       <div class="tutTitle">가이드 2</div>
-      <div class="tutText">‘렌즈 두께 MAP’을 클릭하여<br/>렌즈의 가장 얇은 부분(보라색)을 확인해 보세요!</div>
+      <div class="tutText">‘렌즈 두께 MAP’을 클릭하여<br>렌즈의 가장 얇은 부분(보라색)을 확인해 보세요!</div>
       <button class="tutBtn" id="tutNext2">확인</button>
     </div>
     <div class="tutBox" id="tutTop" style="display:none;">
       <div class="tutTitle">가이드 3</div>
-      <div class="tutText">각 카드를 눌러 미션을 진행해 보세요.<br/>미션 완료시 기프티콘!</div>
+      <div class="tutText">각 카드를 눌러 미션을 진행해 보세요.<br>미션 완료시 기프티콘!</div>
       <button class="tutBtn" id="tutDone">확인</button>
     </div>
   </div>
@@ -759,7 +801,7 @@
   <div id="asdKeyMsgLayer" aria-hidden="true">
     <div id="asdKeyMsgCard">
       <div class="kmTitle">키 메시지</div>
-      <div class="kmText">아큐브 ASD는 자연스러운 눈 깜박임을 통해<br/>빠르고 정확하게 축 안정화를 합니다.</div>
+      <div class="kmText">아큐브 ASD는 자연스러운 눈 깜박임을 통해<br>빠르고 정확하게 축 안정화를 합니다.</div>
       <button class="kmBtn" id="asdKeyConfirm">확인</button>
     </div>
   </div>
@@ -1292,16 +1334,61 @@
     setModel('lens_clear.glb', 'lens', { resetCamera:true });
 
     const tutorialLayer = document.getElementById('tutorialLayer');
+    const tutorialSpot = document.getElementById('tutorialSpot');
     const tutLeft = document.getElementById('tutLeft');
     const tutBottom = document.getElementById('tutBottom');
     const tutTop = document.getElementById('tutTop');
 
+    function setTutorialHighlight(rect, radius = 24){
+      if(!rect) return;
+
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      const rx = rect.width / 2 + radius;
+      const ry = rect.height / 2 + radius;
+
+      const mask = `
+        radial-gradient(
+          ellipse ${rx}px ${ry}px at ${x}px ${y}px,
+          transparent 0,
+          transparent 92%,
+          black 100%
+        )
+      `;
+
+      tutorialSpot.style.webkitMaskImage = mask;
+      tutorialSpot.style.maskImage = mask;
+      tutorialSpot.classList.add('show');
+    }
+
+    function highlightElement(el, extra = 24){
+      if(!el) return;
+      const rect = el.getBoundingClientRect();
+      setTutorialHighlight(rect, extra);
+    }
+
     function showTut(step){
       tutorialLayer.classList.add('show');
       tutorialLayer.setAttribute('aria-hidden','false');
+
       tutLeft.style.display = (step===1)?'block':'none';
       tutBottom.style.display = (step===2)?'block':'none';
       tutTop.style.display = (step===3)?'block':'none';
+
+      if(step === 1){
+        const rect = mv.getBoundingClientRect();
+        const lensRect = {
+          left: rect.left + rect.width * 0.22,
+          top: rect.top + rect.height * 0.22,
+          width: rect.width * 0.56,
+          height: rect.height * 0.50
+        };
+        setTutorialHighlight(lensRect, 12);
+      }else if(step === 2){
+        highlightElement(document.getElementById('bottomBtns'), 18);
+      }else if(step === 3){
+        highlightElement(document.getElementById('missionBar'), 18);
+      }
     }
 
     function hideTut(){
@@ -1310,6 +1397,9 @@
       tutLeft.style.display = 'none';
       tutBottom.style.display = 'none';
       tutTop.style.display = 'none';
+      tutorialSpot.classList.remove('show');
+      tutorialSpot.style.webkitMaskImage = '';
+      tutorialSpot.style.maskImage = '';
     }
 
     document.getElementById('tutNext1')?.addEventListener('click', ()=>showTut(2));
@@ -1321,6 +1411,14 @@
 
     window.addEventListener('load', ()=>{
       showTut(1);
+    });
+
+    window.addEventListener('resize', ()=>{
+      if(tutorialLayer.classList.contains('show')){
+        if(tutLeft.style.display === 'block') showTut(1);
+        else if(tutBottom.style.display === 'block') showTut(2);
+        else if(tutTop.style.display === 'block') showTut(3);
+      }
     });
 
     const asdKeyMsgLayer = document.getElementById('asdKeyMsgLayer');
