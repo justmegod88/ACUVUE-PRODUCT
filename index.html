@@ -168,24 +168,22 @@
       box-shadow: 0 10px 28px rgba(11,31,51,.10);
     }
 
-    /* 우측 하단 팩샷 */
+    /* ✅ 우측 하단 팩샷 */
     #maxPackshot{
       position:fixed;
-      right:22px;
-      bottom:126px;
-      z-index:32;
-      width:min(28vw, 180px);
-      max-width:180px;
-      min-width:112px;
+      right:18px;
+      bottom:50px; /* 조금 더 아래 */
+      width:150px;
+      max-width:34vw;
       height:auto;
-      display:none;
+      z-index:34;
       pointer-events:none;
       user-select:none;
-      filter: drop-shadow(0 10px 20px rgba(11,31,51,.16));
+      display:none;
+      object-fit:contain;
+      mix-blend-mode:multiply; /* 흰 배경이 있으면 최대한 자연스럽게 */
+      filter: drop-shadow(0 10px 18px rgba(11,31,51,.12));
       transform: translateZ(0);
-    }
-    #maxPackshot.show{
-      display:block;
     }
 
     /* PVP */
@@ -503,6 +501,10 @@
       margin-bottom:8px;
       letter-spacing:-.2px;
     }
+    #asdHint .hintStrong{
+      font-weight:900;
+      color:#111;
+    }
     #asdHint .hintBody{
       display:block;
       font-size:20px;
@@ -794,12 +796,12 @@
   <div id="missionBar">
     <div id="missionASD" class="missionCard" role="button" tabindex="0">
       <div class="missionNo">01</div>
-      <div class="missionTitle">ASD 축안정화</div>
+      <div class="missionTitle">ASD™ 축안정화</div>
       <div class="missionDesc">카드를 눌러 확인</div>
     </div>
     <div id="missionPVP" class="missionCard" role="button" tabindex="0">
       <div class="missionNo">02</div>
-      <div class="missionTitle">ASD 편안한 시야</div>
+      <div class="missionTitle">ASD™ 편안한 시야</div>
       <div class="missionDesc">카드를 눌러 확인</div>
     </div>
   </div>
@@ -838,14 +840,10 @@
     <div id="pvpConfirm" role="button" tabindex="0">확인</div>
   </div>
 
-  <!-- 우측 하단 팩샷 -->
-  <img id="maxPackshot" src="MAX.png" alt="아큐브 맥스 난시 팩샷"
-       onerror="this.style.display='none'; this.classList.remove('show');">
-
   <div id="asdOverlay" aria-hidden="true">
     <div id="asdCard">
       <div id="asdHeader">
-        <div id="asdHeaderTitle">ASD 축안정화</div>
+        <div id="asdHeaderTitle">ASD™ 축안정화</div>
         <button id="asdClose" type="button">X</button>
       </div>
 
@@ -869,7 +867,7 @@
 
       <div id="asdHint">
         <div class="hintText">
-          <span class="hintTitle">미션 1</span>
+          <span class="hintTitle">체험해보세요!</span>
           <span class="hintBody"><span class="blue">‘깜박임’ 버튼</span>을 눌러 이탈된 축을 안정화 시켜 보세요.</span>
         </div>
       </div>
@@ -882,22 +880,25 @@
 
     <div class="tutBox" id="tutLeft" style="display:none;">
       <div class="tutTitle">가이드 1</div>
-      <div class="tutText">렌즈를 드래그하여 회전시켜 보세요.<br>확대와 축소를 통해 렌즈 구조를 더 선명하게 확인할 수 있습니다.</div>
+      <div class="tutText">렌즈를 좌우로 드래그하여 움직여 보세요.<br>확대와 축소를 통해 렌즈 구조를 더 선명하게 확인할 수 있습니다.</div>
       <button class="tutBtn" id="tutNext1">확인</button>
     </div>
 
     <div class="tutBox" id="tutBottom" style="display:none;">
       <div class="tutTitle">가이드 2</div>
-      <div class="tutText">‘렌즈 두께 MAP’을 클릭하여<br>렌즈의 가장 얇은 부분(보라색)을 확인해 보세요!</div>
+      <div class="tutText">‘렌즈 두께 MAP’을 클릭하여<br>아큐브® 인피니티 엣지(가장 얇은 보라색 영역)을 확인해 보세요!</div>
       <button class="tutBtn" id="tutNext2">확인</button>
     </div>
 
     <div class="tutBox" id="tutTop" style="display:none;">
       <div class="tutTitle">가이드 3</div>
-      <div class="tutText">각 카드를 눌러 체험을 진행해 보세요.<br>!</div>
+      <div class="tutText">각 카드를 눌러 체험을 진행해 보세요.<br></div>
       <button class="tutBtn" id="tutDone">확인</button>
     </div>
   </div>
+
+  <!-- ✅ 우측 하단 렌즈 팩샷 -->
+  <img id="maxPackshot" src="MAX.png" alt="아큐브 맥스 난시 팩샷" onerror="this.style.display='none';">
 
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
@@ -934,7 +935,6 @@
     const pvpBig = document.getElementById('pvpBig');
     const pvpConfirm = document.getElementById('pvpConfirm');
     const thicknessBar = document.getElementById('thicknessBar');
-    const maxPackshot = document.getElementById('maxPackshot');
     const asdEyeMV = document.getElementById('asdEyeMV');
     const asdLensImg = document.getElementById('asdLensImg');
     const asdBlinkBtn = document.getElementById('asdBlinkBtn');
@@ -944,6 +944,7 @@
     const asdHint = document.getElementById('asdHint');
     const asdLidTop = document.getElementById('asdLidTop');
     const asdLidBot = document.getElementById('asdLidBot');
+    const maxPackshot = document.getElementById('maxPackshot');
 
     let currentMode = 'lens';
     let pvpOn = false;
@@ -979,12 +980,6 @@
     document.addEventListener('visibilitychange', ()=>{
       if(!document.hidden) setTimeout(keepMVPlaying, 60);
     });
-
-    function updatePackshotVisibility(){
-      if(!maxPackshot) return;
-      const shouldShow = (currentMode === 'lens');
-      maxPackshot.classList.toggle('show', shouldShow);
-    }
 
     function getOrbitSafe(){ try{ return mv.getCameraOrbit(); }catch(e){ return null; } }
     function getTargetSafe(){ try{ return mv.getCameraTarget(); }catch(e){ return null; } }
@@ -1035,10 +1030,15 @@
       thicknessBar.setAttribute('aria-hidden', show ? 'false' : 'true');
     }
 
+    function syncPackshot(){
+      if(!maxPackshot) return;
+      maxPackshot.style.display = (currentMode === 'lens') ? 'block' : 'none';
+    }
+
     function setASDHintDefault(){
       asdHint.innerHTML = `
         <div class="hintText">
-          <span class="hintTitle">미션 1</span>
+          <span class="hintTitle">체험해보세요!</span>
           <span class="hintBody"><span class="blue">‘깜박임’ 버튼</span>을 눌러 이탈된 축을 안정화 시켜 보세요.</span>
         </div>
       `;
@@ -1048,7 +1048,7 @@
       asdHint.innerHTML = `
         <div class="hintText">
           <span class="hintTitle">기억해주세요!</span>
-          <span class="hintBody"><span class="blue">아큐브 ASD™</span>는 자연스러운 순목(눈 깜박임)을 통해 하루 종일 또렷하게 축을 안정화 합니다.</span>
+          <span class="hintBody"><span class="blue">아큐브® ASD™</span>는 자연스러운 순목(눈 깜박임)을 통해 하루 종일 또렷하게 축을 안정화 합니다.</span>
         </div>
         <button id="asdConfirmBtn" type="button">확인</button>
       `;
@@ -1255,6 +1255,7 @@
     function setModeButtons(){
       modeLens.classList.toggle('primary', currentMode === 'lens');
       modeHeat.classList.toggle('primary', currentMode === 'heat');
+      syncPackshot();
     }
 
     function forcePVPOff(){
@@ -1303,7 +1304,6 @@
         forcePVPOff();
         showThickness(mode === 'heat');
         setModeButtons();
-        updatePackshotVisibility();
 
         const onLoadOnce = ()=>{
           mv.removeEventListener('load', onLoadOnce);
@@ -1347,7 +1347,7 @@
 
       setModeButtons();
       syncMissionUI();
-      updatePackshotVisibility();
+      syncPackshot();
       keepMVPlaying();
       setTimeout(keepMVPlaying, 120);
     });
@@ -1435,8 +1435,8 @@
       }
       showThickness(currentMode === 'heat');
       resetCameraToModeDefault(currentMode);
-      updatePackshotVisibility();
       syncMissionUI();
+      syncPackshot();
     });
 
     modeLens.addEventListener('click', ()=> setModel('lens_clear.glb', 'lens', { resetCamera:false }));
@@ -1574,15 +1574,14 @@
 
     window.addEventListener('load', ()=>{
       showTut(1);
-      updatePackshotVisibility();
     });
 
     window.addEventListener('resize', ()=>{
-      updatePackshotVisibility();
       if(!tutorialLayer.classList.contains('show')) return;
       if(tutLeft.style.display === 'block') showTut(1);
       else if(tutBottom.style.display === 'block') showTut(2);
       else if(tutTop.style.display === 'block') showTut(3);
+      syncPackshot();
     });
   </script>
 </body>
