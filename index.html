@@ -650,34 +650,34 @@
       display:block;
     }
 
-    /* 가이드용 마스크 */
+    /* 가이드용 전체 딤 */
     #tutorialMask{
       position:absolute;
       inset:0;
-      pointer-events:none;
       background:rgba(8,22,37,.42);
-      backdrop-filter: blur(3px);
-      -webkit-mask-repeat:no-repeat;
-      -webkit-mask-composite: xor;
-              mask-composite: exclude;
-      transition: -webkit-mask .22s ease, mask .22s ease;
+      pointer-events:none;
     }
 
-    /* 강조 링 */
+    /* 강조 영역 */
     #tutorialFocus{
       position:absolute;
       pointer-events:none;
-      border:2px solid rgba(255,255,255,.88);
+      background:transparent;
+      border:2px solid rgba(255,255,255,.92);
       box-shadow:
+        0 0 0 9999px rgba(8,22,37,.42),
         0 0 0 6px rgba(255,255,255,.12),
         0 12px 34px rgba(0,0,0,.12);
       transition: all .22s ease;
+      display:none;
     }
 
     /* 가이드 팝업 */
     .tutBox{
       position:absolute;
-      width:min(380px, calc(100vw - 40px));
+      width:min(360px, calc(100vw - 40px));
+      max-width:min(360px, calc(100vw - 40px));
+      box-sizing:border-box;
       background:linear-gradient(180deg, #1E63B8 0%, #0A5FBE 100%);
       color:#fff;
       border-radius:24px;
@@ -858,7 +858,7 @@
 
     <div class="tutBox" id="tutLeft" style="display:none;">
       <div class="tutTitle">가이드 1</div>
-      <div class="tutText">렌즈를 드래그 및 확대, 축소해 보세요.<br>아큐브 난시 렌즈 구조를 생생하게 확인할 수 있습니다.</div>
+      <div class="tutText">렌즈를 드래그하여 회전시켜 보세요.<br>확대와 축소를 통해 렌즈 구조를 더 선명하게 확인할 수 있습니다.</div>
       <button class="tutBtn" id="tutNext1">확인</button>
     </div>
 
@@ -1419,20 +1419,12 @@
     const tutTop = document.getElementById('tutTop');
 
     function applyTutorialHole(rect, radius = 24){
-      if(!rect || !tutorialMask || !tutorialFocus) return;
+      if(!rect || !tutorialFocus) return;
 
       const left = Math.max(8, rect.left - 8);
       const top = Math.max(8, rect.top - 8);
       const width = Math.min(window.innerWidth - left - 8, rect.width + 16);
       const height = Math.min(window.innerHeight - top - 8, rect.height + 16);
-
-      tutorialMask.style.webkitMask =
-        `linear-gradient(#000 0 0), radial-gradient(circle at center, transparent 98%, #000 100%)`;
-      tutorialMask.style.webkitMaskRepeat = 'no-repeat, no-repeat';
-      tutorialMask.style.webkitMaskSize =
-        `100% 100%, ${width}px ${height}px`;
-      tutorialMask.style.webkitMaskPosition =
-        `0 0, ${left}px ${top}px`;
 
       tutorialFocus.style.left = `${left}px`;
       tutorialFocus.style.top = `${top}px`;
@@ -1440,30 +1432,34 @@
       tutorialFocus.style.height = `${height}px`;
       tutorialFocus.style.borderRadius = `${radius}px`;
       tutorialFocus.style.display = 'block';
+
+      if(tutorialMask) tutorialMask.style.display = 'none';
     }
 
     function positionTutorialBox(box, where){
       if(!box) return;
+
       if(where === 'center-left'){
         box.style.left = '20px';
         box.style.right = 'auto';
         box.style.top = '50%';
         box.style.bottom = 'auto';
         box.style.transform = 'translateY(-50%)';
+        box.style.width = 'min(360px, calc(100vw - 40px))';
       }else if(where === 'bottom'){
         box.style.left = '20px';
         box.style.right = '20px';
         box.style.top = 'auto';
         box.style.bottom = '72px';
         box.style.transform = 'none';
-        box.style.width = 'auto';
+        box.style.width = 'min(360px, calc(100vw - 40px))';
       }else if(where === 'top'){
         box.style.left = '20px';
         box.style.right = '20px';
         box.style.top = '124px';
         box.style.bottom = 'auto';
         box.style.transform = 'none';
-        box.style.width = 'auto';
+        box.style.width = 'min(360px, calc(100vw - 40px))';
       }
     }
 
@@ -1507,7 +1503,6 @@
         const rect = getLensFocusRect();
         applyTutorialHole(rect, Math.round(rect.width / 2));
         tutLeft.style.display = 'block';
-        tutLeft.style.width = 'min(380px, calc(100vw - 40px))';
         positionTutorialBox(tutLeft, 'center-left');
       }
 
@@ -1515,7 +1510,6 @@
         const rect = getBottomFocusRect();
         applyTutorialHole(rect, 22);
         tutBottom.style.display = 'block';
-        tutBottom.style.width = 'auto';
         positionTutorialBox(tutBottom, 'bottom');
       }
 
@@ -1523,7 +1517,6 @@
         const rect = getTopCardFocusRect();
         applyTutorialHole(rect, 20);
         tutTop.style.display = 'block';
-        tutTop.style.width = 'auto';
         positionTutorialBox(tutTop, 'top');
       }
     }
@@ -1535,7 +1528,7 @@
       tutBottom.style.display = 'none';
       tutTop.style.display = 'none';
       tutorialFocus.style.display = 'none';
-      tutorialMask.style.webkitMask = 'none';
+      if(tutorialMask) tutorialMask.style.display = 'block';
     }
 
     document.getElementById('tutNext1')?.addEventListener('click', ()=>showTut(2));
