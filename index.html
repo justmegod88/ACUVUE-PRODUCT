@@ -823,7 +823,7 @@
     <img id="pvpThumb" src="PVP.png" alt="PVP" onerror="this.onerror=null; this.src='PVP.jpeg';">
     <div id="pvpText">
       <div id="pvpTitle">PVP 습윤 인자</div>
-      <div id="hint">렌즈 내 PVP 습윤인자가 수분을 더 오랫동안 눈물막 유지하여 건조감을 감소 시킵니다.</div>
+      <div id="hint">렌즈 내 PVP 습윤인자가 수분을 저녁까지 유지하여 촉촉함과 선명함 제공합니다. </div>
     </div>
     <div id="pvpConfirm" role="button" tabindex="0">확인</div>
   </div>
@@ -870,7 +870,7 @@
 
     <div class="tutBox" id="tutTop" style="display:none;">
       <div class="tutTitle">가이드 3</div>
-      <div class="tutText">각 카드를 눌러 미션을 진행해 보세요.<br>미션 완료시 기프티콘!</div>
+      <div class="tutText">각 카드를 눌러 체험을 진행해 보세요.<br>!</div>
       <button class="tutBtn" id="tutDone">확인</button>
     </div>
   </div>
@@ -1013,12 +1013,12 @@
     }
 
     function setASDHintDefault(){
-      asdHint.innerHTML = '아큐브 ASD는 자연스로운 눈 깜박임을 통해 빠르고 정확하게 축 안정화를 합니다.  미션: ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜주세요';
+      asdHint.innerHTML = '‘깜박임’ 버튼을 눌러 회전되어 있는 난시축을 안정화 시켜주세요';
     }
 
     function setASDHintSuccess(){
       asdHint.innerHTML = `
-        <span>미션성공 : 축이 안정화되었습니다. 확인 버튼을 눌러주세요</span>
+        <span>축이 안정화되었습니다. 확인 버튼을 눌러주세요</span>
         <button id="asdConfirmBtn" type="button">확인</button>
       `;
       document.getElementById('asdConfirmBtn')?.addEventListener('click', (e)=>{
