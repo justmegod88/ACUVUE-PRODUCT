@@ -503,9 +503,11 @@
       top:52%;
       width:80%;
       transform: translate(calc(-50% - 4px), calc(-50% + 10px)) rotate(20deg);
+      transform-origin:50% 50%;
       opacity:.70;
       pointer-events:none;
       will-change: transform, opacity;
+      z-index:2;
     }
 
     #asdLensRim{
@@ -522,6 +524,7 @@
         0 18px 46px rgba(11,31,51,.16),
         inset 0 0 24px rgba(255,255,255,.18);
       opacity:.45;
+      z-index:2;
     }
 
     #asdMaskShade{
@@ -538,6 +541,7 @@
           rgba(11,31,51,.14) 34%,
           rgba(11,31,51,0) 60%);
       opacity:.78;
+      z-index:2;
     }
 
     #asdBlinkLid{
@@ -551,6 +555,12 @@
       left:0;
       right:0;
       height:55%;
+      background:
+        radial-gradient(120% 90% at 50% 85%,
+          rgba(165,120,95,.98) 0%,
+          rgba(120,80,62,.98) 46%,
+          rgba(40,25,22,.98) 92%);
+      filter: blur(.2px);
       opacity:0;
       transform: translateY(-110%);
       will-change: transform, opacity;
@@ -558,8 +568,27 @@
     #asdLidBot{
       top:auto;
       bottom:0;
+      background:
+        radial-gradient(120% 90% at 50% 15%,
+          rgba(165,120,95,.98) 0%,
+          rgba(120,80,62,.98) 46%,
+          rgba(40,25,22,.98) 92%);
       transform: translateY(110%);
     }
+    #asdLidTop::after, #asdLidBot::after{
+      content:"";
+      position:absolute;
+      left:-10%;
+      right:-10%;
+      height:28px;
+      background: radial-gradient(120% 100% at 50% 50%,
+        rgba(0,0,0,.35) 0%,
+        rgba(0,0,0,.18) 35%,
+        rgba(0,0,0,0) 70%);
+      opacity:.55;
+    }
+    #asdLidTop::after{ bottom:-12px; }
+    #asdLidBot::after{ top:-12px; transform: scaleY(-1); }
 
     #asdBlinkBtn, #asdRotateBtn{
       position:absolute;
@@ -573,18 +602,23 @@
       align-items:center;
       justify-content:center;
       z-index:5;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      cursor:pointer;
     }
     #asdBlinkBtn{
       right:14px;
       border:1px solid rgba(0,94,184,.55);
       background:var(--acuvue-blue);
       color:#fff;
+      box-shadow: 0 12px 26px rgba(0,94,184,.20);
     }
     #asdRotateBtn{
       right:76px;
       border:1px solid rgba(0,94,184,.35);
       background:rgba(255,255,255,.92);
       color:var(--acuvue-blue);
+      box-shadow: 0 10px 22px rgba(11,31,51,.12);
     }
 
     #asdAngleBadge{
@@ -615,65 +649,9 @@
     #tutorialLayer.show,
     #asdKeyMsgLayer.show{ display:block; }
 
-    #tutorialSpot{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:94;
-      background:rgba(8,22,37,.58);
-      backdrop-filter:blur(2px);
-      -webkit-mask-repeat:no-repeat;
-      -webkit-mask-size:100% 100%;
-      -webkit-mask-position:center;
-      mask-repeat:no-repeat;
-      mask-size:100% 100%;
-      mask-position:center;
-      display:none;
-    }
-    #tutorialSpot.show{ display:block; }
-
-    .tutBox{
-      position:absolute;
-      width:min(320px, 84vw);
-      background:#005EB8;
-      color:#fff;
-      border-radius:18px;
-      padding:16px 16px 14px;
-      box-shadow:0 24px 80px rgba(0,0,0,.35);
-      border:2px solid rgba(255,255,255,.25);
-    }
-    .tutBox .tutTitle{
-      font-weight:900;
-      margin-bottom:8px;
-      font-size:17px;
-    }
-    .tutBox .tutText{
-      line-height:1.4;
-      font-size:14px;
-      opacity:.95;
-    }
-    .tutBox .tutBtn{
-      margin-top:14px;
-      width:100%;
-      height:44px;
-      border-radius:12px;
-      border:none;
-      background:#ffffff;
-      color:#005EB8;
-      font-weight:900;
-      cursor:pointer;
-      box-shadow:0 8px 20px rgba(0,0,0,.14);
-    }
-
-    #tutLeft{ left:14px; top:42%; transform:translateY(-50%); }
-    #tutBottom{ left:50%; bottom:112px; transform:translateX(-50%); }
-    #tutTop{ left:50%; top:96px; transform:translateX(-50%); }
-
+    .tutBox,
     #asdKeyMsgCard{
       position:absolute;
-      left:16px;
-      top:50%;
-      transform:translateY(-50%);
       width:min(320px, 84vw);
       background:#0B5C8A;
       color:#fff;
@@ -682,16 +660,22 @@
       box-shadow:0 18px 60px rgba(0,0,0,.25);
       border:1px solid rgba(255,255,255,.18);
     }
+
+    .tutBox .tutTitle,
     #asdKeyMsgCard .kmTitle{
       font-weight:800;
       margin-bottom:8px;
       font-size:16px;
     }
+
+    .tutBox .tutText,
     #asdKeyMsgCard .kmText{
       line-height:1.35;
       font-size:14px;
       opacity:.95;
     }
+
+    .tutBox .tutBtn,
     #asdKeyMsgCard .kmBtn{
       margin-top:12px;
       width:100%;
@@ -702,6 +686,16 @@
       color:#fff;
       font-weight:800;
       cursor:pointer;
+    }
+
+    #tutLeft{ left:14px; top:42%; transform:translateY(-50%); }
+    #tutBottom{ left:50%; bottom:112px; transform:translateX(-50%); }
+    #tutTop{ left:50%; top:96px; transform:translateX(-50%); }
+
+    #asdKeyMsgCard{
+      left:16px;
+      top:50%;
+      transform:translateY(-50%);
     }
   </style>
 </head>
@@ -777,8 +771,6 @@
       <div id="asdHint">미션1. ‘깜박임’ 버튼을 눌러 이탈된 축을 안정화 시켜 보세요</div>
     </div>
   </div>
-
-  <div id="tutorialSpot"></div>
 
   <div id="tutorialLayer" aria-hidden="true">
     <div class="tutBox" id="tutLeft" style="display:none;">
@@ -996,9 +988,12 @@
         if(asdLensRim) asdLensRim.style.opacity = '';
       };
 
-      if(!asdLidTop || !asdLidBot) {
+      if(!asdLidTop || !asdLidBot){
         hideLens();
-        setTimeout(()=>{ showLens(); asdBlinkBusy = false; }, 220);
+        setTimeout(()=>{
+          showLens();
+          asdBlinkBusy = false;
+        }, 220);
         return;
       }
 
@@ -1334,61 +1329,16 @@
     setModel('lens_clear.glb', 'lens', { resetCamera:true });
 
     const tutorialLayer = document.getElementById('tutorialLayer');
-    const tutorialSpot = document.getElementById('tutorialSpot');
     const tutLeft = document.getElementById('tutLeft');
     const tutBottom = document.getElementById('tutBottom');
     const tutTop = document.getElementById('tutTop');
 
-    function setTutorialHighlight(rect, radius = 24){
-      if(!rect) return;
-
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      const rx = rect.width / 2 + radius;
-      const ry = rect.height / 2 + radius;
-
-      const mask = `
-        radial-gradient(
-          ellipse ${rx}px ${ry}px at ${x}px ${y}px,
-          transparent 0,
-          transparent 92%,
-          black 100%
-        )
-      `;
-
-      tutorialSpot.style.webkitMaskImage = mask;
-      tutorialSpot.style.maskImage = mask;
-      tutorialSpot.classList.add('show');
-    }
-
-    function highlightElement(el, extra = 24){
-      if(!el) return;
-      const rect = el.getBoundingClientRect();
-      setTutorialHighlight(rect, extra);
-    }
-
     function showTut(step){
       tutorialLayer.classList.add('show');
       tutorialLayer.setAttribute('aria-hidden','false');
-
       tutLeft.style.display = (step===1)?'block':'none';
       tutBottom.style.display = (step===2)?'block':'none';
       tutTop.style.display = (step===3)?'block':'none';
-
-      if(step === 1){
-        const rect = mv.getBoundingClientRect();
-        const lensRect = {
-          left: rect.left + rect.width * 0.22,
-          top: rect.top + rect.height * 0.22,
-          width: rect.width * 0.56,
-          height: rect.height * 0.50
-        };
-        setTutorialHighlight(lensRect, 12);
-      }else if(step === 2){
-        highlightElement(document.getElementById('bottomBtns'), 18);
-      }else if(step === 3){
-        highlightElement(document.getElementById('missionBar'), 18);
-      }
     }
 
     function hideTut(){
@@ -1397,9 +1347,6 @@
       tutLeft.style.display = 'none';
       tutBottom.style.display = 'none';
       tutTop.style.display = 'none';
-      tutorialSpot.classList.remove('show');
-      tutorialSpot.style.webkitMaskImage = '';
-      tutorialSpot.style.maskImage = '';
     }
 
     document.getElementById('tutNext1')?.addEventListener('click', ()=>showTut(2));
@@ -1411,14 +1358,6 @@
 
     window.addEventListener('load', ()=>{
       showTut(1);
-    });
-
-    window.addEventListener('resize', ()=>{
-      if(tutorialLayer.classList.contains('show')){
-        if(tutLeft.style.display === 'block') showTut(1);
-        else if(tutBottom.style.display === 'block') showTut(2);
-        else if(tutTop.style.display === 'block') showTut(3);
-      }
     });
 
     const asdKeyMsgLayer = document.getElementById('asdKeyMsgLayer');
