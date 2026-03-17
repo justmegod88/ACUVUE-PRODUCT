@@ -607,8 +607,8 @@
       position:fixed;
       inset:0;
       display:none;
-      background:rgba(8,22,37,.45);
-      backdrop-filter: blur(3px);
+      background:rgba(8,22,37,.18);
+      backdrop-filter: blur(1px);
     }
     #tutorialLayer{ z-index:95; }
     #asdKeyMsgLayer{ z-index:96; }
@@ -616,53 +616,44 @@
     #asdKeyMsgLayer.show{ display:block; }
 
     #tutorialSpot{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      z-index:94;
-      background:rgba(8,22,37,.58);
-      backdrop-filter:blur(2px);
-      -webkit-mask-repeat:no-repeat;
-      -webkit-mask-size:100% 100%;
-      -webkit-mask-position:center;
-      mask-repeat:no-repeat;
-      mask-size:100% 100%;
-      mask-position:center;
-      display:none;
+      display:none !important;
     }
-    #tutorialSpot.show{ display:block; }
 
     .tutBox{
       position:absolute;
       width:min(320px, 84vw);
-      background:#005EB8;
-      color:#fff;
-      border-radius:18px;
+      color:#ffffff;
+      border-radius:24px;
       padding:16px 16px 14px;
-      box-shadow:0 24px 80px rgba(0,0,0,.35);
-      border:2px solid rgba(255,255,255,.25);
+      background:rgba(0,94,184,.42);
+      border:1.5px solid rgba(255,255,255,.34);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow:0 18px 48px rgba(11,31,51,.20);
     }
     .tutBox .tutTitle{
       font-weight:900;
       margin-bottom:8px;
       font-size:17px;
+      color:#ffffff;
     }
     .tutBox .tutText{
-      line-height:1.4;
+      line-height:1.42;
       font-size:14px;
-      opacity:.95;
+      opacity:.98;
+      color:rgba(255,255,255,.96);
     }
     .tutBox .tutBtn{
       margin-top:14px;
       width:100%;
       height:44px;
-      border-radius:12px;
       border:none;
-      background:#ffffff;
-      color:#005EB8;
+      border-radius:14px;
+      background:rgba(255,255,255,.90);
+      color:var(--acuvue-blue);
       font-weight:900;
       cursor:pointer;
-      box-shadow:0 8px 20px rgba(0,0,0,.14);
+      box-shadow:0 8px 20px rgba(11,31,51,.12);
     }
 
     #tutLeft{ left:14px; top:42%; transform:translateY(-50%); }
@@ -1339,33 +1330,8 @@
     const tutBottom = document.getElementById('tutBottom');
     const tutTop = document.getElementById('tutTop');
 
-    function setTutorialHighlight(rect, radius = 24){
-      if(!rect) return;
-
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      const rx = rect.width / 2 + radius;
-      const ry = rect.height / 2 + radius;
-
-      const mask = `
-        radial-gradient(
-          ellipse ${rx}px ${ry}px at ${x}px ${y}px,
-          transparent 0,
-          transparent 92%,
-          black 100%
-        )
-      `;
-
-      tutorialSpot.style.webkitMaskImage = mask;
-      tutorialSpot.style.maskImage = mask;
-      tutorialSpot.classList.add('show');
-    }
-
-    function highlightElement(el, extra = 24){
-      if(!el) return;
-      const rect = el.getBoundingClientRect();
-      setTutorialHighlight(rect, extra);
-    }
+    function setTutorialHighlight(){ return; }
+    function highlightElement(){ return; }
 
     function showTut(step){
       tutorialLayer.classList.add('show');
@@ -1375,20 +1341,9 @@
       tutBottom.style.display = (step===2)?'block':'none';
       tutTop.style.display = (step===3)?'block':'none';
 
-      if(step === 1){
-        const rect = mv.getBoundingClientRect();
-        const lensRect = {
-          left: rect.left + rect.width * 0.22,
-          top: rect.top + rect.height * 0.22,
-          width: rect.width * 0.56,
-          height: rect.height * 0.50
-        };
-        setTutorialHighlight(lensRect, 12);
-      }else if(step === 2){
-        highlightElement(document.getElementById('bottomBtns'), 18);
-      }else if(step === 3){
-        highlightElement(document.getElementById('missionBar'), 18);
-      }
+      tutorialSpot.classList.remove('show');
+      tutorialSpot.style.webkitMaskImage = '';
+      tutorialSpot.style.maskImage = '';
     }
 
     function hideTut(){
