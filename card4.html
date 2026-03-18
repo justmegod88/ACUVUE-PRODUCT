@@ -15,6 +15,9 @@
       --blue-soft:#176fd6;
       --red-soft:#e02020;
       --pill-border:#0d4c78;
+      --pill-bg:#ffffff;
+      --pill-active1:#2b86ea;
+      --pill-active2:#116bd3;
       --pill-text:#0d2138;
     }
 
@@ -79,7 +82,7 @@
       position:relative;
       height:min(64vw, 540px);
       min-height:420px;
-      background:#efefef url('face_V2.png') center center / cover no-repeat;
+      background:#efefef url('face.png') center center / cover no-repeat;
       overflow:hidden;
     }
 
@@ -88,29 +91,23 @@
       position:absolute;
       inset:0;
       background:
-        radial-gradient(120px 150px at 30% 46%, rgba(255,255,255,.18), rgba(255,255,255,0) 62%),
-        radial-gradient(120px 150px at 69% 46%, rgba(255,255,255,.14), rgba(255,255,255,0) 62%);
+        radial-gradient(120px 150px at 30% 46%, rgba(255,255,255,.22), rgba(255,255,255,0) 62%),
+        radial-gradient(120px 150px at 69% 46%, rgba(255,255,255,.18), rgba(255,255,255,0) 62%);
       pointer-events:none;
       z-index:0;
     }
 
-    /* 중앙 카드형 시표 */
+    /* ===== 시표 영역: 좌측으로 배치 ===== */
     .target-stage{
       position:absolute;
-      left:50%;
-      top:50.2%;
-      width:154px;
-      height:226px;
+      left:37.2%;
+      top:44.2%;
+      width:118px;
+      height:176px;
       transform:translate(-50%,-50%);
       z-index:4;
       pointer-events:none;
-      opacity:0;
-      transition:opacity .3s ease;
-    }
-
-    .scene.mode-on .target-stage,
-    .scene.mode-off .target-stage{
-      opacity:1;
+      transition:left .45s ease, top .45s ease, width .45s ease, height .45s ease;
     }
 
     .target-box{
@@ -119,48 +116,61 @@
       transform:translateX(-50%);
       width:100%;
       height:100%;
-      border-radius:22px;
-      border:2px solid rgba(255,255,255,.58);
+      border-radius:18px;
+      border:2px solid rgba(255,255,255,.55);
+      background:rgba(255,220,235,.30);
       backdrop-filter: blur(1px);
       box-shadow:0 8px 24px rgba(0,0,0,.08);
       transition:all .5s cubic-bezier(.22,.8,.22,1);
     }
 
-    .box-top{
-      z-index:0;
-      background:rgba(252,224,236,.34);
-    }
-
-    .box-bottom{
-      z-index:0;
-      background:rgba(223,232,255,.22);
-    }
+    .target-box.box-top{ z-index:0; }
+    .target-box.box-bottom{ z-index:0; }
 
     .target-a{
       position:absolute;
       left:50%;
       transform:translate(-50%,-50%);
-      font-size:132px;
+      font-size:104px;
       line-height:1;
       font-weight:300;
-      letter-spacing:-8px;
+      letter-spacing:-6px;
       font-family:Georgia, "Times New Roman", serif;
       user-select:none;
       transition:
         top .55s cubic-bezier(.22,.8,.22,1),
         opacity .35s ease,
-        transform .55s cubic-bezier(.22,.8,.22,1);
+        transform .55s cubic-bezier(.22,.8,.22,1),
+        color .35s ease;
       z-index:2;
-      text-shadow:0 2px 6px rgba(0,0,0,.05);
     }
 
     .a-red{ color:var(--red-soft); }
     .a-blue{ color:var(--blue-soft); }
 
-    /* 기본 */
-    .scene.mode-default .target-stage{
-      opacity:0;
-      pointer-events:none;
+    /* 디폴트(1페이지) */
+    .scene.mode-default .box-top,
+    .scene.mode-default .box-bottom{
+      top:0;
+      opacity:.92;
+    }
+    .scene.mode-default .box-top{
+      background:rgba(245,222,232,.24);
+    }
+    .scene.mode-default .box-bottom{
+      background:rgba(245,222,232,.14);
+    }
+    .scene.mode-default .a-red{
+      top:50%;
+      opacity:.18;
+      transform:translate(-50%,-50%);
+      animation:none;
+    }
+    .scene.mode-default .a-blue{
+      top:50%;
+      opacity:.88;
+      transform:translate(-50%,-50%);
+      animation:none;
     }
 
     /* 프리즘 무 */
@@ -169,44 +179,47 @@
       top:0;
       opacity:.92;
     }
-
+    .scene.mode-off .box-top{
+      background:rgba(245,222,232,.28);
+    }
+    .scene.mode-off .box-bottom{
+      background:rgba(245,222,232,.16);
+    }
     .scene.mode-off .a-red{
       top:50%;
-      opacity:.64;
+      opacity:.30;
       transform:translate(-50%,-50%);
       animation:none;
-      color:#cf59dd;
+      color:#b44dc9;
     }
-
     .scene.mode-off .a-blue{
       top:50%;
-      opacity:0;
+      opacity:.92;
       transform:translate(-50%,-50%);
+      color:#8b2da0;
+      animation:none;
     }
 
     /* 프리즘 유 */
     .scene.mode-on .box-top{
       top:-14px;
-      opacity:.96;
-      background:rgba(255,220,232,.48);
+      opacity:.95;
+      background:rgba(251,221,231,.42);
     }
-
     .scene.mode-on .box-bottom{
       top:14px;
-      opacity:.86;
-      background:rgba(218,235,255,.34);
+      opacity:.82;
+      background:rgba(219,234,255,.28);
     }
-
     .scene.mode-on .a-red{
-      top:34%;
+      top:33%;
       opacity:1;
       transform:translate(-50%,-50%);
       color:var(--red-soft);
       animation:redFloat 1.45s ease-in-out infinite;
     }
-
     .scene.mode-on .a-blue{
-      top:66%;
+      top:69%;
       opacity:1;
       transform:translate(-50%,-50%);
       color:var(--blue-soft);
@@ -214,29 +227,23 @@
 
     @keyframes redFloat{
       0%   { transform:translate(-50%,-50%) translateY(0); }
-      20%  { transform:translate(-50%,-50%) translateY(-6px); }
-      45%  { transform:translate(-50%,-50%) translateY(2px); }
-      70%  { transform:translate(-50%,-50%) translateY(-4px); }
+      25%  { transform:translate(-50%,-50%) translateY(-4px); }
+      50%  { transform:translate(-50%,-50%) translateY(1px); }
+      75%  { transform:translate(-50%,-50%) translateY(-3px); }
       100% { transform:translate(-50%,-50%) translateY(0); }
     }
 
-    /* 광학 요소: 소비자 왼쪽 눈(화면 오른쪽이 아니라 사용자가 원한 기준 반영 -> 화면 기준 왼쪽 눈 위) */
+    /* ===== 광학 요소: 우안(사람 기준 오른쪽 눈 = 화면 왼쪽) 앞쪽 ===== */
     .optic{
       position:absolute;
-      left:36.2%;
-      top:46.5%;
-      width:68px;
-      height:132px;
+      left:35.2%;
+      top:48.2%;
+      width:58px;
+      height:118px;
       transform:translate(-50%,-50%);
-      z-index:6;
+      z-index:7;
       transition:all .45s ease;
       pointer-events:none;
-      opacity:0;
-    }
-
-    .scene.mode-on .optic,
-    .scene.mode-off .optic{
-      opacity:1;
     }
 
     .scene.mode-on .optic-prism{ display:block; }
@@ -245,7 +252,10 @@
     .scene.mode-off .optic-prism{ display:none; }
     .scene.mode-off .optic-flat{ display:block; }
 
-    .scene.mode-default .optic{ opacity:0; }
+    .scene.mode-default .optic-prism,
+    .scene.mode-default .optic-flat{
+      display:none;
+    }
 
     .optic-prism,
     .optic-flat{
@@ -261,9 +271,9 @@
       transform:translate(-50%,-50%);
       width:0;
       height:0;
-      border-left:36px solid transparent;
-      border-right:36px solid transparent;
-      border-bottom:116px solid rgba(255,255,255,.42);
+      border-left:30px solid transparent;
+      border-right:30px solid transparent;
+      border-bottom:100px solid rgba(255,255,255,.46);
       filter:drop-shadow(0 4px 10px rgba(0,0,0,.10));
     }
 
@@ -275,9 +285,9 @@
       transform:translate(-50%,-46%);
       width:0;
       height:0;
-      border-left:29px solid transparent;
-      border-right:29px solid transparent;
-      border-bottom:96px solid rgba(214,238,255,.28);
+      border-left:24px solid transparent;
+      border-right:24px solid transparent;
+      border-bottom:82px solid rgba(214,238,255,.30);
     }
 
     .optic-flat::before{
@@ -286,21 +296,21 @@
       left:50%;
       top:50%;
       transform:translate(-50%,-50%);
-      width:46px;
-      height:118px;
+      width:34px;
+      height:92px;
       border-radius:4px;
-      background:linear-gradient(180deg, rgba(255,255,255,.56), rgba(227,236,246,.34));
+      background:linear-gradient(180deg, rgba(255,255,255,.60), rgba(226,236,246,.42));
       border:1px solid rgba(255,255,255,.72);
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.20),
+        inset 0 0 0 1px rgba(255,255,255,.25),
         0 4px 10px rgba(0,0,0,.08);
     }
 
-    /* 점선 */
+    /* ===== 점선: 눈동자 -> A 텍스트 연결 ===== */
     .guide-line{
       position:absolute;
       height:0;
-      border-top:7px dashed;
+      border-top:6px dashed;
       z-index:5;
       transform-origin:left center;
       transition:all .45s ease;
@@ -308,112 +318,113 @@
       opacity:0;
     }
 
-    .scene.mode-on .guide-line,
-    .scene.mode-off .guide-line{
-      opacity:1;
+    /* 화면 왼쪽 눈(우안) -> 시표 */
+    .guide-line.red{
+      left:33.8%;
+      top:51.6%;
+      width:98px;
+      border-color:var(--red-soft);
+    }
+
+    /* 화면 오른쪽 눈(좌안) -> 시표 */
+    .guide-line.blue{
+      left:61.6%;
+      top:49.2%;
+      width:134px;
+      border-color:var(--blue-soft);
     }
 
     .scene.mode-default .guide-line{
       opacity:0;
     }
 
-    .guide-line.red{
-      left:34.8%;
-      top:51.0%;
-      width:104px;
-      border-color:var(--red-soft);
+    .scene.mode-off .guide-line{
+      opacity:1;
     }
-
-    .guide-line.blue{
-      left:61.2%;
-      top:49.0%;
-      width:98px;
-      border-color:var(--blue-soft);
-    }
-
     .scene.mode-off .guide-line.red{
-      transform:translate(0,0) rotate(18deg);
-      width:78px;
+      transform:translate(0,0) rotate(159deg);
+      width:86px;
     }
-
     .scene.mode-off .guide-line.blue{
-      transform:translate(0,0) rotate(164deg);
-      width:72px;
+      transform:translate(0,0) rotate(168deg);
+      width:120px;
     }
 
+    .scene.mode-on .guide-line{
+      opacity:1;
+    }
     .scene.mode-on .guide-line.red{
-      width:126px;
-      transform:translate(0,-11px) rotate(8deg);
+      width:102px;
+      transform:translate(0,-14px) rotate(178deg);
     }
-
     .scene.mode-on .guide-line.blue{
-      width:116px;
-      transform:translate(0,7px) rotate(160deg);
+      width:132px;
+      transform:translate(0,12px) rotate(168deg);
     }
 
-    /* 버튼 */
+    /* ===== 버튼 디자인 개선 ===== */
     .prism-pill{
       position:absolute;
       left:50%;
       bottom:16px;
       transform:translateX(-50%);
       width:min(94%, 760px);
-      height:92px;
+      height:82px;
       border-radius:999px;
       display:flex;
       align-items:center;
-      padding:8px;
-      gap:8px;
+      padding:6px;
+      gap:6px;
       z-index:10;
-      background:linear-gradient(180deg, #ffffff 0%, #f4f8fd 100%);
-      border:4px solid var(--pill-border);
+      background:linear-gradient(180deg, #ffffff 0%, #f5f8fc 100%);
+      border:3px solid var(--pill-border);
       box-shadow:
-        0 14px 26px rgba(0,0,0,.12),
-        inset 0 1px 0 rgba(255,255,255,.85);
+        0 14px 26px rgba(0,0,0,.10),
+        inset 0 1px 0 rgba(255,255,255,.92);
     }
 
     .pill-label{
-      min-width:112px;
+      flex:0 0 110px;
+      min-width:110px;
       height:100%;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:29px;
+      font-size:28px;
       font-weight:900;
       color:#111;
       letter-spacing:-.5px;
       border-radius:999px;
       background:transparent;
       text-align:center;
-      padding:0 12px;
+      padding:0 10px;
       user-select:none;
-      flex:0 0 auto;
     }
 
     .pill-btn{
       flex:1 1 0;
       height:100%;
       border-radius:999px;
-      border:3px solid #144f7b;
-      background:linear-gradient(180deg, #fdfefe 0%, #ecf3fb 100%);
+      border:2.5px solid #144f7b;
+      background:linear-gradient(180deg, #ffffff 0%, #eef4fb 100%);
       color:var(--pill-text);
-      font-size:28px;
+      font-size:26px;
       font-weight:900;
       letter-spacing:-.4px;
       cursor:pointer;
       transition:all .22s ease;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.95),
-        0 2px 8px rgba(0,0,0,.05);
+        inset 0 1px 0 rgba(255,255,255,.98),
+        0 2px 8px rgba(0,0,0,.04);
     }
 
     .pill-btn.active{
-      background:linear-gradient(180deg, #2b86ea 0%, #116bd3 100%);
+      background:linear-gradient(180deg, var(--pill-active1) 0%, var(--pill-active2) 100%);
       color:#fff;
       border-color:#0c4f9b;
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.20),
-        0 10px 18px rgba(0,94,184,.22);
+        0 10px 18px rgba(0,94,184,.18);
     }
 
     .pill-btn:not(.active):active{
@@ -464,26 +475,32 @@
       .modal-title{ font-size:20px; }
       .scene{ height:520px; min-height:360px; }
 
-      .target-stage{ width:128px; height:192px; }
-      .target-a{ font-size:108px; }
-
-      .optic{ width:56px; height:108px; }
-      .optic-prism::before{
-        border-left-width:30px;
-        border-right-width:30px;
-        border-bottom-width:94px;
+      .target-stage{
+        width:104px;
+        height:158px;
       }
-      .optic-prism::after{
+      .target-a{ font-size:90px; }
+
+      .optic{
+        width:48px;
+        height:98px;
+      }
+      .optic-prism::before{
         border-left-width:24px;
         border-right-width:24px;
-        border-bottom-width:78px;
+        border-bottom-width:82px;
+      }
+      .optic-prism::after{
+        border-left-width:20px;
+        border-right-width:20px;
+        border-bottom-width:68px;
       }
       .optic-flat::before{
-        width:40px;
-        height:100px;
+        width:28px;
+        height:78px;
       }
 
-      .prism-pill{ height:80px; }
+      .prism-pill{ height:76px; }
       .pill-label,.pill-btn{ font-size:22px; }
 
       .message{
@@ -519,42 +536,43 @@
       }
 
       .target-stage{
-        width:86px;
-        height:132px;
-        top:49.5%;
+        left:37.0%;
+        top:44.5%;
+        width:82px;
+        height:126px;
       }
 
       .target-box{
-        border-radius:18px;
+        border-radius:16px;
       }
 
       .scene.mode-on .box-top{ top:-10px; }
       .scene.mode-on .box-bottom{ top:10px; }
 
       .target-a{
-        font-size:74px;
+        font-size:72px;
         letter-spacing:-4px;
       }
 
       .optic{
-        left:35.2%;
-        top:46.4%;
-        width:42px;
-        height:82px;
+        left:35.0%;
+        top:48.0%;
+        width:38px;
+        height:76px;
       }
       .optic-prism::before{
-        border-left-width:22px;
-        border-right-width:22px;
-        border-bottom-width:70px;
+        border-left-width:20px;
+        border-right-width:20px;
+        border-bottom-width:62px;
       }
       .optic-prism::after{
-        border-left-width:18px;
-        border-right-width:18px;
-        border-bottom-width:58px;
+        border-left-width:16px;
+        border-right-width:16px;
+        border-bottom-width:50px;
       }
       .optic-flat::before{
-        width:28px;
-        height:78px;
+        width:24px;
+        height:64px;
       }
 
       .guide-line{
@@ -562,66 +580,62 @@
       }
 
       .guide-line.red{
-        left:34.1%;
-        top:51.4%;
+        left:33.6%;
+        top:51.8%;
       }
-
       .guide-line.blue{
-        left:61.0%;
-        top:49.2%;
+        left:61.2%;
+        top:49.0%;
       }
 
       .scene.mode-off .guide-line.red{
-        width:50px;
-        transform:translate(0,0) rotate(18deg);
+        width:72px;
+        transform:translate(0,0) rotate(159deg);
       }
-
       .scene.mode-off .guide-line.blue{
-        width:46px;
-        transform:translate(0,0) rotate(164deg);
+        width:98px;
+        transform:translate(0,0) rotate(168deg);
       }
 
       .scene.mode-on .guide-line.red{
-        width:80px;
-        transform:translate(0,-10px) rotate(8deg);
+        width:84px;
+        transform:translate(0,-10px) rotate(178deg);
       }
-
       .scene.mode-on .guide-line.blue{
-        width:74px;
-        transform:translate(0,7px) rotate(160deg);
+        width:108px;
+        transform:translate(0,9px) rotate(168deg);
       }
 
       .prism-pill{
         width:min(94%, 520px);
-        height:66px;
+        height:58px;
         bottom:10px;
         border-width:3px;
-        gap:6px;
-        padding:6px;
+        gap:5px;
+        padding:5px;
       }
 
       .pill-label{
-        min-width:74px;
-        font-size:15px;
-        padding:0 8px;
+        flex:0 0 72px;
+        min-width:72px;
+        font-size:14px;
+        padding:0 6px;
       }
 
       .pill-btn{
-        font-size:15px;
-        border-width:3px;
-        padding:0 8px;
+        font-size:14px;
+        border-width:2.5px;
+        padding:0 6px;
       }
 
       .message{
         padding:18px 14px 18px;
         gap:12px;
       }
-
       .message-copy{
         font-size:17px;
         line-height:1.38;
       }
-
       .confirm-btn{
         min-width:82px;
         height:58px;
@@ -648,13 +662,13 @@
           <div class="target-a a-blue">A</div>
         </div>
 
+        <div class="guide-line red"></div>
+        <div class="guide-line blue"></div>
+
         <div class="optic">
           <div class="optic-prism"></div>
           <div class="optic-flat"></div>
         </div>
-
-        <div class="guide-line red"></div>
-        <div class="guide-line blue"></div>
 
         <div class="prism-pill">
           <div class="pill-label">단안</div>
@@ -680,23 +694,13 @@
     const messageCopy = document.getElementById('messageCopy');
 
     function setMode(mode){
-      scene.classList.remove('mode-default','mode-on','mode-off');
-
-      btnOn.classList.remove('active');
-      btnOff.classList.remove('active');
-
-      if(mode === 'default'){
-        scene.classList.add('mode-default');
-        messageCopy.innerHTML = `
-          프리즘이 단안 난시 소비자에게 미치는 영향을
-          <span class="blue">‘프리즘 유/무 버튼’</span>을 통해 확인해 보세요
-        `;
-        return;
-      }
+      scene.classList.remove('mode-default', 'mode-on', 'mode-off');
 
       if(mode === 'on'){
         scene.classList.add('mode-on');
         btnOn.classList.add('active');
+        btnOff.classList.remove('active');
+
         messageCopy.innerHTML = `
           단안 난시 소비자의 경우, 프리즘의 영향으로
           <span class="blue">양안의 이미지 위치에 차이가 발생하여 오후 피로감 발생 가능</span>
@@ -704,11 +708,25 @@
         return;
       }
 
-      scene.classList.add('mode-off');
-      btnOff.classList.add('active');
+      if(mode === 'off'){
+        scene.classList.add('mode-off');
+        btnOn.classList.remove('active');
+        btnOff.classList.add('active');
+
+        messageCopy.innerHTML = `
+          단안 난시 소비자의 경우, 프리즘의 영향이 없이
+          <span class="blue">저녁까지 편안함과 선명함 제공</span>
+        `;
+        return;
+      }
+
+      scene.classList.add('mode-default');
+      btnOn.classList.remove('active');
+      btnOff.classList.remove('active');
+
       messageCopy.innerHTML = `
-        단안 난시 소비자의 경우, 프리즘의 영향이 없이
-        <span class="blue">저녁까지 편안함과 선명함 제공</span>
+        프리즘이 단안 난시 소비자에게 미치는 영향을
+        <span class="blue">‘프리즘 유/무 버튼’</span>을 통해 확인해 보세요
       `;
     }
 
@@ -719,7 +737,7 @@
       alert('여기에 닫기 로직 연결');
     }
 
-    /* 첫 화면 = 안내 기본 상태 */
+    /* 디폴트 첫 화면 */
     setMode('default');
   </script>
 </body>
