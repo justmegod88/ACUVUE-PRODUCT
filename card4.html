@@ -727,7 +727,7 @@
       const cardW = mobile ? 82 : (tablet ? 104 : 118);
       const cardH = mobile ? 126 : (tablet ? 158 : 176);
       const cardCx = w * 0.225;
-      const cardCy = h * 0.568;
+      const cardCy = h * 0.500;
 
       targetStage.style.width = cardW + 'px';
       targetStage.style.height = cardH + 'px';
@@ -762,8 +762,8 @@
 
         /* 프리즘 유:
            빨간 점선은 눈 쪽은 고정, 카드 쪽만 위로 */
-        const onRedStartY = cardCy + cardH * 0.10;
-        const onBlueStartY = cardCy + cardH * 0.51;
+        const onRedStartY = cardCy + cardH * 0.05;
+        const onBlueStartY = cardCy + cardH * 0.43;
 
         placeLine(
           lineRed,
@@ -789,8 +789,8 @@
 
         /* 프리즘 무:
            카드 접점만 위로 */
-        const offRedStartY = cardCy + cardH * 0.37;
-        const offBlueStartY = cardCy + cardH * 0.47;
+        const offRedStartY = cardCy + cardH * 0.28;
+        const offBlueStartY = cardCy + cardH * 0.38;
 
         placeLine(
           lineRed,
