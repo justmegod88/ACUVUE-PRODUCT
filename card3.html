@@ -3,547 +3,473 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-  <title>Card 3 - 편안한 시야</title>
+  <title>ASD™ 편안한 시야</title>
 
   <style>
     :root{
       --acuvue-blue:#005EB8;
-      --acuvue-blue-2:#1E78D6;
-      --acuvue-soft:#EAF3FF;
-      --acuvue-soft-2:#F5F9FF;
-      --text-navy:#0B1F33;
-      --text-sub:#30485F;
-      --line:#D9E6F5;
-      --shadow:0 18px 60px rgba(11,31,51,.18);
-      --glass:rgba(255,255,255,.86);
-      --panel-grad: linear-gradient(180deg, rgba(234,243,255,.96) 0%, rgba(255,255,255,.92) 58%, rgba(245,249,255,.88) 100%);
-      --panel-stroke: rgba(0,94,184,.18);
-      --panel-glow: 0 16px 50px rgba(0,94,184,.10), 0 18px 60px rgba(11,31,51,.14);
-      --panel-topline: linear-gradient(90deg, rgba(0,94,184,.80), rgba(0,94,184,.14));
+      --acuvue-blue-deep:#0a3e63;
+      --panel:#dfe8f4;
+      --header:#e8eef7;
+      --border:#c9d5e6;
+      --text:#111827;
     }
 
     *{ box-sizing:border-box; }
 
     html,body{
-      height:100%;
       margin:0;
-      font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", system-ui, sans-serif;
-      background:linear-gradient(180deg, var(--acuvue-soft-2) 0%, #ffffff 52%, var(--acuvue-soft-2) 100%);
-      color:var(--text-navy);
-      overflow:hidden;
+      height:100%;
+      background:#000;
+      font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
     }
 
-    .stage{
-      position:fixed;
-      inset:0;
-      overflow:hidden;
-      background:
-        radial-gradient(60% 52% at 50% 44%, rgba(0,94,184,.06) 0%, rgba(0,94,184,0) 62%),
-        linear-gradient(180deg, rgba(255,255,255,.70) 0%, rgba(234,243,255,.42) 100%);
-    }
-
-    .topBar{
-      position:fixed;
-      top:12px;
-      left:12px;
-      right:12px;
-      z-index:20;
+    .wrap{
+      min-height:100%;
       display:flex;
-      gap:10px;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
     }
 
     .card{
-      flex:1;
-      min-height:86px;
-      border-radius:18px;
-      padding:14px 14px 12px;
-      background:rgba(255,255,255,.84);
-      border:1px solid var(--line);
-      box-shadow:0 10px 28px rgba(11,31,51,.08);
-      backdrop-filter:blur(12px);
+      width:min(860px, 96vw);
+      border-radius:22px;
+      overflow:hidden;
+      background:#fff;
+      border:1px solid var(--border);
+      box-shadow:0 24px 70px rgba(0,0,0,.28);
     }
 
-    .cardNo{
-      font-size:13px;
-      font-weight:900;
-      color:var(--text-sub);
-      opacity:.82;
-      margin-bottom:6px;
-    }
-    .cardTitle{
-      font-size:16px;
-      font-weight:900;
-      color:var(--text-navy);
-      margin-bottom:6px;
-      letter-spacing:-.2px;
-    }
-    .cardDesc{
-      font-size:12.5px;
-      color:var(--text-sub);
-      line-height:1.35;
-    }
-
-    .card.active{
-      background:rgba(0,94,184,.11);
-      border-color:rgba(0,94,184,.30);
-    }
-
-    .viewer{
-      position:absolute;
-      inset:110px 0 140px 0;
+    .card-header{
+      height:76px;
+      background:var(--header);
       display:flex;
       align-items:center;
-      justify-content:center;
-      pointer-events:none;
+      justify-content:space-between;
+      padding:0 26px;
+      border-bottom:1px solid rgba(0,0,0,.06);
     }
 
-    .eyeWrap{
+    .card-title{
+      font-size:27px;
+      font-weight:900;
+      color:#000;
+      letter-spacing:-.4px;
+    }
+
+    .close-btn{
+      border:none;
+      background:transparent;
+      font-size:28px;
+      line-height:1;
+      cursor:pointer;
+      color:#000;
+      padding:0;
+    }
+
+    .stage{
       position:relative;
-      width:min(78vw, 520px);
-      aspect-ratio:1/1;
-      border-radius:999px;
-      overflow:visible;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      width:100%;
+      aspect-ratio: 1.72 / 1;
+      min-height:340px;
+      overflow:hidden;
+      background:#ddd;
     }
 
-    .faceBase{
+    .face-img{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
-      object-fit:contain;
-      pointer-events:none;
-      user-select:none;
-      filter: drop-shadow(0 16px 26px rgba(11,31,51,.10));
+      object-fit:cover;
+      display:block;
     }
 
-    /* 이미지 없을 때 대비용 */
-    .fallbackFace{
+    /* 프리즘 / 플랫 바 */
+    .optic{
       position:absolute;
-      inset:10% 10%;
-      border-radius:50%;
-      background:
-        radial-gradient(40% 28% at 50% 48%, rgba(255,255,255,.95) 0%, rgba(241,246,252,.95) 40%, rgba(224,235,248,.95) 100%);
-      border:1px solid rgba(0,94,184,.10);
-      box-shadow:
-        inset 0 -20px 50px rgba(0,94,184,.05),
-        0 18px 40px rgba(11,31,51,.10);
-    }
-
-    .eyeRow{
-      position:absolute;
-      left:18%;
-      right:18%;
-      top:43%;
-      height:18%;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
+      left:50%;
+      top:52%;
+      transform:translate(-50%,-50%);
+      width:94px;
+      height:210px;
+      z-index:3;
       pointer-events:none;
+      transition:opacity .35s ease, transform .45s ease;
     }
 
-    .eye{
-      position:relative;
-      width:28%;
-      height:100%;
-      border-radius:999px;
-      overflow:visible;
-    }
-
-    .eyeShape{
+    .optic-flat,
+    .optic-prism{
       position:absolute;
       inset:0;
-      border-radius:999px;
-      background:
-        radial-gradient(60% 90% at 50% 45%, #ffffff 0%, #f4f8fc 65%, #d9e5f1 100%);
+      transition:opacity .35s ease, transform .45s ease;
+    }
+
+    .optic-flat{
+      border-radius:10px;
+      background:linear-gradient(
+        180deg,
+        rgba(255,235,246,.78) 0%,
+        rgba(247,227,244,.72) 48%,
+        rgba(255,213,229,.82) 100%
+      );
+      border:1px solid rgba(255,255,255,.7);
       box-shadow:
-        inset 0 0 0 1px rgba(11,31,51,.08),
-        inset 0 -8px 12px rgba(11,31,51,.08);
-    }
-
-    .pupil{
-      position:absolute;
-      top:50%;
-      width:16%;
-      height:34%;
-      transform:translate(-50%,-50%);
-      border-radius:999px;
-      background:
-        radial-gradient(circle at 35% 35%, rgba(255,255,255,.28) 0%, rgba(255,255,255,0) 30%),
-        radial-gradient(circle at 50% 50%, #1b1b1b 0%, #070707 75%, #000 100%);
-      box-shadow:0 1px 5px rgba(0,0,0,.18);
-      transition:left .9s ease, transform .9s ease;
-    }
-
-    .leftEye .pupil{ left:52%; }
-    .rightEye .pupil{ left:48%; }
-
-    .state-off .leftEye .pupil{ left:52%; transform:translate(-50%,-50%); }
-    .state-off .rightEye .pupil{ left:48%; transform:translate(-50%,-50%); }
-
-    .state-on .leftEye .pupil{ left:47%; transform:translate(-50%,-50%); }
-    .state-on .rightEye .pupil{ left:53%; transform:translate(-50%,-50%); }
-
-    .prismLayer{
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:min(72vw, 440px);
-      aspect-ratio:1/1;
-      transform:translate(-50%,-50%);
-      pointer-events:none;
-    }
-
-    .prismImg{
-      position:absolute;
-      top:50%;
-      width:26%;
-      max-width:120px;
-      opacity:0;
-      transition:
-        transform .95s cubic-bezier(.22,.84,.18,1),
-        opacity .55s ease;
-      filter: drop-shadow(0 10px 18px rgba(0,94,184,.16));
-    }
-
-    .prismLeft{
-      left:27%;
-      transform:translate(-50%,-50%) translateX(0px) scale(.92);
-    }
-    .prismRight{
-      left:73%;
-      transform:translate(-50%,-50%) translateX(0px) scale(.92);
-    }
-
-    .state-on .prismImg{
+        inset 0 0 0 1px rgba(255,255,255,.28),
+        0 10px 20px rgba(0,0,0,.05);
       opacity:1;
     }
-    .state-on .prismLeft{
-      transform:translate(-50%,-50%) translateX(-16px) scale(1);
-    }
-    .state-on .prismRight{
-      transform:translate(-50%,-50%) translateX(16px) scale(1);
+
+    .optic-flat::before{
+      content:"A";
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:118px;
+      font-weight:300;
+      color:rgba(216,189,166,.92);
+      text-shadow:0 1px 0 rgba(255,255,255,.22);
     }
 
-    .flatLayer{
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:min(72vw, 440px);
-      aspect-ratio:1/1;
-      transform:translate(-50%,-50%);
-      pointer-events:none;
-    }
-
-    .flatImg{
-      position:absolute;
-      top:50%;
-      width:24%;
-      max-width:110px;
+    .optic-prism{
       opacity:0;
-      transition:
-        transform .6s ease,
-        opacity .35s ease;
-      filter: drop-shadow(0 10px 18px rgba(11,31,51,.10));
+      transform:translateY(0);
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
 
-    .flatLeft{
-      left:27%;
-      transform:translate(-50%,-50%) scale(.96);
-    }
-    .flatRight{
-      left:73%;
-      transform:translate(-50%,-50%) scale(.96);
-    }
-
-    .state-off .flatImg{
-      opacity:1;
-      transform:translate(-50%,-50%) scale(1);
-    }
-
-    .messagePanel{
-      position:fixed;
-      left:12px;
-      right:12px;
-      bottom:88px;
-      z-index:25;
-      border-radius:18px;
-      border:1px solid var(--panel-stroke);
-      background:var(--panel-grad);
-      box-shadow:var(--panel-glow);
-      backdrop-filter:blur(14px);
-      overflow:hidden;
-    }
-
-    .messagePanel::before{
+    .optic-prism::before{
       content:"";
+      width:0;
+      height:0;
+      border-left:46px solid transparent;
+      border-right:46px solid transparent;
+      border-bottom:190px solid rgba(143,212,255,.82);
+      filter:drop-shadow(0 10px 18px rgba(0,0,0,.08));
+    }
+
+    .optic-prism::after{
+      content:"A";
       position:absolute;
-      left:0;
-      right:0;
-      top:0;
-      height:2px;
-      background:var(--panel-topline);
+      left:50%;
+      top:58%;
+      transform:translate(-50%,-50%);
+      font-size:108px;
+      font-weight:300;
+      color:rgba(216,189,166,.88);
+      text-shadow:0 1px 0 rgba(255,255,255,.18);
     }
 
-    .panelTop{
-      padding:12px 14px 10px;
-      border-bottom:1px solid rgba(11,31,51,.08);
+    /* 시표: 상하 분리 */
+    .target-stage{
+      position:absolute;
+      left:50%;
+      top:52%;
+      transform:translate(-50%,-50%);
+      width:112px;
+      height:184px;
+      z-index:4;
+      pointer-events:none;
+    }
+
+    .target-a{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      font-size:118px;
+      line-height:1;
+      font-weight:300;
+      color:rgba(216,189,166,.96);
+      text-shadow:0 1px 0 rgba(255,255,255,.25);
+      transition:
+        transform .55s cubic-bezier(.22,.61,.36,1),
+        opacity .35s ease,
+        filter .35s ease;
+    }
+
+    /* 기본: 하나처럼 */
+    .target-stage.is-off .target-top{
+      transform:translate(-50%,-50%) translateY(0);
+      opacity:.98;
+      filter:none;
+    }
+    .target-stage.is-off .target-bottom{
+      transform:translate(-50%,-50%) translateY(0);
+      opacity:.98;
+      filter:none;
+    }
+
+    /* 프리즘 영향: 프리즘이 들어간 쪽 상이 위로 올라감 */
+    .target-stage.is-on .target-top{
+      transform:translate(-50%,-50%) translateY(-20px);
+      opacity:.88;
+      filter:blur(.15px);
+    }
+    .target-stage.is-on .target-bottom{
+      transform:translate(-50%,-50%) translateY(10px);
+      opacity:.78;
+      filter:blur(.1px);
+    }
+
+    /* 시선 점선 */
+    .guide-line{
+      position:absolute;
+      height:0;
+      border-top:3px dotted;
+      opacity:.8;
+      z-index:2;
+      transition:transform .55s cubic-bezier(.22,.61,.36,1), opacity .35s ease;
+      transform-origin:left center;
+      pointer-events:none;
+    }
+
+    .guide-line.left{
+      width:110px;
+      left:38.5%;
+      top:52%;
+      border-color:#e45b5b;
+      transform:rotate(8deg);
+    }
+    .guide-line.right{
+      width:110px;
+      left:50.4%;
+      top:52%;
+      border-color:#4f8cff;
+      transform:rotate(-8deg);
+    }
+
+    .target-stage.is-on ~ .guide-line.left{
+      transform:rotate(12deg) translateY(-8px);
+    }
+    .target-stage.is-on ~ .guide-line.right{
+      transform:rotate(-12deg) translateY(-8px);
+    }
+
+    /* 토글 */
+    .toggle-wrap{
+      position:absolute;
+      right:24px;
+      bottom:20px;
+      z-index:5;
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-
-    .panelTitle{
-      font-size:17px;
-      font-weight:900;
-      letter-spacing:-.2px;
-      color:var(--text-navy);
-    }
-
-    .toggleWrap{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      background:rgba(255,255,255,.86);
-      border:1px solid rgba(0,94,184,.12);
+      background:#136a99;
+      border:4px solid #083651;
       border-radius:999px;
-      padding:5px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+      padding:0;
+      overflow:hidden;
+      box-shadow:0 8px 18px rgba(0,0,0,.14);
     }
 
-    .toggleBtn{
-      min-width:110px;
-      height:40px;
-      border:none;
-      border-radius:999px;
-      background:transparent;
-      color:var(--text-sub);
-      font-weight:900;
-      font-size:13px;
-      letter-spacing:-.1px;
-      cursor:pointer;
-      transition:all .22s ease;
-      padding:0 14px;
-    }
-
-    .toggleBtn.active{
-      background:linear-gradient(180deg, var(--acuvue-blue) 0%, #0A66C6 100%);
+    .toggle-label{
       color:#fff;
-      box-shadow:0 8px 16px rgba(0,94,184,.18);
+      font-size:24px;
+      font-weight:500;
+      padding:0 34px;
+      white-space:nowrap;
+      letter-spacing:-.3px;
     }
 
-    .panelBody{
-      padding:14px 14px 16px;
+    .toggle-btn{
+      min-width:122px;
+      height:96px;
+      border:none;
+      border-left:4px solid #083651;
+      background:#1f739f;
+      color:#e9f5ff;
+      font-size:26px;
+      font-weight:500;
+      cursor:pointer;
+      transition:background .2s ease, color .2s ease, opacity .2s ease;
     }
 
-    .lead{
-      font-size:15px;
+    .toggle-btn.active{
+      background:#2e86b8;
+      color:#fff;
+    }
+
+    /* 하단 메시지 */
+    .message-box{
+      background:#dfe8f4;
+      padding:30px 34px 26px;
+      position:relative;
+    }
+
+    .message-text{
+      margin:0;
+      font-size:32px;
+      line-height:1.33;
       font-weight:900;
-      color:var(--acuvue-blue);
-      margin-bottom:8px;
-      letter-spacing:-.2px;
-    }
-
-    .bodyText{
-      font-size:16px;
-      line-height:1.48;
-      color:#111;
-      font-weight:800;
-      letter-spacing:-.2px;
+      color:#000;
+      letter-spacing:-.6px;
+      padding-right:150px;
       word-break:keep-all;
     }
 
-    .bodyText .blue{
-      color:var(--acuvue-blue);
+    .message-text .blue{
+      color:#166bca;
     }
 
-    .bottomBtns{
-      position:fixed;
-      left:12px;
-      right:12px;
-      bottom:12px;
-      z-index:30;
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-
-    .roundBtn{
-      width:46px;
-      height:46px;
-      min-width:46px;
+    .confirm-btn{
+      position:absolute;
+      right:28px;
+      bottom:24px;
+      width:118px;
+      height:74px;
       border:none;
-      border-radius:999px;
-      background:rgba(255,255,255,.86);
-      border:1px solid var(--line);
-      box-shadow:0 10px 28px rgba(11,31,51,.10);
-      font-size:18px;
-      font-weight:900;
-      color:var(--text-navy);
-      backdrop-filter:blur(10px);
-      cursor:pointer;
-    }
-
-    .mainBtn{
-      flex:1;
-      height:48px;
-      border:none;
-      border-radius:14px;
-      background:rgba(255,255,255,.86);
-      border:1px solid var(--line);
-      box-shadow:0 10px 28px rgba(11,31,51,.10);
-      font-weight:900;
-      font-size:14px;
-      color:var(--text-navy);
-      backdrop-filter:blur(10px);
-      cursor:pointer;
-    }
-
-    .mainBtn.primary{
-      background:var(--acuvue-blue);
+      border-radius:16px;
+      background:#1169cf;
       color:#fff;
-      border-color:rgba(0,94,184,.55);
+      font-size:24px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 10px 22px rgba(17,105,207,.22);
     }
 
-    .helperNote{
-      position:fixed;
-      left:50%;
-      top:98px;
-      transform:translateX(-50%);
-      z-index:12;
-      padding:8px 14px;
-      border-radius:999px;
-      background:rgba(255,255,255,.86);
-      border:1px solid rgba(0,94,184,.14);
-      box-shadow:0 8px 24px rgba(11,31,51,.08);
-      font-size:12.5px;
-      font-weight:800;
-      color:var(--text-sub);
-      backdrop-filter:blur(10px);
-      white-space:nowrap;
+    @media (max-width: 768px){
+      .card-header{ height:64px; padding:0 18px; }
+      .card-title{ font-size:22px; }
+      .stage{ min-height:260px; }
+      .optic{
+        width:70px;
+        height:154px;
+      }
+      .optic-flat::before{ font-size:84px; }
+      .optic-prism::before{
+        border-left-width:34px;
+        border-right-width:34px;
+        border-bottom-width:140px;
+      }
+      .optic-prism::after{
+        font-size:78px;
+      }
+      .target-stage{
+        width:84px;
+        height:136px;
+      }
+      .target-a{
+        font-size:86px;
+      }
+      .target-stage.is-on .target-top{
+        transform:translate(-50%,-50%) translateY(-15px);
+      }
+      .target-stage.is-on .target-bottom{
+        transform:translate(-50%,-50%) translateY(8px);
+      }
+      .guide-line.left{
+        width:78px;
+        left:37.2%;
+        top:52.4%;
+      }
+      .guide-line.right{
+        width:78px;
+        left:51%;
+        top:52.4%;
+      }
+      .toggle-wrap{
+        right:16px;
+        bottom:14px;
+        transform:scale(.84);
+        transform-origin:right bottom;
+      }
+      .message-box{
+        padding:22px 22px 22px;
+      }
+      .message-text{
+        font-size:22px;
+        padding-right:108px;
+      }
+      .confirm-btn{
+        width:92px;
+        height:58px;
+        font-size:18px;
+        right:18px;
+        bottom:18px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="stage state-off" id="stage">
-    <div class="topBar">
-      <div class="card">
-        <div class="cardNo">01</div>
-        <div class="cardTitle">ASD™ 축안정화</div>
-        <div class="cardDesc">카드를 눌러 확인</div>
+  <div class="wrap">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">ASD™ 편안한 시야</div>
+        <button class="close-btn" type="button">X</button>
       </div>
-      <div class="card">
-        <div class="cardNo">02</div>
-        <div class="cardTitle">PVP 습윤 인자</div>
-        <div class="cardDesc">카드를 눌러 확인</div>
-      </div>
-      <div class="card active">
-        <div class="cardNo">03</div>
-        <div class="cardTitle">편안한 시야</div>
-        <div class="cardDesc">프리즘 영향 비교</div>
-      </div>
-    </div>
 
-    <div class="helperNote">이미지는 플레이스홀더로 연결해두었습니다</div>
+      <div class="stage">
+        <!-- 얼굴 이미지는 폴더에 넣은 파일명으로 바꿔도 됨 -->
+        <img class="face-img" src="face.png" alt="눈 이미지" onerror="this.style.display='none'; this.parentElement.style.background='#e5e7eb';">
 
-    <div class="viewer">
-      <div class="eyeWrap">
-        <img class="faceBase" src="face_base.png" alt="face" onerror="this.style.display='none';document.getElementById('fallbackFace').style.display='block';">
-        <div class="fallbackFace" id="fallbackFace" style="display:none;"></div>
-
-        <div class="eyeRow">
-          <div class="eye leftEye">
-            <div class="eyeShape"></div>
-            <div class="pupil"></div>
-          </div>
-          <div class="eye rightEye">
-            <div class="eyeShape"></div>
-            <div class="pupil"></div>
-          </div>
+        <div class="optic" id="optic">
+          <div class="optic-flat" id="opticFlat"></div>
+          <div class="optic-prism" id="opticPrism"></div>
         </div>
 
-        <!-- 프리즘 영향 ON -->
-        <div class="prismLayer">
-          <img class="prismImg prismLeft" src="prism_triangle_left.png" alt="prism left"
-               onerror="this.onerror=null;this.src='prism_triangle.png';">
-          <img class="prismImg prismRight" src="prism_triangle_right.png" alt="prism right"
-               onerror="this.onerror=null;this.src='prism_triangle.png';">
+        <div class="target-stage is-off" id="targetStage">
+          <div class="target-a target-top">A</div>
+          <div class="target-a target-bottom">A</div>
         </div>
 
-        <!-- 프리즘 없음 OFF -->
-        <div class="flatLayer">
-          <img class="flatImg flatLeft" src="prism_flat_left.png" alt="flat left"
-               onerror="this.onerror=null;this.src='prism_flat.png';">
-          <img class="flatImg flatRight" src="prism_flat_right.png" alt="flat right"
-               onerror="this.onerror=null;this.src='prism_flat.png';">
-        </div>
-      </div>
-    </div>
+        <div class="guide-line left" id="leftLine"></div>
+        <div class="guide-line right" id="rightLine"></div>
 
-    <div class="messagePanel">
-      <div class="panelTop">
-        <div class="panelTitle">편안한 시야</div>
-
-        <div class="toggleWrap">
-          <button class="toggleBtn" id="btnOn">프리즘 영향</button>
-          <button class="toggleBtn active" id="btnOff">프리즘 없음</button>
+        <div class="toggle-wrap">
+          <div class="toggle-label">단안 프리즘</div>
+          <button class="toggle-btn" id="btnPrismOn" type="button">프리즘 영향</button>
+          <button class="toggle-btn active" id="btnPrismOff" type="button">프리즘 없음</button>
         </div>
       </div>
 
-      <div class="panelBody">
-        <div class="lead" id="leadText">편안한 시야 비교</div>
-        <div class="bodyText" id="bodyText">
-          <span class="blue">프리즘 없음</span> 상태에서는 좌우 시야가 상대적으로 안정적으로 유지되어
-          보다 편안하게 볼 수 있습니다.
-        </div>
+      <div class="message-box">
+        <p class="message-text" id="messageText">
+          단안 난시 소비자의 경우, 프리즘의 영향이 없이
+          <span class="blue">저녁까지 편안함과 선명함 제공</span>
+        </p>
+        <button class="confirm-btn" type="button">확인</button>
       </div>
-    </div>
-
-    <div class="bottomBtns">
-      <button class="roundBtn" id="btnReset">↺</button>
-      <button class="mainBtn primary">투명 렌즈 모드</button>
-      <button class="mainBtn">렌즈 두께 MAP</button>
     </div>
   </div>
 
   <script>
-    const stage = document.getElementById('stage');
-    const btnOn = document.getElementById('btnOn');
-    const btnOff = document.getElementById('btnOff');
-    const btnReset = document.getElementById('btnReset');
-    const leadText = document.getElementById('leadText');
-    const bodyText = document.getElementById('bodyText');
+    const targetStage = document.getElementById('targetStage');
+    const opticFlat = document.getElementById('opticFlat');
+    const opticPrism = document.getElementById('opticPrism');
+    const btnPrismOn = document.getElementById('btnPrismOn');
+    const btnPrismOff = document.getElementById('btnPrismOff');
+    const messageText = document.getElementById('messageText');
 
-    function setState(isPrismOn){
-      stage.classList.toggle('state-on', isPrismOn);
-      stage.classList.toggle('state-off', !isPrismOn);
+    function setPrismState(state){
+      const isOn = state === 'on';
 
-      btnOn.classList.toggle('active', isPrismOn);
-      btnOff.classList.toggle('active', !isPrismOn);
+      targetStage.classList.remove('is-on', 'is-off');
+      targetStage.classList.add(isOn ? 'is-on' : 'is-off');
 
-      if(isPrismOn){
-        leadText.textContent = '프리즘 영향 시';
-        bodyText.innerHTML = `
-          <span class="blue">프리즘 영향</span>이 있는 경우 좌우 상의 위치가 조금씩 달라지면서
-          시야가 <span class="blue">서서히 분리되어 보일 수 있음</span>을 표현한 예시입니다.
-        `;
+      btnPrismOn.classList.toggle('active', isOn);
+      btnPrismOff.classList.toggle('active', !isOn);
+
+      opticPrism.style.opacity = isOn ? '1' : '0';
+      opticPrism.style.transform = isOn ? 'translateY(0)' : 'translateY(0)';
+      opticFlat.style.opacity = isOn ? '0' : '1';
+
+      if(isOn){
+        messageText.innerHTML =
+          '단안 난시 소비자의 경우, 프리즘의 영향으로 <span class="blue">상의 위치에 차이가 발생하여 오후 피로감 발생 가능</span>';
       }else{
-        leadText.textContent = '프리즘 없음';
-        bodyText.innerHTML = `
-          <span class="blue">프리즘 없음</span> 상태에서는 좌우 시야가 상대적으로 안정적으로 유지되어
-          보다 편안하게 볼 수 있습니다.
-        `;
+        messageText.innerHTML =
+          '단안 난시 소비자의 경우, 프리즘의 영향이 없이 <span class="blue">저녁까지 편안함과 선명함 제공</span>';
       }
     }
 
-    btnOn.addEventListener('click', ()=> setState(true));
-    btnOff.addEventListener('click', ()=> setState(false));
-    btnReset.addEventListener('click', ()=> setState(false));
+    btnPrismOn.addEventListener('click', ()=> setPrismState('on'));
+    btnPrismOff.addEventListener('click', ()=> setPrismState('off'));
 
-    setState(false);
+    setPrismState('off');
   </script>
 </body>
 </html>
