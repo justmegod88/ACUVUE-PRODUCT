@@ -82,7 +82,7 @@
       position:relative;
       height:min(64vw, 540px);
       min-height:420px;
-      background:#efefef url('face_V2.png') center center / cover no-repeat;
+      background:#efefef url('face.png') center center / cover no-repeat;
       overflow:hidden;
     }
 
@@ -97,14 +97,14 @@
       z-index:0;
     }
 
-    /* ===== 시표 영역: 좌측으로 배치 레프트 위치 변경 숫자 작게 ===== */
+    /* ===== 시표 영역: 왼쪽 빈 공간 ===== */
     .target-stage{
       position:absolute;
-      left:22%;
+      left:24%;
       top:42%;
       width:118px;
       height:176px;
-      transform:none;
+      transform:translate(-50%,-50%);
       z-index:4;
       pointer-events:none;
       transition:left .45s ease, top .45s ease, width .45s ease, height .45s ease;
@@ -233,14 +233,14 @@
       100% { transform:translate(-50%,-50%) translateY(0); }
     }
 
-    /* ===== 광학 요소: 우안(사람 기준 오른쪽 눈 = 화면 왼쪽) 앞쪽 ===== 탑이 작을 수록 위로 left가 클수록 오른쪽 */
+    /* ===== 광학 요소: 눈 위 ===== */
     .optic{
       position:absolute;
-      left:38.5%;
-      top:47%; 
+      left:39%;
+      top:45%;
       width:58px;
       height:118px;
-      transform:none;
+      transform:translate(-50%,-50%);
       z-index:7;
       transition:all .45s ease;
       pointer-events:none;
@@ -306,7 +306,7 @@
         0 4px 10px rgba(0,0,0,.08);
     }
 
-    /* ===== 점선: 눈동자 -> A 텍스트 연결 ===== */
+    /* ===== 점선: 눈동자 -> 시표/A ===== */
     .guide-line{
       position:absolute;
       height:0;
@@ -320,17 +320,17 @@
 
     /* 화면 왼쪽 눈(우안) -> 시표 */
     .guide-line.red{
-      left:36.5%;
-      top:51%;
-      width:98px;
+      left:33.8%;
+      top:50.2%;
+      width:138px;
       border-color:var(--red-soft);
     }
 
     /* 화면 오른쪽 눈(좌안) -> 시표 */
     .guide-line.blue{
-      left:63.5%;
-      top:49%;
-      width:134px;
+      left:58.8%;
+      top:47.6%;
+      width:202px;
       border-color:var(--blue-soft);
     }
 
@@ -342,27 +342,27 @@
       opacity:1;
     }
     .scene.mode-off .guide-line.red{
-      transform:translate(0,0) rotate(159deg);
-      width:86px;
+      transform:translate(0,0) rotate(168deg);
+      width:130px;
     }
     .scene.mode-off .guide-line.blue{
-      transform:translate(0,0) rotate(168deg);
-      width:120px;
+      transform:translate(0,0) rotate(170deg);
+      width:192px;
     }
 
     .scene.mode-on .guide-line{
       opacity:1;
     }
     .scene.mode-on .guide-line.red{
-      width:102px;
-      transform:translate(0,-14px) rotate(178deg);
+      width:134px;
+      transform:translate(0,-16px) rotate(181deg);
     }
     .scene.mode-on .guide-line.blue{
-      width:132px;
-      transform:translate(0,12px) rotate(168deg);
+      width:196px;
+      transform:translate(0,10px) rotate(170deg);
     }
 
-    /* ===== 버튼 디자인 개선 ===== */
+    /* ===== 버튼 ===== */
     .prism-pill{
       position:absolute;
       left:50%;
@@ -478,10 +478,14 @@
       .target-stage{
         width:104px;
         height:158px;
+        left:23%;
+        top:42%;
       }
       .target-a{ font-size:90px; }
 
       .optic{
+        left:38%;
+        top:45%;
         width:48px;
         height:98px;
       }
@@ -498,6 +502,29 @@
       .optic-flat::before{
         width:28px;
         height:78px;
+      }
+
+      .guide-line.red{
+        left:33.4%;
+        top:50.0%;
+      }
+      .guide-line.blue{
+        left:58.2%;
+        top:47.4%;
+      }
+
+      .scene.mode-off .guide-line.red{
+        width:118px;
+      }
+      .scene.mode-off .guide-line.blue{
+        width:170px;
+      }
+
+      .scene.mode-on .guide-line.red{
+        width:122px;
+      }
+      .scene.mode-on .guide-line.blue{
+        width:174px;
       }
 
       .prism-pill{ height:76px; }
@@ -536,8 +563,8 @@
       }
 
       .target-stage{
-        left:37.0%;
-        top:44.5%;
+        left:22%;
+        top:41.5%;
         width:82px;
         height:126px;
       }
@@ -555,8 +582,8 @@
       }
 
       .optic{
-        left:35.0%;
-        top:48.0%;
+        left:38%;
+        top:44.5%;
         width:38px;
         height:76px;
       }
@@ -580,30 +607,30 @@
       }
 
       .guide-line.red{
-        left:33.6%;
-        top:51.8%;
+        left:33.2%;
+        top:50.4%;
       }
       .guide-line.blue{
-        left:61.2%;
-        top:49.0%;
+        left:57.8%;
+        top:47.2%;
       }
 
       .scene.mode-off .guide-line.red{
-        width:72px;
-        transform:translate(0,0) rotate(159deg);
+        width:82px;
+        transform:translate(0,0) rotate(169deg);
       }
       .scene.mode-off .guide-line.blue{
-        width:98px;
-        transform:translate(0,0) rotate(168deg);
+        width:122px;
+        transform:translate(0,0) rotate(170deg);
       }
 
       .scene.mode-on .guide-line.red{
-        width:84px;
-        transform:translate(0,-10px) rotate(178deg);
+        width:86px;
+        transform:translate(0,-10px) rotate(181deg);
       }
       .scene.mode-on .guide-line.blue{
-        width:108px;
-        transform:translate(0,9px) rotate(168deg);
+        width:126px;
+        transform:translate(0,8px) rotate(170deg);
       }
 
       .prism-pill{
@@ -737,7 +764,6 @@
       alert('여기에 닫기 로직 연결');
     }
 
-    /* 디폴트 첫 화면 */
     setMode('default');
   </script>
 </body>
