@@ -98,6 +98,8 @@
     /* ===== 시표 카드 ===== */
     .target-stage{
       position:absolute;
+      left:21.5%;
+      top:43.5%;
       width:118px;
       height:176px;
       transform:translate(-50%,-50%);
@@ -228,14 +230,16 @@
       100% { transform:translate(-50%,-50%) translateY(0); }
     }
 
-    /* ===== 광학 요소 ===== */
+    /* ===== 광학 요소 : 오른쪽 눈 위 ===== */
     .optic{
       position:absolute;
+      left:41.2%;
+      top:44.8%;
       width:58px;
       height:118px;
       transform:translate(-50%,-50%);
       z-index:7;
-      transition:left .35s ease, top .35s ease, width .35s ease, height .35s ease;
+      transition:all .45s ease;
       pointer-events:none;
     }
 
@@ -299,28 +303,58 @@
         0 4px 10px rgba(0,0,0,.08);
     }
 
-    /* ===== 점선 ===== */
+    /* ===== 점선 : 카드 오른쪽 끝 -> 눈동자 ===== */
     .guide-line{
       position:absolute;
       height:0;
       border-top:6px dashed;
       z-index:5;
       transform-origin:left center;
-      transition:left .35s ease, top .35s ease, width .35s ease, transform .35s ease, opacity .25s ease;
+      transition:all .45s ease;
       pointer-events:none;
       opacity:0;
     }
 
-    .guide-line.red{ border-color:var(--red-soft); }
-    .guide-line.blue{ border-color:var(--blue-soft); }
+    .guide-line.red{
+      left:30.4%;
+      top:51.4%;
+      width:96px;
+      border-color:var(--red-soft);
+    }
+
+    .guide-line.blue{
+      left:30.4%;
+      top:50.0%;
+      width:182px;
+      border-color:var(--blue-soft);
+    }
 
     .scene.mode-default .guide-line{
       opacity:0;
     }
 
-    .scene.mode-off .guide-line,
+    .scene.mode-off .guide-line{
+      opacity:1;
+    }
+    .scene.mode-off .guide-line.red{
+      width:100px;
+      transform:translate(0,0) rotate(-8deg);
+    }
+    .scene.mode-off .guide-line.blue{
+      width:186px;
+      transform:translate(0,0) rotate(-6deg);
+    }
+
     .scene.mode-on .guide-line{
       opacity:1;
+    }
+    .scene.mode-on .guide-line.red{
+      width:96px;
+      transform:translate(0,-12px) rotate(-12deg);
+    }
+    .scene.mode-on .guide-line.blue{
+      width:182px;
+      transform:translate(0,4px) rotate(-8deg);
     }
 
     /* ===== 버튼 ===== */
@@ -438,10 +472,14 @@
       .target-stage{
         width:104px;
         height:158px;
+        left:21.5%;
+        top:43%;
       }
       .target-a{ font-size:90px; }
 
       .optic{
+        left:40.8%;
+        top:44.8%;
         width:48px;
         height:98px;
       }
@@ -459,6 +497,20 @@
         width:28px;
         height:78px;
       }
+
+      .guide-line.red{
+        left:30.0%;
+        top:51.2%;
+      }
+      .guide-line.blue{
+        left:30.0%;
+        top:49.8%;
+      }
+
+      .scene.mode-off .guide-line.red{ width:96px; }
+      .scene.mode-off .guide-line.blue{ width:176px; }
+      .scene.mode-on .guide-line.red{ width:94px; }
+      .scene.mode-on .guide-line.blue{ width:178px; }
 
       .prism-pill{ height:76px; }
       .pill-label,.pill-btn{ font-size:22px; }
@@ -496,6 +548,8 @@
       }
 
       .target-stage{
+        left:22.0%;
+        top:43.2%;
         width:82px;
         height:126px;
       }
@@ -513,6 +567,8 @@
       }
 
       .optic{
+        left:40.8%;
+        top:44.8%;
         width:38px;
         height:76px;
       }
@@ -533,6 +589,33 @@
 
       .guide-line{
         border-top-width:5px;
+      }
+
+      .guide-line.red{
+        left:29.8%;
+        top:51.8%;
+      }
+      .guide-line.blue{
+        left:29.8%;
+        top:50.4%;
+      }
+
+      .scene.mode-off .guide-line.red{
+        width:90px;
+        transform:translate(0,0) rotate(-8deg);
+      }
+      .scene.mode-off .guide-line.blue{
+        width:144px;
+        transform:translate(0,0) rotate(-6deg);
+      }
+
+      .scene.mode-on .guide-line.red{
+        width:88px;
+        transform:translate(0,-8px) rotate(-12deg);
+      }
+      .scene.mode-on .guide-line.blue{
+        width:146px;
+        transform:translate(0,4px) rotate(-8deg);
       }
 
       .prism-pill{
@@ -591,10 +674,10 @@
           <div class="target-a a-blue">A</div>
         </div>
 
-        <div id="lineRed" class="guide-line red"></div>
-        <div id="lineBlue" class="guide-line blue"></div>
+        <div class="guide-line red"></div>
+        <div class="guide-line blue"></div>
 
-        <div id="optic" class="optic">
+        <div class="optic">
           <div class="optic-prism"></div>
           <div class="optic-flat"></div>
         </div>
@@ -621,10 +704,6 @@
     const btnOn = document.getElementById('btnOn');
     const btnOff = document.getElementById('btnOff');
     const messageCopy = document.getElementById('messageCopy');
-    const targetStage = document.getElementById('targetStage');
-    const optic = document.getElementById('optic');
-    const lineRed = document.getElementById('lineRed');
-    const lineBlue = document.getElementById('lineBlue');
 
     function setMode(mode){
       scene.classList.remove('mode-default', 'mode-on', 'mode-off');
@@ -638,7 +717,10 @@
           단안 난시 소비자의 경우, 프리즘의 영향으로
           <span class="blue">양안의 이미지 위치에 차이가 발생하여 오후 피로감 발생 가능</span>
         `;
-      }else if(mode === 'off'){
+        return;
+      }
+
+      if(mode === 'off'){
         scene.classList.add('mode-off');
         btnOn.classList.remove('active');
         btnOff.classList.add('active');
@@ -647,18 +729,17 @@
           단안 난시 소비자의 경우, 프리즘의 영향이 없이
           <span class="blue">저녁까지 편안함과 선명함 제공</span>
         `;
-      }else{
-        scene.classList.add('mode-default');
-        btnOn.classList.remove('active');
-        btnOff.classList.remove('active');
-
-        messageCopy.innerHTML = `
-          프리즘이 단안 난시 소비자에게 미치는 영향을
-          <span class="blue">‘프리즘 유/무 버튼’</span>을 통해 확인해 보세요
-        `;
+        return;
       }
 
-      requestAnimationFrame(positionInteractiveElements);
+      scene.classList.add('mode-default');
+      btnOn.classList.remove('active');
+      btnOff.classList.remove('active');
+
+      messageCopy.innerHTML = `
+        프리즘이 단안 난시 소비자에게 미치는 영향을
+        <span class="blue">‘프리즘 유/무 버튼’</span>을 통해 확인해 보세요
+      `;
     }
 
     btnOn.addEventListener('click', () => setMode('on'));
@@ -667,87 +748,6 @@
     function closeDemo(){
       alert('여기에 닫기 로직 연결');
     }
-
-    function clamp(v, min, max){
-      return Math.max(min, Math.min(max, v));
-    }
-
-    function setPercentPosition(el, xPx, yPx){
-      const rect = scene.getBoundingClientRect();
-      el.style.left = ((xPx / rect.width) * 100) + '%';
-      el.style.top = ((yPx / rect.height) * 100) + '%';
-    }
-
-    function positionInteractiveElements(){
-      const sceneRect = scene.getBoundingClientRect();
-      const w = sceneRect.width;
-      const h = sceneRect.height;
-
-      /* 기준점: face_V2 기준, 비율로 고정
-         - 오른쪽 눈 중심(사용자 요청 기준 프리즘 위치)
-         - 왼쪽 눈 중심
-         - 카드 영역은 왼쪽 빈 공간
-      */
-      const rightEye = { x: w * 0.405, y: h * 0.452 };
-      const leftEye  = { x: w * 0.635, y: h * 0.445 };
-
-      const isMobile = w <= 560;
-      const isTablet = w <= 820 && w > 560;
-
-      /* 시표 카드 */
-      const cardW = isMobile ? 82 : (isTablet ? 104 : 118);
-      const cardH = isMobile ? 126 : (isTablet ? 158 : 176);
-      const cardCx = w * 0.215;
-      const cardCy = h * 0.435;
-
-      targetStage.style.width = cardW + 'px';
-      targetStage.style.height = cardH + 'px';
-      setPercentPosition(targetStage, cardCx, cardCy);
-
-      /* 프리즘/플랫 바 = 오른쪽 눈 위에 정확히 */
-      const opticW = isMobile ? 38 : (isTablet ? 48 : 58);
-      const opticH = isMobile ? 76 : (isTablet ? 98 : 118);
-      const opticCx = rightEye.x + (isMobile ? 2 : 4);
-      const opticCy = rightEye.y - (isMobile ? 8 : 10);
-
-      optic.style.width = opticW + 'px';
-      optic.style.height = opticH + 'px';
-      setPercentPosition(optic, opticCx, opticCy);
-
-      /* 카드 오른쪽 끝 기준 */
-      const cardRightX = cardCx + (cardW / 2) - 2;
-      const redStartY  = cardCy + cardH * 0.31;
-      const blueStartY = cardCy + cardH * 0.63;
-
-      /* mode별 끝점 */
-      const modeOn = scene.classList.contains('mode-on');
-      const modeOff = scene.classList.contains('mode-off');
-
-      let redEndX = rightEye.x - 8;
-      let redEndY = rightEye.y + (modeOn ? -10 : -2);
-
-      let blueEndX = leftEye.x - 10;
-      let blueEndY = leftEye.y + (modeOn ? 6 : 0);
-
-      function placeLine(el, sx, sy, ex, ey){
-        const dx = ex - sx;
-        const dy = ey - sy;
-        const length = Math.sqrt(dx*dx + dy*dy);
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-        el.style.left = (sx / w * 100) + '%';
-        el.style.top = (sy / h * 100) + '%';
-        el.style.width = length + 'px';
-        el.style.transform = `rotate(${angle}deg)`;
-      }
-
-      if(modeOn || modeOff){
-        placeLine(lineRed, cardRightX, redStartY, redEndX, redEndY);
-        placeLine(lineBlue, cardRightX, blueStartY, blueEndX, blueEndY);
-      }
-    }
-
-    window.addEventListener('load', positionInteractiveElements);
-    window.addEventListener('resize', positionInteractiveElements);
 
     setMode('default');
   </script>
