@@ -8,7 +8,6 @@
   <style>
     :root{
       --acuvue-blue:#005EB8;
-      --panel-bg:#dfe8f3;
       --text:#0c1f35;
       --shadow:0 18px 44px rgba(10,30,55,.20);
       --blue-soft:#176fd6;
@@ -114,14 +113,23 @@
       height:100%;
       border-radius:18px;
       border:2px solid rgba(255,255,255,.58);
-      background:rgba(255,220,235,.30);
       backdrop-filter: blur(1px);
       box-shadow:0 8px 24px rgba(0,0,0,.08);
-      transition:all .5s cubic-bezier(.22,.8,.22,1);
+      transition:
+        top .45s ease,
+        opacity .35s ease,
+        background .35s ease,
+        transform .45s ease;
     }
 
-    .target-box.box-top{ z-index:0; }
-    .target-box.box-bottom{ z-index:0; }
+    .target-box.box-top{
+      z-index:0;
+      background:rgba(251,221,231,.38);
+    }
+    .target-box.box-bottom{
+      z-index:0;
+      background:rgba(245,222,232,.16);
+    }
 
     .target-a{
       position:absolute;
@@ -144,10 +152,12 @@
     .a-red{ color:var(--red-soft); }
     .a-blue{ color:var(--blue-soft); }
 
+    /* 디폴트 */
     .scene.mode-default .box-top,
     .scene.mode-default .box-bottom{
       top:0;
       opacity:.92;
+      transform:translateX(-50%);
     }
     .scene.mode-default .box-top{
       background:rgba(245,222,232,.24);
@@ -170,10 +180,12 @@
       color:#8b2da0;
     }
 
+    /* 프리즘 무 */
     .scene.mode-off .box-top,
     .scene.mode-off .box-bottom{
       top:0;
       opacity:.92;
+      transform:translateX(-50%);
     }
     .scene.mode-off .box-top{
       background:rgba(245,222,232,.28);
@@ -196,15 +208,18 @@
       animation:none;
     }
 
+    /* 프리즘 유 */
     .scene.mode-on .box-top{
       top:-14px;
-      opacity:.95;
+      opacity:.96;
       background:rgba(251,221,231,.42);
+      animation:pinkFloat 1.45s ease-in-out infinite;
     }
     .scene.mode-on .box-bottom{
       top:14px;
       opacity:.82;
       background:rgba(219,234,255,.28);
+      transform:translateX(-50%);
     }
     .scene.mode-on .a-red{
       top:33%;
@@ -226,6 +241,14 @@
       50%  { transform:translate(-50%,-50%) translateY(1px); }
       75%  { transform:translate(-50%,-50%) translateY(-3px); }
       100% { transform:translate(-50%,-50%) translateY(0); }
+    }
+
+    @keyframes pinkFloat{
+      0%   { transform:translateX(-50%) translateY(0); }
+      25%  { transform:translateX(-50%) translateY(-4px); }
+      50%  { transform:translateX(-50%) translateY(1px); }
+      75%  { transform:translateX(-50%) translateY(-3px); }
+      100% { transform:translateX(-50%) translateY(0); }
     }
 
     /* ===== 광학 요소 ===== */
@@ -689,25 +712,21 @@
       const rect = scene.getBoundingClientRect();
       const w = rect.width;
       const h = rect.height;
-
       const mobile = w <= 560;
       const tablet = w <= 820 && w > 560;
 
-      /* ===== 고정 기준점 (face_V2 기준) =====
-         - 왼쪽 눈(화면상 왼쪽 눈) 중심
-         - 오른쪽 눈(화면상 오른쪽 눈) 중심
-      */
+      /* 눈 위치 - 현재 프리즘 맞는 스샷 기준 */
       const eyeLeft = {
-        x: w * 0.555,
-        y: h * 0.405
+        x: w * 0.552,
+        y: h * 0.408
       };
 
       const eyeRight = {
-        x: w * 0.735,
-        y: h * 0.402
+        x: w * 0.811,
+        y: h * 0.410
       };
 
-      /* ===== 카드 ===== */
+      /* 카드 */
       const cardW = mobile ? 82 : (tablet ? 104 : 118);
       const cardH = mobile ? 126 : (tablet ? 158 : 176);
       const cardCx = w * 0.225;
@@ -717,62 +736,57 @@
       targetStage.style.height = cardH + 'px';
       setCenterPercent(targetStage, cardCx, cardCy, rect);
 
-      /* ===== 프리즘 / 플랫바 =====
-         화면상 왼쪽 눈 바로 위에 오도록
-      */
+      /* 프리즘/플랫바 - 지금 좋은 위치 유지 */
       const opticW = mobile ? 38 : (tablet ? 48 : 58);
       const opticH = mobile ? 76 : (tablet ? 98 : 118);
-
-      const opticCx = eyeLeft.x - (mobile ? 2 : 3);
-      const opticCy = eyeLeft.y - (mobile ? 4 : 6);
+      const opticCx = eyeLeft.x + (mobile ? -1 : -2);
+      const opticCy = eyeLeft.y + (mobile ? -2 : -2);
 
       optic.style.width = opticW + 'px';
       optic.style.height = opticH + 'px';
       setCenterPercent(optic, opticCx, opticCy, rect);
 
-      /* ===== 카드 오른쪽 끝 기준 ===== */
-      const lineStartX = cardCx + (cardW / 2) - 4;
-      const redStartY = cardCy + cardH * 0.34;
-      const blueStartY = cardCy + cardH * 0.66;
+      /* 점선 시작점 = 카드 오른쪽 끝 */
+      const startX = cardCx + cardW * 0.47;
+      const redStartY = cardCy + cardH * 0.30;
+      const blueStartY = cardCy + cardH * 0.64;
 
       const modeOn = scene.classList.contains('mode-on');
       const modeOff = scene.classList.contains('mode-off');
 
       if(modeOn){
-        /* 프리즘 영향: 위/아래 분리 */
         placeLine(
           lineRed,
-          lineStartX,
+          startX,
           redStartY,
-          eyeLeft.x - (mobile ? 8 : 10),
-          eyeLeft.y - (mobile ? 10 : 14),
+          eyeLeft.x - (mobile ? 2 : 4),
+          eyeLeft.y - (mobile ? 12 : 16),
           rect
         );
 
         placeLine(
           lineBlue,
-          lineStartX,
+          startX,
           blueStartY,
-          eyeRight.x - (mobile ? 8 : 10),
+          eyeRight.x - (mobile ? 10 : 12),
           eyeRight.y + (mobile ? 2 : 4),
           rect
         );
       }else if(modeOff){
-        /* 프리즘 없음: 둘이 거의 한 점으로 */
         placeLine(
           lineRed,
-          lineStartX,
+          startX,
           redStartY,
-          eyeLeft.x - (mobile ? 6 : 8),
+          eyeLeft.x - (mobile ? 2 : 4),
           eyeLeft.y + (mobile ? 1 : 2),
           rect
         );
 
         placeLine(
           lineBlue,
-          lineStartX,
+          startX,
           blueStartY,
-          eyeRight.x - (mobile ? 8 : 10),
+          eyeRight.x - (mobile ? 10 : 12),
           eyeRight.y + (mobile ? 1 : 2),
           rect
         );
