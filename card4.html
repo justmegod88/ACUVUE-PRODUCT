@@ -12,10 +12,11 @@
       --shadow:0 18px 44px rgba(10,30,55,.20);
       --blue-soft:#176fd6;
       --red-soft:#e02020;
-      --pill-border:#0d4c78;
-      --pill-active1:#2b86ea;
-      --pill-active2:#116bd3;
-      --pill-text:#0d2138;
+      --seg-border:#0d4c78;
+      --seg-active1:#2b86ea;
+      --seg-active2:#116bd3;
+      --seg-text:#0d2138;
+      --seg-muted:#4f6781;
     }
 
     *{ box-sizing:border-box; }
@@ -94,7 +95,6 @@
       z-index:0;
     }
 
-    /* ===== 시표 카드 ===== */
     .target-stage{
       position:absolute;
       width:118px;
@@ -248,7 +248,6 @@
       100% { transform:translateX(-50%) translateY(0); }
     }
 
-    /* ===== 광학 요소 ===== */
     .optic{
       position:absolute;
       width:58px;
@@ -319,7 +318,6 @@
         0 4px 10px rgba(0,0,0,.08);
     }
 
-    /* ===== 점선 ===== */
     .guide-line{
       position:absolute;
       height:0;
@@ -343,53 +341,34 @@
       opacity:1;
     }
 
-    /* ===== 버튼 ===== */
-    .prism-pill{
+    /* 3버튼 */
+    .seg-wrap{
       position:absolute;
       left:50%;
       bottom:16px;
       transform:translateX(-50%);
       width:min(94%, 760px);
-      height:82px;
-      border-radius:999px;
-      display:flex;
-      align-items:center;
-      padding:6px;
-      gap:6px;
       z-index:10;
+      padding:8px;
+      border-radius:999px;
       background:linear-gradient(180deg, #ffffff 0%, #f5f8fc 100%);
-      border:3px solid var(--pill-border);
+      border:3px solid var(--seg-border);
       box-shadow:
         0 14px 26px rgba(0,0,0,.10),
         inset 0 1px 0 rgba(255,255,255,.92);
-    }
-
-    .pill-label{
-      flex:0 0 110px;
-      min-width:110px;
-      height:100%;
-      display:flex;
+      display:grid;
+      grid-template-columns: 1fr 1.35fr 1.1fr;
+      gap:8px;
       align-items:center;
-      justify-content:center;
-      font-size:28px;
-      font-weight:900;
-      color:#111;
-      letter-spacing:-.5px;
-      border-radius:999px;
-      background:transparent;
-      text-align:center;
-      padding:0 10px;
-      user-select:none;
     }
 
-    .pill-btn{
-      flex:1 1 0;
-      height:100%;
+    .seg-btn{
+      height:66px;
       border-radius:999px;
       border:2.5px solid #144f7b;
       background:linear-gradient(180deg, #ffffff 0%, #eef4fb 100%);
-      color:var(--pill-text);
-      font-size:26px;
+      color:var(--seg-text);
+      font-size:22px;
       font-weight:900;
       letter-spacing:-.4px;
       cursor:pointer;
@@ -397,10 +376,12 @@
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.98),
         0 2px 8px rgba(0,0,0,.04);
+      padding:0 12px;
+      white-space:nowrap;
     }
 
-    .pill-btn.active{
-      background:linear-gradient(180deg, #2b86ea 0%, #116bd3 100%);
+    .seg-btn.active{
+      background:linear-gradient(180deg, var(--seg-active1) 0%, var(--seg-active2) 100%);
       color:#fff;
       border-color:#0c4f9b;
       box-shadow:
@@ -408,7 +389,20 @@
         0 10px 18px rgba(0,94,184,.18);
     }
 
-    .pill-btn:not(.active):active{
+    .seg-btn.default-active{
+      background:linear-gradient(180deg, #ffffff 0%, #eef5ff 100%);
+      color:#003f7f;
+      border-color:#7eaee5;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.98),
+        0 8px 16px rgba(126,174,229,.18);
+    }
+
+    .seg-btn:not(.active):not(.default-active){
+      color:var(--seg-muted);
+    }
+
+    .seg-btn:not(.active):active{
       transform:scale(.985);
     }
 
@@ -480,8 +474,7 @@
         height:78px;
       }
 
-      .prism-pill{ height:76px; }
-      .pill-label,.pill-btn{ font-size:22px; }
+      .seg-btn{ font-size:19px; height:62px; }
 
       .message{
         padding:22px 18px 22px;
@@ -555,24 +548,18 @@
         border-top-width:5px;
       }
 
-      .prism-pill{
+      .seg-wrap{
         width:min(94%, 520px);
-        height:58px;
         bottom:10px;
-        border-width:3px;
-        gap:5px;
         padding:5px;
+        gap:5px;
+        border-width:3px;
+        grid-template-columns: 1fr 1.35fr 1.05fr;
       }
 
-      .pill-label{
-        flex:0 0 72px;
-        min-width:72px;
-        font-size:14px;
-        padding:0 6px;
-      }
-
-      .pill-btn{
-        font-size:14px;
+      .seg-btn{
+        height:48px;
+        font-size:12px;
         border-width:2.5px;
         padding:0 6px;
       }
@@ -619,17 +606,17 @@
           <div class="optic-flat"></div>
         </div>
 
-        <div class="prism-pill">
-          <div class="pill-label">단안</div>
-          <button id="btnOn" class="pill-btn" type="button">프리즘 유</button>
-          <button id="btnOff" class="pill-btn" type="button">프리즘 무</button>
+        <div class="seg-wrap">
+          <button id="btnDefault" class="seg-btn default-active" type="button">맨눈</button>
+          <button id="btnOn" class="seg-btn" type="button">단안 프리즘 영향</button>
+          <button id="btnOff" class="seg-btn" type="button">프리즘 없음</button>
         </div>
       </div>
 
       <div class="message">
         <div id="messageCopy" class="message-copy">
           프리즘이 단안 난시 소비자에게 미치는 영향을
-          <span class="blue">‘프리즘 유/무 버튼’</span>을 통해 확인해 보세요
+          <span class="blue">버튼을 통해 확인해 보세요</span>
         </div>
         <button class="confirm-btn" type="button" onclick="closeDemo()">확인</button>
       </div>
@@ -638,6 +625,7 @@
 
   <script>
     const scene = document.getElementById('scene');
+    const btnDefault = document.getElementById('btnDefault');
     const btnOn = document.getElementById('btnOn');
     const btnOff = document.getElementById('btnOff');
     const messageCopy = document.getElementById('messageCopy');
@@ -649,10 +637,13 @@
     function setMode(mode){
       scene.classList.remove('mode-default', 'mode-on', 'mode-off');
 
+      btnDefault.classList.remove('active', 'default-active');
+      btnOn.classList.remove('active');
+      btnOff.classList.remove('active');
+
       if(mode === 'on'){
         scene.classList.add('mode-on');
         btnOn.classList.add('active');
-        btnOff.classList.remove('active');
 
         messageCopy.innerHTML = `
           단안 난시 소비자의 경우, 프리즘의 영향으로
@@ -660,7 +651,6 @@
         `;
       }else if(mode === 'off'){
         scene.classList.add('mode-off');
-        btnOn.classList.remove('active');
         btnOff.classList.add('active');
 
         messageCopy.innerHTML = `
@@ -669,18 +659,18 @@
         `;
       }else{
         scene.classList.add('mode-default');
-        btnOn.classList.remove('active');
-        btnOff.classList.remove('active');
+        btnDefault.classList.add('default-active');
 
         messageCopy.innerHTML = `
           프리즘이 단안 난시 소비자에게 미치는 영향을
-          <span class="blue">‘프리즘 유/무 버튼’</span>을 통해 확인해 보세요
+          <span class="blue">버튼을 통해 확인해 보세요</span>
         `;
       }
 
       requestAnimationFrame(positionInteractiveElements);
     }
 
+    btnDefault.addEventListener('click', () => setMode('default'));
     btnOn.addEventListener('click', () => setMode('on'));
     btnOff.addEventListener('click', () => setMode('off'));
 
@@ -723,7 +713,7 @@
         y: h * 0.410
       };
 
-      /* 카드: 조금 더 아래 */
+      /* 카드 위치 유지 */
       const cardW = mobile ? 82 : (tablet ? 104 : 118);
       const cardH = mobile ? 126 : (tablet ? 158 : 176);
       const cardCx = w * 0.225;
@@ -733,7 +723,7 @@
       targetStage.style.height = cardH + 'px';
       setCenterPercent(targetStage, cardCx, cardCy, rect);
 
-      /* 프리즘/플랫바: 현재 좋은 위치 유지 */
+      /* 프리즘/플랫바 */
       const opticW = mobile ? 38 : (tablet ? 48 : 58);
       const opticH = mobile ? 76 : (tablet ? 98 : 118);
       const opticCx = eyeLeft.x + (mobile ? -1 : -2);
@@ -746,10 +736,8 @@
       const modeOn = scene.classList.contains('mode-on');
       const modeOff = scene.classList.contains('mode-off');
 
-      /* 카드 오른쪽 끝 기준 */
       const startX = cardCx + cardW * 0.47;
 
-      /* 프리즘 무 기준 눈 쪽 끝점: 절대 고정 */
       const offRedEndX = eyeLeft.x - (mobile ? 2 : 4);
       const offRedEndY = eyeLeft.y + (mobile ? 1 : 2);
 
@@ -760,8 +748,6 @@
         lineRed.style.opacity = '1';
         lineBlue.style.opacity = '1';
 
-        /* 프리즘 유:
-           빨간 점선은 눈 쪽은 고정, 카드 쪽만 위로 */
         const onRedStartY = cardCy + cardH * -0.20;
         const onBlueStartY = cardCy + cardH * 0.20;
 
@@ -787,8 +773,6 @@
         lineRed.style.opacity = '1';
         lineBlue.style.opacity = '1';
 
-        /* 프리즘 무:
-           카드 접점만 위로 */
         const offRedStartY = cardCy + cardH * 0.18;
         const offBlueStartY = cardCy + cardH * 0.20;
 
