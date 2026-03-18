@@ -152,7 +152,6 @@
     .a-red{ color:var(--red-soft); }
     .a-blue{ color:var(--blue-soft); }
 
-    /* 디폴트 */
     .scene.mode-default .box-top,
     .scene.mode-default .box-bottom{
       top:0;
@@ -180,7 +179,6 @@
       color:#8b2da0;
     }
 
-    /* 프리즘 무 */
     .scene.mode-off .box-top,
     .scene.mode-off .box-bottom{
       top:0;
@@ -208,7 +206,6 @@
       animation:none;
     }
 
-    /* 프리즘 유 */
     .scene.mode-on .box-top{
       top:-14px;
       opacity:.96;
@@ -715,7 +712,7 @@
       const mobile = w <= 560;
       const tablet = w <= 820 && w > 560;
 
-      /* 눈 위치 - 현재 프리즘 맞는 스샷 기준 */
+      /* 눈 위치 */
       const eyeLeft = {
         x: w * 0.552,
         y: h * 0.408
@@ -726,17 +723,17 @@
         y: h * 0.410
       };
 
-      /* 카드 */
+      /* 카드: 아주 조금 아래 */
       const cardW = mobile ? 82 : (tablet ? 104 : 118);
       const cardH = mobile ? 126 : (tablet ? 158 : 176);
       const cardCx = w * 0.225;
-      const cardCy = h * 0.435;
+      const cardCy = h * 0.448;
 
       targetStage.style.width = cardW + 'px';
       targetStage.style.height = cardH + 'px';
       setCenterPercent(targetStage, cardCx, cardCy, rect);
 
-      /* 프리즘/플랫바 - 지금 좋은 위치 유지 */
+      /* 프리즘/플랫바: 현재 좋은 위치 유지 */
       const opticW = mobile ? 38 : (tablet ? 48 : 58);
       const opticH = mobile ? 76 : (tablet ? 98 : 118);
       const opticCx = eyeLeft.x + (mobile ? -1 : -2);
@@ -746,53 +743,76 @@
       optic.style.height = opticH + 'px';
       setCenterPercent(optic, opticCx, opticCy, rect);
 
-      /* 점선 시작점 = 카드 오른쪽 끝 */
-      const startX = cardCx + cardW * 0.47;
-      const redStartY = cardCy + cardH * 0.30;
-      const blueStartY = cardCy + cardH * 0.64;
-
       const modeOn = scene.classList.contains('mode-on');
       const modeOff = scene.classList.contains('mode-off');
 
+      /* 카드 오른쪽 끝 기준 */
+      const startX = cardCx + cardW * 0.47;
+
+      /* 프리즘 무 기준 눈 쪽 끝점: 절대 고정 */
+      const offRedEndX = eyeLeft.x - (mobile ? 2 : 4);
+      const offRedEndY = eyeLeft.y + (mobile ? 1 : 2);
+
+      const offBlueEndX = eyeRight.x - (mobile ? 10 : 12);
+      const offBlueEndY = eyeRight.y + (mobile ? 1 : 2);
+
       if(modeOn){
-        placeLine(
-          lineRed,
-          startX,
-          redStartY,
-          eyeLeft.x - (mobile ? 2 : 4),
-          eyeLeft.y - (mobile ? 12 : 16),
-          rect
-        );
-
-        placeLine(
-          lineBlue,
-          startX,
-          blueStartY,
-          eyeRight.x - (mobile ? 10 : 12),
-          eyeRight.y + (mobile ? 2 : 4),
-          rect
-        );
-      }else if(modeOff){
-        placeLine(
-          lineRed,
-          startX,
-          redStartY,
-          eyeLeft.x - (mobile ? 2 : 4),
-          eyeLeft.y + (mobile ? 1 : 2),
-          rect
-        );
-
-        placeLine(
-          lineBlue,
-          startX,
-          blueStartY,
-          eyeRight.x - (mobile ? 10 : 12),
-          eyeRight.y + (mobile ? 1 : 2),
-          rect
-        );
-      }else{
         lineRed.style.opacity = '1';
         lineBlue.style.opacity = '1';
+
+        /* 프리즘 유:
+           빨간 점선은 눈 쪽은 고정, 카드 쪽만 위로 */
+        const onRedStartY = cardCy + cardH * 0.26;
+        const onBlueStartY = cardCy + cardH * 0.68;
+
+        placeLine(
+          lineRed,
+          startX,
+          onRedStartY,
+          offRedEndX,
+          offRedEndY,
+          rect
+        );
+
+        placeLine(
+          lineBlue,
+          startX,
+          onBlueStartY,
+          eyeRight.x - (mobile ? 10 : 12),
+          eyeRight.y + (mobile ? 5 : 7),
+          rect
+        );
+
+      }else if(modeOff){
+        lineRed.style.opacity = '1';
+        lineBlue.style.opacity = '1';
+
+        /* 프리즘 무:
+           파란 점선 카드쪽 시작점만 조금 위 */
+        const offRedStartY = cardCy + cardH * 0.53;
+        const offBlueStartY = cardCy + cardH * 0.67;
+
+        placeLine(
+          lineRed,
+          startX,
+          offRedStartY,
+          offRedEndX,
+          offRedEndY,
+          rect
+        );
+
+        placeLine(
+          lineBlue,
+          startX,
+          offBlueStartY,
+          offBlueEndX,
+          offBlueEndY,
+          rect
+        );
+
+      }else{
+        lineRed.style.opacity = '0';
+        lineBlue.style.opacity = '0';
       }
     }
 
