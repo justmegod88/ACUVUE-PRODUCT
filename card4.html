@@ -98,7 +98,7 @@
     /* ===== 시표 카드 ===== */
     .target-stage{
       position:absolute;
-      left:21.8%;
+      left:21.5%;
       top:43.5%;
       width:118px;
       height:176px;
@@ -233,11 +233,11 @@
       100% { transform:translate(-50%,-50%) translateY(0); }
     }
 
-    /* ===== 광학 요소 : 오른쪽 눈 위 ===== */
+    /* ===== 광학 요소 : 오른쪽 눈 위로 이동 ===== */
     .optic{
       position:absolute;
-      left:37.8%;
-      top:45.2%;
+      left:39.8%;
+      top:46.3%;
       width:58px;
       height:118px;
       transform:translate(-50%,-50%);
@@ -306,7 +306,7 @@
         0 4px 10px rgba(0,0,0,.08);
     }
 
-    /* ===== 점선 : 눈동자 -> 카드 오른쪽 끝 ===== */
+    /* ===== 점선 : 카드 오른쪽 끝 -> 눈동자 ===== */
     .guide-line{
       position:absolute;
       height:0;
@@ -318,17 +318,18 @@
       opacity:0;
     }
 
+    /* 카드 오른쪽 끝 부근 시작 */
     .guide-line.red{
-      left:31.2%;
-      top:52.0%;
-      width:98px;
+      left:28.8%;
+      top:53.3%;
+      width:88px;
       border-color:var(--red-soft);
     }
 
     .guide-line.blue{
-      left:54.5%;
-      top:49.2%;
-      width:170px;
+      left:28.8%;
+      top:52.0%;
+      width:176px;
       border-color:var(--blue-soft);
     }
 
@@ -336,28 +337,30 @@
       opacity:0;
     }
 
+    /* 프리즘 무 */
     .scene.mode-off .guide-line{
       opacity:1;
     }
     .scene.mode-off .guide-line.red{
-      width:102px;
-      transform:translate(0,0) rotate(172deg);
+      width:92px;
+      transform:translate(0,0) rotate(-10deg);
     }
     .scene.mode-off .guide-line.blue{
-      width:174px;
-      transform:translate(0,0) rotate(171deg);
+      width:182px;
+      transform:translate(0,0) rotate(-8deg);
     }
 
+    /* 프리즘 유 */
     .scene.mode-on .guide-line{
       opacity:1;
     }
     .scene.mode-on .guide-line.red{
-      width:106px;
-      transform:translate(0,-16px) rotate(178deg);
+      width:96px;
+      transform:translate(0,-10px) rotate(-14deg);
     }
     .scene.mode-on .guide-line.blue{
-      width:178px;
-      transform:translate(0,10px) rotate(171deg);
+      width:186px;
+      transform:translate(0,6px) rotate(-10deg);
     }
 
     /* ===== 버튼 ===== */
@@ -482,8 +485,8 @@
       .target-a{ font-size:90px; }
 
       .optic{
-        left:37.5%;
-        top:45%;
+        left:39.2%;
+        top:46.0%;
         width:48px;
         height:98px;
       }
@@ -503,18 +506,18 @@
       }
 
       .guide-line.red{
-        left:31.0%;
-        top:51.8%;
+        left:28.5%;
+        top:53.0%;
       }
       .guide-line.blue{
-        left:54.0%;
-        top:49.0%;
+        left:28.5%;
+        top:51.8%;
       }
 
-      .scene.mode-off .guide-line.red{ width:98px; }
-      .scene.mode-off .guide-line.blue{ width:162px; }
-      .scene.mode-on .guide-line.red{ width:102px; }
-      .scene.mode-on .guide-line.blue{ width:166px; }
+      .scene.mode-off .guide-line.red{ width:88px; }
+      .scene.mode-off .guide-line.blue{ width:170px; }
+      .scene.mode-on .guide-line.red{ width:92px; }
+      .scene.mode-on .guide-line.blue{ width:174px; }
 
       .prism-pill{ height:76px; }
       .pill-label,.pill-btn{ font-size:22px; }
@@ -552,8 +555,8 @@
       }
 
       .target-stage{
-        left:22.2%;
-        top:43.2%;
+        left:22.0%;
+        top:43.0%;
         width:82px;
         height:126px;
       }
@@ -571,8 +574,8 @@
       }
 
       .optic{
-        left:37.8%;
-        top:45.0%;
+        left:39.3%;
+        top:46.0%;
         width:38px;
         height:76px;
       }
@@ -596,30 +599,30 @@
       }
 
       .guide-line.red{
-        left:31.0%;
-        top:52.2%;
+        left:28.2%;
+        top:53.5%;
       }
       .guide-line.blue{
-        left:54.2%;
-        top:49.4%;
+        left:28.2%;
+        top:52.2%;
       }
 
       .scene.mode-off .guide-line.red{
-        width:84px;
-        transform:translate(0,0) rotate(172deg);
+        width:82px;
+        transform:translate(0,0) rotate(-10deg);
       }
       .scene.mode-off .guide-line.blue{
-        width:128px;
-        transform:translate(0,0) rotate(171deg);
+        width:136px;
+        transform:translate(0,0) rotate(-8deg);
       }
 
       .scene.mode-on .guide-line.red{
-        width:88px;
-        transform:translate(0,-10px) rotate(178deg);
+        width:86px;
+        transform:translate(0,-8px) rotate(-14deg);
       }
       .scene.mode-on .guide-line.blue{
-        width:132px;
-        transform:translate(0,8px) rotate(171deg);
+        width:140px;
+        transform:translate(0,5px) rotate(-10deg);
       }
 
       .prism-pill{
