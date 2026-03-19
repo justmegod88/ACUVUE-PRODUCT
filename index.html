@@ -1538,7 +1538,7 @@
         model.materials.forEach(mat=>{
           const pbr = mat.pbrMetallicRoughness;
           if(!pbr) return;
-          const base = [0.82, 0.93, 0.97, 0.90];
+          const base = [0.81, 0.92, 0.96, 0.89];
           pbr.setBaseColorFactor(base);
           try{ pbr.setRoughnessFactor(0.08); }catch(e){}
           try{ pbr.setMetallicFactor(0.0); }catch(e){}
