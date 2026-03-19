@@ -980,23 +980,19 @@
 
     #cfSegWrap{
       position:absolute; left:50%; bottom:16px; transform:translateX(-50%); width:min(94%, 760px); z-index:10;
-      padding:8px; border-radius:999px; background:#ffffff;
-      border:3px solid #0d5f9b; box-shadow:none;
+      padding:8px; border-radius:999px; background:linear-gradient(180deg, #ffffff 0%, #f5f8fc 100%);
+      border:3px solid #0d4c78; box-shadow:0 14px 26px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.92);
       display:grid; grid-template-columns: 1fr 1.35fr 1.1fr; gap:8px; align-items:center;
     }
     .cf-seg-btn{
-      height:66px; border-radius:999px; border:2.5px solid #1f6498; background:#ffffff;
-      color:#163c61; font-size:22px; font-weight:900; letter-spacing:-.4px; cursor:pointer; transition:background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease;
-      box-shadow:none; padding:0 12px; white-space:nowrap;
+      height:66px; border-radius:999px; border:2.5px solid #1b5d93; background:#ffffff;
+      color:#183d63; font-size:22px; font-weight:900; letter-spacing:-.4px; cursor:pointer; transition:all .18s ease;
+      box-shadow:none; padding:0 12px; white-space:nowrap; -webkit-appearance:none; appearance:none;
     }
-    .cf-seg-btn.active{
-      background:#dfeeff; color:#114a78; border-color:#1f6498; box-shadow:none;
-    }
-    .cf-seg-btn.default-active{
-      background:#ffffff; color:#163c61; border-color:#1f6498; box-shadow:none;
-    }
-    .cf-seg-btn:not(.active):not(.default-active){ color:#163c61; }
-    .cf-seg-btn:active{ transform:scale(.985); }
+    .cf-seg-btn.active{ background:#e7f2ff; color:#0f4f87; border-color:#1b5d93; box-shadow:none; }
+    .cf-seg-btn.default-active{ background:#e7f2ff; color:#0f4f87; border-color:#1b5d93; box-shadow:none; }
+    .cf-seg-btn:not(.active):not(.default-active){ color:#183d63; }
+    .cf-seg-btn:not(.active):active{ transform:scale(.985); }
 
     #comfortMessage{
       background:#dbe5f1; padding:28px 34px 30px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px;
