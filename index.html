@@ -1160,9 +1160,9 @@
         </div>
 
         <div id="cfSegWrap">
-          <button id="cfBtnDefault" class="cf-seg-btn default-active" type="button">나안</button>
-          <button id="cfBtnOn" class="cf-seg-btn" type="button">단안만 프리즘 존재</button>
-          <button id="cfBtnOff" class="cf-seg-btn" type="button">프리즘 영향 없음</button>
+          <button id="cfBtnDefault" class="cf-seg-btn default-active" type="button">맨눈</button>
+          <button id="cfBtnOn" class="cf-seg-btn" type="button">단안 프리즘 영향</button>
+          <button id="cfBtnOff" class="cf-seg-btn" type="button">프리즘 없음</button>
         </div>
       </div>
 
@@ -1538,16 +1538,15 @@
         model.materials.forEach(mat=>{
           const pbr = mat.pbrMetallicRoughness;
           if(!pbr) return;
-          const base = pbr.baseColorFactor ? [...pbr.baseColorFactor] : [1,1,1,1];
-          base[3] = Math.max(base[3], 0.45);
+          const base = [0.85, 0.96, 1.0, 0.95];
           pbr.setBaseColorFactor(base);
-          try{ pbr.setRoughnessFactor(0.28); }catch(e){}
+          try{ pbr.setRoughnessFactor(0.08); }catch(e){}
           try{ pbr.setMetallicFactor(0.0); }catch(e){}
           if(mat.extensions && mat.extensions.KHR_materials_transmission){
-            mat.extensions.KHR_materials_transmission.transmissionFactor = 0.86;
+            mat.extensions.KHR_materials_transmission.transmissionFactor = 0.15;
           }
           try{
-            if(mat.emissiveFactor){ mat.emissiveFactor = [0.04, 0.06, 0.07]; }
+            if(mat.emissiveFactor){ mat.emissiveFactor = [0.02, 0.05, 0.06]; }
           }catch(e){}
           try{ if(mat.setAlphaMode) mat.setAlphaMode('BLEND'); }catch(e){}
         });
