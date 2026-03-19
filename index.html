@@ -981,22 +981,22 @@
     #cfSegWrap{
       position:absolute; left:50%; bottom:16px; transform:translateX(-50%); width:min(94%, 760px); z-index:10;
       padding:8px; border-radius:999px; background:#ffffff;
-      border:3px solid #0d5b9c; box-shadow:0 10px 22px rgba(0,0,0,.08);
+      border:3px solid #0d5f9b; box-shadow:none;
       display:grid; grid-template-columns: 1fr 1.35fr 1.1fr; gap:8px; align-items:center;
     }
     .cf-seg-btn{
-      height:66px; border-radius:999px; border:2.5px solid #1f5f96; background:#ffffff;
-      color:#173b62; font-size:22px; font-weight:900; letter-spacing:-.4px; cursor:pointer; transition:all .18s ease;
-      box-shadow:none; padding:0 12px; white-space:nowrap; outline:none;
+      height:66px; border-radius:999px; border:2.5px solid #1f6498; background:#ffffff;
+      color:#163c61; font-size:22px; font-weight:900; letter-spacing:-.4px; cursor:pointer; transition:background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease;
+      box-shadow:none; padding:0 12px; white-space:nowrap;
     }
     .cf-seg-btn.active{
-      background:#eaf3ff; color:#0f4f87; border-color:#1f6eb7; box-shadow:none;
+      background:#dfeeff; color:#114a78; border-color:#1f6498; box-shadow:none;
     }
     .cf-seg-btn.default-active{
-      background:#eaf3ff; color:#0f4f87; border-color:#1f6eb7; box-shadow:none;
+      background:#ffffff; color:#163c61; border-color:#1f6498; box-shadow:none;
     }
-    .cf-seg-btn:not(.active):not(.default-active){ color:#173b62; }
-    .cf-seg-btn:not(.active):active{ transform:scale(.985); }
+    .cf-seg-btn:not(.active):not(.default-active){ color:#163c61; }
+    .cf-seg-btn:active{ transform:scale(.985); }
 
     #comfortMessage{
       background:#dbe5f1; padding:28px 34px 30px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px;
