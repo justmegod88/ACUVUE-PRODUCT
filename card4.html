@@ -349,10 +349,10 @@
       transform:translateX(-50%);
       width:min(94%, 760px);
       z-index:10;
-      padding:8px;
-      border-radius:999px;
-      background:#ffffff;
-      border:2px solid #c8dbef;
+      padding:0;
+      border-radius:0;
+      background:transparent;
+      border:none;
       box-shadow:none;
       display:grid;
       grid-template-columns: 1fr 1.35fr 1.1fr;
@@ -379,14 +379,14 @@
     .seg-btn.active{
       background:#eaf4ff;
       color:#0f4f8f;
-      border-color:#6fa3d8;
+      border-color:#8eb5de;
       box-shadow:none;
     }
 
     .seg-btn.default-active{
       background:#eaf4ff;
       color:#0f4f8f;
-      border-color:#6fa3d8;
+      border-color:#8eb5de;
       box-shadow:none;
     }
 
@@ -543,9 +543,11 @@
       .seg-wrap{
         width:min(94%, 520px);
         bottom:10px;
-        padding:5px;
+        padding:0;
         gap:5px;
-        border-width:2px;
+        border:none;
+        background:transparent;
+        box-shadow:none;
         grid-template-columns: 1fr 1.35fr 1.05fr;
       }
 
@@ -694,7 +696,6 @@
       const mobile = w <= 560;
       const tablet = w <= 820 && w > 560;
 
-      /* 눈 위치 */
       const eyeLeft = {
         x: w * 0.552,
         y: h * 0.408
@@ -705,7 +706,6 @@
         y: h * 0.410
       };
 
-      /* 카드 위치 유지 */
       const cardW = mobile ? 82 : (tablet ? 104 : 118);
       const cardH = mobile ? 126 : (tablet ? 158 : 176);
       const cardCx = w * 0.225;
@@ -715,7 +715,6 @@
       targetStage.style.height = cardH + 'px';
       setCenterPercent(targetStage, cardCx, cardCy, rect);
 
-      /* 프리즘/플랫바 */
       const opticW = mobile ? 38 : (tablet ? 48 : 58);
       const opticH = mobile ? 76 : (tablet ? 98 : 118);
       const opticCx = eyeLeft.x + (mobile ? -1 : -2);
