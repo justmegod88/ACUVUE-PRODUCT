@@ -797,8 +797,8 @@
       inset:0;
       z-index:82;
       display:none;
-      background:rgba(255,255,255,.08);
-      backdrop-filter: blur(3px);
+      background:rgba(255,255,255,.16);
+      backdrop-filter: blur(8px);
       align-items:center;
       justify-content:center;
       padding:18px;
@@ -1539,15 +1539,15 @@
           const pbr = mat.pbrMetallicRoughness;
           if(!pbr) return;
           const base = pbr.baseColorFactor ? [...pbr.baseColorFactor] : [1,1,1,1];
-          base[3] = Math.max(base[3], 0.45);
+          base[3] = Math.max(base[3], 0.68);
           pbr.setBaseColorFactor(base);
-          try{ pbr.setRoughnessFactor(0.28); }catch(e){}
+          try{ pbr.setRoughnessFactor(0.18); }catch(e){}
           try{ pbr.setMetallicFactor(0.0); }catch(e){}
           if(mat.extensions && mat.extensions.KHR_materials_transmission){
-            mat.extensions.KHR_materials_transmission.transmissionFactor = 0.86;
+            mat.extensions.KHR_materials_transmission.transmissionFactor = 0.62;
           }
           try{
-            if(mat.emissiveFactor){ mat.emissiveFactor = [0.04, 0.06, 0.07]; }
+            if(mat.emissiveFactor){ mat.emissiveFactor = [0.05, 0.07, 0.08]; }
           }catch(e){}
           try{ if(mat.setAlphaMode) mat.setAlphaMode('BLEND'); }catch(e){}
         });
@@ -1860,7 +1860,7 @@
       if(modeOn){
         cfLineRed.style.opacity = '1';
         cfLineBlue.style.opacity = '1';
-        const onRedStartY = cardCy + cardH * -0.20;
+        const onRedStartY = cardCy + cardH * -0.27;
         const onBlueStartY = cardCy + cardH * 0.20;
         cfPlaceLine(cfLineRed, startX, onRedStartY, offRedEndX, offRedEndY, rect);
         cfPlaceLine(cfLineBlue, startX, onBlueStartY, eyeRight.x - (mobile ? 10 : 12), eyeRight.y + (mobile ? 5 : 7), rect);
